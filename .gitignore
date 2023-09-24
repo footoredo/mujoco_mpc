@@ -32,3 +32,6 @@ MJDATA.TXT
 MJMODEL.TXT
 # Python
 python/dist/
+
+.ipynb_checkpoints
+furniture_sim

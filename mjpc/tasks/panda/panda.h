@@ -26,9 +26,11 @@ class Panda : public ThreadSafeTask {
   std::string XmlPath() const override;
   class ResidualFn : public mjpc::BaseResidualFn {
    public:
-    explicit ResidualFn(const Panda* task) : mjpc::BaseResidualFn(task) {}
+    explicit ResidualFn(const Panda* task) : mjpc::BaseResidualFn(task), object_a_(0), object_b_(0) {}
     void Residual(const mjModel* model, const mjData* data,
                   double* residual) const override;
+    int object_a_;
+    int object_b_;
   };
   Panda() : residual_(this) {}
   void TransitionLocked(mjModel* model, mjData* data) override;
