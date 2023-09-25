@@ -52,8 +52,10 @@ add_library(
   tasks/manipulation/common.h
   tasks/manipulation/manipulation.cc
   tasks/manipulation/manipulation.h
-  tasks/panda/panda.cc
-  tasks/panda/panda.h
+  tasks/panda/cabinet/cabinet.cc
+  tasks/panda/cabinet/cabinet.h
+  tasks/panda/kitchen/kitchen.cc
+  tasks/panda/kitchen/kitchen.h
   tasks/particle/particle.cc
   tasks/particle/particle.h
   tasks/quadrotor/quadrotor.cc

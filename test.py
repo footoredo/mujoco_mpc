@@ -31,7 +31,7 @@ def environment_reset(model, data):
 def test(use_viewer=True):
     model_path = (
         pathlib.Path(__file__).parent
-        / "build/mjpc/tasks/panda/task.xml"
+        / "build/mjpc/tasks/panda/kitchen/task.xml"
     )
     model = mujoco.MjModel.from_xml_path(str(model_path))
     data = mujoco.MjData(model)
@@ -51,8 +51,8 @@ def test(use_viewer=True):
     actions = []
     observations = []
 
-    with agent_lib.Agent(task_id="Panda", model=model) as agent:
-        def plan(step_limit=5000, cost_limit=None, viewer=None):
+    with agent_lib.Agent(task_id="Panda Kitchen", model=model) as agent:
+        def plan(step_limit=5000, cost_limit=None, viewer=None, cost_name=None):
             for i in range(step_limit):
                 agent.set_state(
                     time=data.time,
@@ -73,9 +73,13 @@ def test(use_viewer=True):
                     if viewer is not None:
                         viewer.sync()
                     # total_cost += agent.get_total_cost()
-                cost = agent.get_total_cost()
+                if cost_name is None:
+                    cost = agent.get_total_cost()
+                else:
+                    cost = agent.get_cost_term_values()[cost_name]
                 if i % 20 == 0:
-                    print(i, cost)
+                    # print(i, cost)
+                    print(i, agent.get_cost_term_values())
                 # agent.planner_step()
                 if cost_limit is not None and cost <= cost_limit:
                     return True
@@ -85,33 +89,56 @@ def test(use_viewer=True):
         
         def run(viewer=None):
             # print(agent.get_parameters())
+
+            # for cabinet
+            # agent.set_task_parameters({"ReachObjectA": "hand"})
+            # agent.set_task_parameters({"ReachObjectB": "box_right"})
+            # agent.set_task_parameters({"MoveAwayObjectA": "box_right"})
+            # agent.set_task_parameters({"MoveAwayObjectB": "doorhandle"})
+            # agent.set_task_parameters({"MoveAwayDistance": 0.4})
+            # agent.set_cost_weights(
+            #     {"Reach": 1, "Joint Target": 0, "Move Away": 1.0}
+            # )
+
+            # for kitchen move kettle
             agent.set_task_parameters({"ReachObjectA": "hand"})
-            agent.set_task_parameters({"ReachObjectB": "box_right"})
-            agent.set_task_parameters({"MoveAwayObjectA": "box_right"})
-            agent.set_task_parameters({"MoveAwayObjectB": "doorhandle"})
-            agent.set_task_parameters({"MoveAwayDistance": 0.4})
+            agent.set_task_parameters({"ReachObjectB": "kettle_handle"})
+            agent.set_task_parameters({"MoveAwayObjectA": "kettle_handle"})
+            agent.set_task_parameters({"MoveAwayObjectB": "microwave_handle"})
+            agent.set_task_parameters({"MoveAwayDistance": 0.6})
             agent.set_cost_weights(
-                {"Reach": 1, "Joint Target": 0, "Move Away": 1.0}
+                {"Reach": 1, "Joint Target": 0, "Move Away": 1}
             )
 
             agent.reset()
             environment_reset(model, data)
 
             print(agent.get_task_parameters())
-            print(agent.get_total_cost())
+            print(agent.get_cost_term_values())
             print(agent.get_cost_weights())
 
             # print(data.qpos)
-            succ = plan(cost_limit=0.01, viewer=viewer)
+            succ = plan(cost_limit=0.01, viewer=viewer, cost_name="Move Away")
+            # return succ
             if not succ:
                 return False
 
+            # # open cabinet
+            # agent.set_task_parameters({"ReachObjectA": "hand"})
+            # agent.set_task_parameters({"ReachObjectB": "doorhandle"})
+            # agent.set_task_parameters({"JointTarget": "rightdoorhinge"})
+            # agent.set_task_parameters({"JointTargetAngle": 1.0})
+            # agent.set_cost_weights(
+            #     {"Reach": 1, "Joint Target": 0.5, "Move Away": 0.0}
+            # )
+
+            # open microwave
             agent.set_task_parameters({"ReachObjectA": "hand"})
-            agent.set_task_parameters({"ReachObjectB": "doorhandle"})
-            agent.set_task_parameters({"JointTarget": "rightdoorhinge"})
+            agent.set_task_parameters({"ReachObjectB": "microwave_handle"})
+            agent.set_task_parameters({"JointTarget": "micro0joint"})
             agent.set_task_parameters({"JointTargetAngle": 1.0})
             agent.set_cost_weights(
-                {"Reach": 1, "Joint Target": 0.5, "Move Away": 0.0}
+                {"Reach": 1, "Joint Target": 1.0, "Move Away": 0}
             )
 
             print(agent.get_task_parameters())
@@ -120,7 +147,7 @@ def test(use_viewer=True):
 
             # print(data.qpos)
 
-            succ = plan(cost_limit=0.1, viewer=viewer)
+            succ = plan(cost_limit=0.1, viewer=viewer, cost_name="Joint Target")
             return succ
 
         if use_viewer:

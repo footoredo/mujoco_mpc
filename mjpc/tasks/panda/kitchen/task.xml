@@ -1,0 +1,131 @@
+<mujoco model="Panda">
+  <include file="../../common.xml"/>
+
+  <size memory="1M"/>
+
+  <custom>
+    <numeric name="agent_planner" data="0" />
+    <numeric name="agent_horizon" data="0.5" />
+    <numeric name="agent_timestep" data="0.009" />
+    <numeric name="agent_policy_width" data="0.0035" />
+    <numeric name="sampling_trajectories" data="60"/>
+    <numeric name="sampling_spline_points" data="7" />
+    <numeric name="sampling_exploration" data="0.1" />
+    <numeric name="gradient_spline_points" data="6" />
+
+	<numeric name="residual_select_ReachObjectA" data="0"/>
+	<text name="residual_list_ReachObjectA" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
+	<numeric name="residual_select_ReachObjectB" data="0"/>
+	<text name="residual_list_ReachObjectB" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
+
+	<numeric name="residual_select_JointTarget" data="0"/>
+	<text name="residual_list_JointTarget" data="leftdoorhinge|rightdoorhinge|knob1_joint|knob2_joint|knob3_joint|knob4_joint|lightswitch_joint|micro0joint"/>
+	<numeric name="residual_JointTargetAngle" data="1 0 1"/>
+
+	<numeric name="residual_select_MoveAwayObjectA" data="0"/>
+	<text name="residual_list_MoveAwayObjectA" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
+	<numeric name="residual_select_MoveAwayObjectB" data="0"/>
+	<text name="residual_list_MoveAwayObjectB" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
+	<numeric name="residual_MoveAwayDistance" data="1.0 1 2"/>
+  </custom>
+
+  <statistic extent="1.5" center="0.1 0.2 0.3"/>
+
+  <visual>
+    <quality shadowsize="8192"/>
+    <global azimuth="180" elevation="-30"/>
+    <scale framelength=".3" framewidth=".03"/>
+  </visual>
+
+  <default>
+    <geom solref=".001 1"/>
+  </default>
+
+  <compiler angle="radian" />
+  <include file="../furniture_sim/oven/oven_asset.xml"/>
+  <include file="../furniture_sim/counters/counters_asset.xml"/>
+  <include file="../furniture_sim/backwall/backwall_asset.xml"/>
+  <include file="../furniture_sim/slidecabinet/slidecabinet_asset.xml"/>
+  <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/>
+  <include file="../furniture_sim/microwave/microwave_asset.xml"/>
+  <include file="../furniture_sim/kettle/kettle_asset.xml"/>
+
+  <worldbody>
+    <site name="world"/>
+    <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
+        directional="true" castshadow="true"/>
+
+	<!-- <body pos="1.0 -0.7 -1.6" axisangle="0 0 1 -1.57079"> -->
+	<body pos="0.7 1.2 -1.6">
+	  <body name="oven" pos="0 0 0">
+	  	<include file="../furniture_sim/oven/oven_body.xml"/>
+	  </body>
+	  <body name="sink" pos="0 0 0">
+	  	<include file="../furniture_sim/counters/sink_counter_body.xml"/>
+	  </body>
+	  <body name="island" pos="0 0 0">
+	  	<include file="../furniture_sim/counters/box_counter_body.xml"/>
+	  </body>
+      <body name="backwall" pos="0 0 0">
+	  	<include file="../furniture_sim/backwall/backwall_body.xml"/>
+	  </body>
+	   <body name="slidecabinet" pos="0.4 0.3 2.6" >
+	  	<include file="../furniture_sim/slidecabinet/slidecabinet_body.xml"/>
+	  </body>
+      <body name="hingecabinet" pos="-0.504 0.3 2.6" >
+	  	<include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
+	  </body>
+	  <body name="microwave" pos="-0.750 -0.025 1.6" euler="0 0 0.3">
+	  	<include file="../furniture_sim/microwave/microwave_body0.xml"/>
+	  </body>
+    </body>
+    <body name="box" pos="1.0 0.0 0.2">
+      <joint type="free"/>
+      <geom class="kettle_collision" type="box" size="0.05 0.05 0.05" mass=".3"/>
+      <geom material="kettle_Gmetal" pos="0 0 0" size="0.052 0.052 0.052" type="box"/>
+      <site name="box" type="box" pos="0 0 0" size="0.05 0.05 0.05"/>
+    </body>
+ 	<body name="kettle" pos="100.58 -0.12 0.026" axisangle="0 0 1 -1.57079">
+	  <freejoint/>
+      <include file="../furniture_sim/kettle/kettle_body4.xml"/>
+    </body>   
+	
+  </worldbody>
+
+  <contact>
+    <exclude body1="world" body2="left_finger"/>
+    <exclude body1="world" body2="right_finger"/>
+    <exclude body1="left_finger" body2="right_finger"/>
+  </contact>
+
+  <sensor>
+	<user name="Reach" dim="3" user="2 0 0 5 0.01"/>
+	<user name="Joint Target" dim="1" user="2 0 0 1 0.003"/>
+	<user name="Move Away" dim="1" user="2 0 0 5 0.01"/>
+    <framepos name="hand" objtype="site" objname="eeff"/>
+	<!--
+    <framepos name="trace0" objtype="site" objname="touch_left"/>
+    <framepos name="trace1" objtype="site" objname="touch_right"/>
+	-->
+	<framepos name="cabinet_doorhandle_r" objtype="site" objname="rightdoor_site"/>
+	<framepos name="cabinet_doorhandle_l" objtype="site" objname="leftdoor_site"/>
+	<framepos name="kettle_handle" objtype="site" objname="kettle_site4"/>
+	<framepos name="microwave_handle" objtype="site" objname="microhandle_site"/>
+	<framepos name="slide_handle" objtype="site" objname="slide_site"/>
+	<framepos name="knob1" objtype="site" objname="knob1_site"/>
+	<framepos name="knob2" objtype="site" objname="knob2_site"/>
+	<framepos name="knob3" objtype="site" objname="knob3_site"/>
+	<framepos name="knob4" objtype="site" objname="knob4_site"/>
+	<jointpos name='knob1_joint' joint= 'knob1_joint'/>
+	<jointpos name='knob2_joint' joint= 'knob2_joint'/>
+	<jointpos name='knob3_joint' joint= 'knob3_joint'/>
+	<jointpos name='knob4_joint' joint= 'knob4_joint'/>
+	<jointpos name='lightswitch_joint' joint= 'lightswitch_joint'/>
+    <jointpos name="slidedoor_joint" joint="slidedoor_joint"/>
+	<jointpos name='leftdoorhinge' joint= 'leftdoorhinge'/>
+	<jointpos name='rightdoorhinge' joint= 'rightdoorhinge'/>
+    <jointpos name="micro0joint" joint="micro0joint"/>
+  </sensor>
+
+  <include file="panda.xml"/>
+</mujoco>

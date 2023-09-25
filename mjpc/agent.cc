@@ -349,6 +349,8 @@ int Agent::SetSelectionParamByName(std::string_view name,
       } else {
         shift++;
       }
+    } else if (absl::StartsWith(numeric_name, "residual_")) {
+      shift++;
     }
   }
   return -1;

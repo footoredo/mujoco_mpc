@@ -12,27 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MJPC_MJPC_TASKS_PANDA_PANDA_H_
-#define MJPC_MJPC_TASKS_PANDA_PANDA_H_
+#ifndef MJPC_MJPC_TASKS_PANDA_CABINET_H_
+#define MJPC_MJPC_TASKS_PANDA_CABINET_H_
 
 #include <string>
 #include <mujoco/mujoco.h>
 #include "mjpc/task.h"
 
 namespace mjpc {
-class Panda : public ThreadSafeTask {
+namespace panda {
+
+class Cabinet : public ThreadSafeTask {
  public:
   std::string Name() const override;
   std::string XmlPath() const override;
   class ResidualFn : public mjpc::BaseResidualFn {
    public:
-    explicit ResidualFn(const Panda* task) : mjpc::BaseResidualFn(task), object_a_(0), object_b_(0) {}
+    explicit ResidualFn(const Cabinet* task) : mjpc::BaseResidualFn(task), object_a_(0), object_b_(0) {}
     void Residual(const mjModel* model, const mjData* data,
                   double* residual) const override;
     int object_a_;
     int object_b_;
   };
-  Panda() : residual_(this) {}
+  Cabinet() : residual_(this) {}
   void TransitionLocked(mjModel* model, mjData* data) override;
 
  protected:
@@ -44,7 +46,9 @@ class Panda : public ThreadSafeTask {
  private:
   ResidualFn residual_;
 };
+
+}  // namespace panda
 }  // namespace mjpc
 
 
-#endif  // MJPC_MJPC_TASKS_PANDA_PANDA_H_
+#endif  // MJPC_MJPC_TASKS_PANDA_CABINET_H_
