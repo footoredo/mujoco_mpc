@@ -28,12 +28,11 @@ std::string Cabinet::XmlPath() const {
   return GetModelPath("panda/cabinet/task.xml");
 }
 std::string Cabinet::Name() const { return "Panda Cabinet"; }
-
 const std::array<std::string, 7> object_names = {
-    "hand", "leftdoorhandle", "rightdoorhandle", "box", "box_left", "box_right", "cube"
+    "hand", "leftdoorhandle", "rightdoorhandle", "box", "box_left", "box_right", "target"
 };
 
-const std::array<std::string, 3> joint_names = {
+const std::array<std::string, 2> joint_names = {
     "leftdoorhinge", "rightdoorhinge"
 };
 

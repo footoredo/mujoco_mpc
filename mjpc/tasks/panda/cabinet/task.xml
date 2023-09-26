@@ -14,18 +14,18 @@
     <numeric name="gradient_spline_points" data="6" />
 
     <numeric name="residual_select_ReachObjectA" data="0"/>
-    <text name="residual_list_ReachObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|cube"/>
+    <text name="residual_list_ReachObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
     <numeric name="residual_select_ReachObjectB" data="4"/>
-    <text name="residual_list_ReachObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|cube"/>
+    <text name="residual_list_ReachObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
 
     <numeric name="residual_select_JointTarget" data="0"/>
     <text name="residual_list_JointTarget" data="leftdoorhinge|rightdoorhinge"/>
     <numeric name="residual_JointTargetAngle" data="1 0 1"/>
 
     <numeric name="residual_select_MoveAwayObjectA" data="1"/>
-    <text name="residual_list_MoveAwayObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|cube"/>
+    <text name="residual_list_MoveAwayObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
     <numeric name="residual_select_MoveAwayObjectB" data="4"/>
-    <text name="residual_list_MoveAwayObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|cube"/>
+    <text name="residual_list_MoveAwayObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
     <numeric name="residual_MoveAwayDistance" data="0.5 0.1 2"/>
   </custom>
 
@@ -56,7 +56,7 @@
   </asset>
 
   <worldbody>
-    <camera pos="1.237 -1.307 1.277" xyaxes="0.875 0.485 -0.000 -0.220 0.397 0.891"/>
+    <!-- <camera pos="1.237 -1.307 1.277" xyaxes="0.875 0.485 -0.000 -0.220 0.397 0.891"/> -->
 
     <site name="world"/>
     <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
@@ -127,7 +127,7 @@
     <framepos name="box" objtype="site" objname="box"/>
     <framepos name="box_left" objtype="site" objname="box_left"/>
     <framepos name="box_right" objtype="site" objname="box_right"/>
-    <framepos name="cube" objtype="site" objname="target"/>
+    <framepos name="target" objtype="site" objname="target"/>
     <jointpos name="leftdoorhinge" joint="leftdoorhinge"/>
     <jointpos name="rightdoorhinge" joint="rightdoorhinge"/>
 
