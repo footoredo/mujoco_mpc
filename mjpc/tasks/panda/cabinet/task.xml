@@ -1,7 +1,7 @@
 <mujoco model="Panda">
   <include file="../../common.xml"/>
 
-  <size memory="1M" nuserdata="10"/>
+  <size memory="1M"/>
 
   <custom>
     <numeric name="agent_planner" data="0" />
@@ -80,7 +80,7 @@
       <site name="target" type="box" pos="0 0 0" size="0.03 0.03 0.03"/>
     </body>
 
-    <body name="cabinet" pos="0 1 .25" >
+    <body name="hingecabinet" pos="0 1 .25" >
       <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
     </body>
 
@@ -151,5 +151,5 @@
 
   <!-- <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/> -->
 
-  <include file="../panda.xml"/>
+  <include file="panda.xml"/>
 </mujoco>
