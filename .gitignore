@@ -35,3 +35,4 @@ python/dist/
 
 .ipynb_checkpoints
 furniture_sim
+*.mp4

@@ -13,19 +13,29 @@
     <numeric name="sampling_exploration" data="0.1" />
     <numeric name="gradient_spline_points" data="6" />
 
+  	<numeric name="residual_PinchForce" data="20 0 100"/>
+
+	<numeric name="residual_select_FingerTouchObject" data="0"/>
+	<text name="residual_list_FingerTouchObject" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
+
 	<numeric name="residual_select_ReachObjectA" data="0"/>
-	<text name="residual_list_ReachObjectA" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
+	<text name="residual_list_ReachObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 	<numeric name="residual_select_ReachObjectB" data="0"/>
-	<text name="residual_list_ReachObjectB" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
+	<text name="residual_list_ReachObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
+
+	<numeric name="residual_select_Reach2ObjectA" data="0"/>
+	<text name="residual_list_Reach2ObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
+	<numeric name="residual_select_Reach2ObjectB" data="0"/>
+	<text name="residual_list_Reach2ObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 
 	<numeric name="residual_select_JointTarget" data="0"/>
 	<text name="residual_list_JointTarget" data="leftdoorhinge|rightdoorhinge|knob1_joint|knob2_joint|knob3_joint|knob4_joint|lightswitch_joint|micro0joint"/>
 	<numeric name="residual_JointTargetAngle" data="1 0 1"/>
 
 	<numeric name="residual_select_MoveAwayObjectA" data="0"/>
-	<text name="residual_list_MoveAwayObjectA" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
-	<numeric name="residual_select_MoveAwayObjectB" data="0"/>
-	<text name="residual_list_MoveAwayObjectB" data="hand|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|microwave_handle|slide_handle|knob1|knob2|knob3|knob4"/>
+	<text name="residual_list_MoveAwayObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
+	<numeric name="residual_select_MoveAwayObjectB" data="4"/>
+	<text name="residual_list_MoveAwayObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 	<numeric name="residual_MoveAwayDistance" data="1.0 1 2"/>
   </custom>
 
@@ -54,9 +64,12 @@
     <site name="world"/>
     <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
         directional="true" castshadow="true"/>
+    
+    <camera pos="-1.581 -2.186 1.570" xyaxes="0.666 -0.746 0.000 0.333 0.297 0.895"/>
 
 	<!-- <body pos="1.0 -0.7 -1.6" axisangle="0 0 1 -1.57079"> -->
-	<body pos="0.7 1.2 -1.6">
+	<!-- <body pos="0.6 1.0 -1.6"> -->
+	<body pos="0.6 -0.7 -1.6" axisangle="0 0 1 -1.57079">
 	  <body name="oven" pos="0 0 0">
 	  	<include file="../furniture_sim/oven/oven_body.xml"/>
 	  </body>
@@ -75,19 +88,28 @@
       <body name="hingecabinet" pos="-0.504 0.3 2.6" >
 	  	<include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
 	  </body>
-	  <body name="microwave" pos="-0.750 -0.025 1.6" euler="0 0 0.3">
+	  <!-- <body name="microwave" pos="-0.750 -0.025 1.6" euler="0 0 0.0"> -->
+	  <body name="microwave" pos="-0.850 0.25 1.6" euler="0 0 0.3">
+	  	<site name="microwave_center" type="box" pos="-0.2 0.0 0.02" size="0.01 0.01 0.01"/>
 	  	<include file="../furniture_sim/microwave/microwave_body0.xml"/>
 	  </body>
     </body>
-    <body name="box" pos="1.0 0.0 0.2">
+    <!-- <body name="box" pos="0.0 1.0 0.2"> -->
+	<body name="box" pos="0.9 0.25 0.2">
       <joint type="free"/>
-      <geom class="kettle_collision" type="box" size="0.05 0.05 0.05" mass=".3"/>
-      <geom material="kettle_Gmetal" pos="0 0 0" size="0.052 0.052 0.052" type="box"/>
-      <site name="box" type="box" pos="0 0 0" size="0.05 0.05 0.05"/>
+      <geom class="kettle_collision" type="box" size="0.03 0.03 0.03" mass=".3"/>
+      <!-- <geom material="kettle_Gmetal" pos="0 0 0" size="0.052 0.052 0.052" type="box"/> -->
+	  <geom material="kettle_green" pos="0 0 0" size="0.032 0.032 0.032" type="box"/>
+      <site name="box" type="box" pos="0 0 0" size="0.03 0.03 0.03"/>
     </body>
- 	<body name="kettle" pos="100.58 -0.12 0.026" axisangle="0 0 1 -1.57079">
+	<body name="target_position" pos="0.5 0.1 0.0005">
+      <site name="target_position" type="box" pos="0 0 0" size="0.05 0.05 0.001"/>
+    </body>
+ 	<!-- <body name="kettle" pos="-100.12 0.58 0.026" axisangle="0 0 1 -1.57079"> -->
+	<body name="kettle" pos="0.38 -0.02 0.026" axisangle="0 0 1 -1.57079">
 	  <freejoint/>
-      <include file="../furniture_sim/kettle/kettle_body4.xml"/>
+	  <include file="../furniture_sim/kettle/kettle_body0.xml"/>
+	  <site type="sphere" name="kettle_center" pos="0 0 0.15" size=".01"/>
     </body>   
 	
   </worldbody>
@@ -99,23 +121,38 @@
   </contact>
 
   <sensor>
-	<user name="Reach" dim="3" user="2 0 0 5 0.01"/>
+	<user name="Finger Touch" dim="6" user="2 0 0 5 0.01"/>
+	<user name="Pinch" dim="1" user="2 0 0 5 0.01"/>
+	<user name="Reach" dim="3" user="2 0 0 5 0.1"/>
+	<user name="Reach2" dim="3" user="2 0 0 5 0.1"/>
 	<user name="Joint Target" dim="1" user="2 0 0 1 0.003"/>
-	<user name="Move Away" dim="1" user="2 0 0 5 0.01"/>
+	<user name="Move Away" dim="1" user="2 1 0 5 0.01"/>
+	<user name="Default Pose" dim="3" user="2 0 0 5 0.01"/>
     <framepos name="hand" objtype="site" objname="eeff"/>
 	<!--
     <framepos name="trace0" objtype="site" objname="touch_left"/>
     <framepos name="trace1" objtype="site" objname="touch_right"/>
 	-->
+    <framepos name="box" objtype="site" objname="box"/>
+    <framepos name="target_position" objtype="site" objname="target_position"/>
 	<framepos name="cabinet_doorhandle_r" objtype="site" objname="rightdoor_site"/>
 	<framepos name="cabinet_doorhandle_l" objtype="site" objname="leftdoor_site"/>
-	<framepos name="kettle_handle" objtype="site" objname="kettle_site4"/>
+	<framepos name="kettle_handle" objtype="site" objname="kettle_site0"/>
+	<framepos name="kettle_center" objtype="site" objname="kettle_center"/>
 	<framepos name="microwave_handle" objtype="site" objname="microhandle_site"/>
+	<framepos name="microwave_center" objtype="site" objname="microwave_center"/>
 	<framepos name="slide_handle" objtype="site" objname="slide_site"/>
 	<framepos name="knob1" objtype="site" objname="knob1_site"/>
 	<framepos name="knob2" objtype="site" objname="knob2_site"/>
 	<framepos name="knob3" objtype="site" objname="knob3_site"/>
 	<framepos name="knob4" objtype="site" objname="knob4_site"/>
+
+	<jointpos name='panda_joint0' joint= 'joint0'/>
+	<jointpos name='panda_joint1' joint= 'joint1'/>
+	<jointpos name='panda_joint2' joint= 'joint2'/>
+	<jointpos name='panda_joint3' joint= 'joint3'/>
+	<jointpos name='panda_joint4' joint= 'joint4'/>
+
 	<jointpos name='knob1_joint' joint= 'knob1_joint'/>
 	<jointpos name='knob2_joint' joint= 'knob2_joint'/>
 	<jointpos name='knob3_joint' joint= 'knob3_joint'/>
@@ -125,6 +162,10 @@
 	<jointpos name='leftdoorhinge' joint= 'leftdoorhinge'/>
 	<jointpos name='rightdoorhinge' joint= 'rightdoorhinge'/>
     <jointpos name="micro0joint" joint="micro0joint"/>
+	<framepos name="leftfinger" objtype="site" objname="touch_left"/>
+	<framepos name="rightfinger" objtype="site" objname="touch_right"/>
+	<force name="leftfingerforce" site="touch_left"/>
+	<force name="rightfingerforce" site="touch_right"/>
   </sensor>
 
   <include file="panda.xml"/>

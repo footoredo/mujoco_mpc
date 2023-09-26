@@ -29,8 +29,8 @@ std::string Cabinet::XmlPath() const {
 }
 std::string Cabinet::Name() const { return "Panda Cabinet"; }
 
-const std::array<std::string, 5> object_names = {
-    "hand", "doorhandle", "box", "box_left", "box_right"
+const std::array<std::string, 7> object_names = {
+    "hand", "leftdoorhandle", "rightdoorhandle", "box", "box_left", "box_right", "cube"
 };
 
 const std::array<std::string, 3> joint_names = {
@@ -125,6 +125,14 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // std::cout << model->nu << std::endl;
   // mju_copy(residual + counter, data->actuator_force, model->nu);
   // counter += model->nu;
+
+  // default position
+  double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+  for (int i = 0; i < 3; i ++) {
+    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));
+    // std::cout << panda_joints[i] << " ";
+    residual[counter ++] = panda_joints_default[i] - joint_i;
+  }
 
   // sensor dim sanity check
   // TODO: use this pattern everywhere and make this a utility function

@@ -274,14 +274,14 @@
     <general site="eeff" refsite="world" ctrlrange="-1 1" ctrllimited="true" gainprm="5" gear="0 0 0 1 0 0"/>
     <general site="eeff" refsite="world" ctrlrange="-1 1" ctrllimited="true" gainprm="5" gear="0 0 0 0 1 0"/>
     <general site="eeff" refsite="world" ctrlrange="-1 1" ctrllimited="true" gainprm="5" gear="0 0 0 0 0 1"/> -->
-    <general name="arm_direct_actuator_0" joint="joint0" ctrlrange="-1 1" gainprm="3"/> 
-    <general name="arm_direct_actuator_1" joint="joint1" ctrlrange="-1 1" gainprm="3"/> 
-    <general name="arm_direct_actuator_2" joint="joint2" ctrlrange="-1 1" gainprm="3"/> 
-    <general name="arm_direct_actuator_3" joint="joint3" ctrlrange="-1 1" gainprm="3"/> 
-    <general name="arm_direct_actuator_4" joint="joint4" ctrlrange="-1 1" gainprm="3"/> 
-    <general name="arm_direct_actuator_5" joint="joint5" ctrlrange="-1 1" gainprm="3"/> 
-    <general name="arm_direct_actuator_6" joint="joint6" ctrlrange="-1 1" gainprm="5"/> 
-    <general name="arm_direct_actuator_7" joint="joint7" ctrlrange="-1 1" gainprm="5"/> 
+    <general name="arm_direct_actuator_0" joint="joint0" ctrlrange="-1 1" gainprm="5"/> 
+    <general name="arm_direct_actuator_1" joint="joint1" ctrlrange="-1 1" gainprm="5"/> 
+    <general name="arm_direct_actuator_2" joint="joint2" ctrlrange="-1 1" gainprm="5"/> 
+    <general name="arm_direct_actuator_3" joint="joint3" ctrlrange="-1 1" gainprm="5"/> 
+    <general name="arm_direct_actuator_4" joint="joint4" ctrlrange="-1 1" gainprm="5"/> 
+    <general name="arm_direct_actuator_5" joint="joint5" ctrlrange="-1 1" gainprm="10"/> 
+    <general name="arm_direct_actuator_6" joint="joint6" ctrlrange="-1 1" gainprm="10"/> 
+    <general name="arm_direct_actuator_7" joint="joint7" ctrlrange="-1 1" gainprm="10"/> 
     <!-- <general site="eeff" refsite="world" ctrlrange="-1 1" ctrllimited="true" gainprm="5" gear="0 0 0 0 0 1"/> -->
     <intvelocity class="panda" name="actuator8" tendon="split" ctrlrange="-.5 .5" ctrllimited="true" forcerange="-100 100" actrange="0.005 0.1" kp="100"/>
   </actuator>
