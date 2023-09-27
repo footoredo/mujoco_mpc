@@ -94,21 +94,24 @@ NAME_MAPPING = {
     "kitchen": KITCHEN_NAME_MAPPING
 }
 
+PRIMARY_REWARD = None
+
 
 def reset_reward():
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
     for key in REWARD_CNT.keys():
         REWARD_CNT[key] = 0
     TASK_PARAMS = {}
     COST_WEIGHTS = {}
+    PRIMARY_REWARD = None
 
 
 def map_name(name):
     return NAME_MAPPING[ENV][name]
 
 
-def minimize_l2_distance_reward(obj1, obj2):
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
     REWARD_CNT["min_l2"] += 1
     cnt = REWARD_CNT["min_l2"]
     if cnt == 1:
@@ -117,20 +120,27 @@ def minimize_l2_distance_reward(obj1, obj2):
     TASK_PARAMS[f"Reach{cnt}ObjectB"] = map_name(obj2)
     COST_WEIGHTS[f"Reach{cnt}"] = 1.0
 
+    if primary_reward:
+        PRIMARY_REWARD = f"Reach{cnt}"
 
-def maximize_l2_distance_reward(obj1, obj2, distance=0.6):
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+
+def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
     REWARD_CNT["max_l2"] += 1
     cnt = REWARD_CNT["max_l2"]
     if cnt == 1:
         cnt = ""
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
+    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.2
     COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
 
+    if primary_reward:
+        PRIMARY_REWARD = f"Move Away{cnt}"
 
-def set_joint_fraction_reward(obj, fraction):
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+
+def set_joint_fraction_reward(obj, fraction, primary_reward=False):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
     REWARD_CNT["joint"] += 1
     cnt = REWARD_CNT["joint"]
     if cnt == 1:
@@ -138,6 +148,9 @@ def set_joint_fraction_reward(obj, fraction):
     TASK_PARAMS[f"JointTarget{cnt}"] = map_name(obj)
     TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction * 1.5
     COST_WEIGHTS[f"Joint Target{cnt}"] = 1.0
+
+    if primary_reward:
+        PRIMARY_REWARD = f"Joint Target{cnt}"
 
 
 def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save_video=True, save_last_img=False, verbose=False):
@@ -357,10 +370,12 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
             return succ
 
         def run_custom(viewer=None):
-            cost_limit = 0.01 * sum(list(COST_WEIGHTS.values()))
-            # cost_limit = 0.02
+            if PRIMARY_REWARD is None:
+                cost_limit = 0.01 * sum(list(COST_WEIGHTS.values()))
+            else:
+                cost_limit = 0.02
             succ = run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-            cost_limit=cost_limit, num_retries=3, viewer=viewer)
+            cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=3, viewer=viewer)
 
             return succ
 
@@ -401,6 +416,7 @@ def execute_plan(duration=None):
 
     print(TASK_PARAMS)
     print(COST_WEIGHTS)
+    print(PRIMARY_REWARD)
     
     print(int(_execute(ENV, custom=True, use_viewer=False, save_video=False, save_last_img=True, init_data=init_data)))
 
