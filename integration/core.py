@@ -53,6 +53,9 @@ def environment_reset(model, data):
   return get_observation(model, data)
 
 
+# ENV = "cabinet"
+ENV = "kitchen"
+
 REWARD_CNT = {
     "min_l2": 0,
     "max_l2": 0,
@@ -61,6 +64,35 @@ REWARD_CNT = {
 
 TASK_PARAMS = {}
 COST_WEIGHTS = {}
+
+CABINET_NAME_MAPPING = {
+    "palm": "hand",
+    "red_block": "box",
+    "red_block_left_side": "box_left",
+    "red_block_right_side": "box_right",
+    "left_wooden_cabinet_handle": "leftdoorhandle",
+    "right_wooden_cabinet_handle": "rightdoorhandle",
+    "left_wooden_cabinet": "leftdoorhinge",
+    "right_wooden_cabinet": "rightdoorhinge",
+    "yellow_cube": "target",
+    "right_wooden_cabinet_center": "target_position"
+}
+
+KITCHEN_NAME_MAPPING = {
+    "palm": "hand",
+    "left_cabinet_handle": "cabinet_doorhandle_l",
+    "right_cabinet_handle": "cabinet_doorhandle_r",
+    "left_cabinet": "leftdoorhinge",
+    "right_cabinet": "rightdoorhinge",
+    "microwave_handle": "microwave_handle",
+    "microwave": "micro0joint",
+    "kettle": "kettle_handle"
+}
+
+NAME_MAPPING = {
+    "cabinet": CABINET_NAME_MAPPING,
+    "kitchen": KITCHEN_NAME_MAPPING
+}
 
 
 def reset_reward():
@@ -71,25 +103,29 @@ def reset_reward():
     COST_WEIGHTS = {}
 
 
-def set_min_l2_distance_reward(obj1, obj2):
+def map_name(name):
+    return NAME_MAPPING[ENV][name]
+
+
+def minimize_l2_distance_reward(obj1, obj2):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
     REWARD_CNT["min_l2"] += 1
     cnt = REWARD_CNT["min_l2"]
     if cnt == 1:
         cnt = ""
-    TASK_PARAMS[f"Reach{cnt}ObjectA"] = obj1
-    TASK_PARAMS[f"Reach{cnt}ObjectB"] = obj2
+    TASK_PARAMS[f"Reach{cnt}ObjectA"] = map_name(obj1)
+    TASK_PARAMS[f"Reach{cnt}ObjectB"] = map_name(obj2)
     COST_WEIGHTS[f"Reach{cnt}"] = 1.0
 
 
-def set_max_l2_distance_reward(obj1, obj2, distance=0.6):
+def maximize_l2_distance_reward(obj1, obj2, distance=0.6):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
     REWARD_CNT["max_l2"] += 1
     cnt = REWARD_CNT["max_l2"]
     if cnt == 1:
         cnt = ""
-    TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = obj1
-    TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = obj2
+    TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
+    TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
     COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
 
 
@@ -99,8 +135,8 @@ def set_joint_fraction_reward(obj, fraction):
     cnt = REWARD_CNT["joint"]
     if cnt == 1:
         cnt = ""
-    TASK_PARAMS[f"JointTarget{cnt}"] = obj
-    TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction
+    TASK_PARAMS[f"JointTarget{cnt}"] = map_name(obj)
+    TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction * 1.5
     COST_WEIGHTS[f"Joint Target{cnt}"] = 1.0
 
 
@@ -180,7 +216,7 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
                 # viewer.render()
             return False
         
-        def run_once(task_parameters, cost_weights, cost_limit, cost_name=None, viewer=None):
+        def run_once(task_parameters, cost_weights, cost_limit, cost_name=None, step_limit=1000, viewer=None):
             if task_parameters is not None:
                 agent.set_task_parameters(task_parameters)
             cost_names = agent.get_cost_term_values().keys()
@@ -188,19 +224,22 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
                 key: cost_weights.get(key, 0.0) for key in cost_names
             }
             agent.set_cost_weights(zeroed_cost_weights)
-            return plan(cost_limit=cost_limit, cost_name=cost_name, viewer=viewer)
+            return plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit, viewer=viewer)
         
         def run_reset(viewer=None):
             run_once(task_parameters=None, cost_weights={
                 "Default Pose": 1
             }, cost_limit=0.02, cost_name="Default Pose", viewer=viewer)
 
-        def run_with_retries(task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, viewer=None):
+        def run_with_retries(task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, step_limit=1000, viewer=None):
             for i in range(num_retries):
-                if verbose:
-                    print(f"Task [{task_name}] retry #{i} ...")
+                print(f"Task [{task_name}] retry #{i} ...")
                 run_reset(viewer=viewer)
-                succ = run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, viewer=viewer)
+                succ = run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, step_limit=step_limit, viewer=viewer)
+                costs = agent.get_cost_term_values()
+                for name in sorted(cost_weights.keys()):
+                    print(name, costs[name])
+                print()
                 if succ:
                     return True
             return False
@@ -307,9 +346,21 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
 
             return succ
 
+        def run_cabinet_dummy(viewer=None):
+            succ = run_with_retries("remove stick", task_parameters={
+                "ReachObjectA": "rightdoorhandle",
+                "ReachObjectB": "leftdoorhandle",
+            }, cost_weights={"Reach": 1.0},
+            cost_limit=0.02, cost_name="Reach", num_retries=1, step_limit=50, viewer=viewer)
+            input()
+
+            return succ
+
         def run_custom(viewer=None):
+            cost_limit = 0.01 * sum(list(COST_WEIGHTS.values()))
+            # cost_limit = 0.02
             succ = run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-            cost_limit=0.02 * sum(list(COST_WEIGHTS.values())), num_retries=3, viewer=viewer)
+            cost_limit=cost_limit, num_retries=3, viewer=viewer)
 
             return succ
 
@@ -319,7 +370,7 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
             if task == "kitchen":
                 run_fn = run_kitchen_cabinet
             elif task == "cabinet":
-                run_fn = run_cabinet_test1
+                run_fn = run_cabinet_dummy
             else:
                 raise NotImplementedError()
 
@@ -337,12 +388,12 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
             im = mj_viewer.read_pixels(camid=0)
             cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
 
-        # joblib.dump(data, "data.joblib")
+        joblib.dump(data, "data.joblib")
 
         return ret
 
 
-def execute_plan():
+def execute_plan(duration=None):
     try:
         init_data = joblib.load("data.joblib")
     except FileNotFoundError:
@@ -351,19 +402,21 @@ def execute_plan():
     print(TASK_PARAMS)
     print(COST_WEIGHTS)
     
-    print(int(_execute("cabinet", custom=True, use_viewer=False, save_video=False, save_last_img=True, init_data=init_data)))
+    print(int(_execute(ENV, custom=True, use_viewer=False, save_video=False, save_last_img=True, init_data=init_data)))
 
 
 if __name__ == "__main__":
 
-    try:
-        init_data = joblib.load("data.joblib")
-    except FileNotFoundError:
-        init_data = None
+    init_data = None
+
+    # try:
+    #     init_data = joblib.load("data.joblib")
+    # except FileNotFoundError:
+    #     init_data = None
 
     T = 1
     n_succ = 0
     for _ in range(T):
-        n_succ += int(_execute("cabinet", use_viewer=False, save_video=False, save_last_img=True, init_data=init_data))
+        n_succ += int(_execute("cabinet", use_viewer=True, save_video=False, save_last_img=True, init_data=init_data))
     
     print(n_succ)

@@ -67,7 +67,10 @@
 
     <!-- <camera pos="0.151 -0.631 0.883" xyaxes="1.000 -0.031 -0.000 0.015 0.507 0.862"/> -->
     <!-- <camera pos="0.477 -1.143 1.296" xyaxes="0.932 0.362 -0.000 -0.205 0.528 0.824"/> -->
-    <camera pos="-0.222 -1.523 1.620" xyaxes="0.988 -0.152 -0.000 0.087 0.567 0.819"/>
+    <!-- <camera pos="-0.222 -1.523 1.620" xyaxes="0.988 -0.152 -0.000 0.087 0.567 0.819"/> -->
+    <!-- <camera pos="-0.522 -0.710 0.767" xyaxes="0.915 -0.403 -0.000 0.154 0.350 0.924"/> -->
+    <!-- <camera pos="-0.347 -0.650 0.668" xyaxes="0.937 -0.350 -0.000 0.138 0.370 0.919"/> -->
+    <camera pos="-0.539 -0.757 0.589" xyaxes="0.864 -0.504 0.000 0.118 0.202 0.972"/>
 
     <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" material="blue_grid"/>
 
@@ -75,7 +78,7 @@
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.20 0.02 0.02" mass=".3"/>
       <!-- <geom material="M_hinge_blue" pos="0 0 0" size="0.20 0.02 0.02" type="box"/> -->
-      <geom material="kettle_blue" pos="0 0 0" size="0.201 0.021 0.021" type="box"/>
+      <geom material="kettle_red" pos="0 0 0" size="0.201 0.021 0.021" type="box"/>
       <site name="box" type="box" pos="0 0 0" size="0.20 0.02 0.02"/>
       <site name="box_left" type="box" pos="-0.175 0 0" size="0.005 0.02 0.02" rgba="1 .1 .1 .3"/>
       <site name="box_right" type="box" pos="0.175 0 0" size="0.005 0.02 0.02" rgba=".1 .1 1 .3"/>

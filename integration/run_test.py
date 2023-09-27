@@ -1,10 +1,8 @@
-from core import reset_reward, set_min_l2_distance_reward, set_max_l2_distance_reward, \
+from core import reset_reward, minimize_l2_distance_reward, maximize_l2_distance_reward, \
     set_joint_fraction_reward, execute_plan
 
-
 reset_reward()
+minimize_l2_distance_reward("palm", "microwave_handle")
+set_joint_fraction_reward("microwave", 1)
 
-set_min_l2_distance_reward("hand", "box_right")
-set_max_l2_distance_reward("rightdoorhandle", "box_right")
-
-execute_plan()
+execute_plan(2)
