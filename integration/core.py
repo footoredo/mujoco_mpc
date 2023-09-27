@@ -10,6 +10,7 @@ import mujoco_mpc
 # print(mujoco_mpc.__file__)
 from mujoco_mpc import agent as agent_lib
 import numpy as np
+import joblib
 
 
 import pathlib
@@ -52,18 +53,73 @@ def environment_reset(model, data):
   return get_observation(model, data)
 
 
-def test(task="kitchen", use_viewer=True):
+REWARD_CNT = {
+    "min_l2": 0,
+    "max_l2": 0,
+    "joint": 0,
+}
+
+TASK_PARAMS = {}
+COST_WEIGHTS = {}
+
+
+def reset_reward():
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+    for key in REWARD_CNT.keys():
+        REWARD_CNT[key] = 0
+    TASK_PARAMS = {}
+    COST_WEIGHTS = {}
+
+
+def set_min_l2_distance_reward(obj1, obj2):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+    REWARD_CNT["min_l2"] += 1
+    cnt = REWARD_CNT["min_l2"]
+    if cnt == 1:
+        cnt = ""
+    TASK_PARAMS[f"Reach{cnt}ObjectA"] = obj1
+    TASK_PARAMS[f"Reach{cnt}ObjectB"] = obj2
+    COST_WEIGHTS[f"Reach{cnt}"] = 1.0
+
+
+def set_max_l2_distance_reward(obj1, obj2, distance=0.6):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+    REWARD_CNT["max_l2"] += 1
+    cnt = REWARD_CNT["max_l2"]
+    if cnt == 1:
+        cnt = ""
+    TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = obj1
+    TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = obj2
+    COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
+
+
+def set_joint_fraction_reward(obj, fraction):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS
+    REWARD_CNT["joint"] += 1
+    cnt = REWARD_CNT["joint"]
+    if cnt == 1:
+        cnt = ""
+    TASK_PARAMS[f"JointTarget{cnt}"] = obj
+    TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction
+    COST_WEIGHTS[f"Joint Target{cnt}"] = 1.0
+
+
+def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save_video=True, save_last_img=False, verbose=False):
     # ctx = mujoco.GLContext(1920, 1080)
     # ctx.make_current()
 
     model_path = (
-        pathlib.Path(__file__).parent
+        pathlib.Path(__file__).parent.parent
         / f"build/mjpc/tasks/panda/{task}/task.xml"
     )
     model = mujoco.MjModel.from_xml_path(str(model_path))
-    data = mujoco.MjData(model)
+    if init_data is None:
+        data = mujoco.MjData(model)
+    else:
+        data = init_data
 
-    mj_viewer = mujoco_viewer.MujocoViewer(model, data, 'offscreen', width=640, height=480)
+    mj_viewer = mujoco_viewer.MujocoViewer(model, data, 'offscreen', width=1280, height=960)
+    # mj_viewer = mujoco_viewer.MujocoViewer(model, data, 'offscreen', width=640, height=480)
 
     # viewer = mujoco_viewer.MujocoViewer(model, data)
 
@@ -106,14 +162,15 @@ def test(task="kitchen", use_viewer=True):
                     observations.append(environment_step(model, data, actions[-1]))
                     if viewer is not None:
                         viewer.sync()
-                img = mj_viewer.read_pixels(camid=0)
-                images.append(img)
+                if save_video:
+                    img = mj_viewer.read_pixels(camid=0)
+                    images.append(img)
                     # total_cost += agent.get_total_cost()
                 if cost_name is None:
                     cost = agent.get_total_cost()
                 else:
                     cost = agent.get_cost_term_values()[cost_name]
-                if i % 20 == 0:
+                if i % 20 == 0 and verbose:
                     # print(i, cost)
                     print(i, f"{agent.get_total_cost():.2f} {cost:.2f}", agent.get_cost_term_values())
                 # agent.planner_step()
@@ -123,7 +180,7 @@ def test(task="kitchen", use_viewer=True):
                 # viewer.render()
             return False
         
-        def run_once(task_parameters, cost_weights, cost_limit, cost_name, viewer=None):
+        def run_once(task_parameters, cost_weights, cost_limit, cost_name=None, viewer=None):
             if task_parameters is not None:
                 agent.set_task_parameters(task_parameters)
             cost_names = agent.get_cost_term_values().keys()
@@ -138,11 +195,12 @@ def test(task="kitchen", use_viewer=True):
                 "Default Pose": 1
             }, cost_limit=0.02, cost_name="Default Pose", viewer=viewer)
 
-        def run_with_retries(task_name, task_parameters, cost_weights, cost_limit, cost_name, num_retries=3, viewer=None):
+        def run_with_retries(task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, viewer=None):
             for i in range(num_retries):
-                print(f"Task [{task_name}] retry #{i} ...")
+                if verbose:
+                    print(f"Task [{task_name}] retry #{i} ...")
                 run_reset(viewer=viewer)
-                succ = run_once(task_parameters, cost_weights, cost_limit, cost_name, viewer=viewer)
+                succ = run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, viewer=viewer)
                 if succ:
                     return True
             return False
@@ -225,146 +283,45 @@ def test(task="kitchen", use_viewer=True):
             cost_limit=0.02, cost_name="Reach2", num_retries=3, viewer=viewer)
 
             return succ
-            
+        
+        def run_cabinet_test1(viewer=None):
+            succ = run_with_retries("remove stick", task_parameters={
+                "ReachObjectA": "hand",
+                "ReachObjectB": "box_right",
+                "MoveAwayObjectA": "box_right",
+                "MoveAwayObjectB": "rightdoorhandle",
+                "MoveAwayDistance": 0.6
+            }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
+            cost_limit=0.02, cost_name="Move Away", num_retries=3, viewer=viewer)
+
             return succ
         
-        # def run(viewer=None):
-        #     # print(agent.get_parameters())
+        def run_cabinet_test2(viewer=None):
+            succ = run_with_retries("open door", task_parameters={
+                "ReachObjectA": "hand",
+                "ReachObjectB": "rightdoorhandle",
+                "JointTarget": "rightdoorhinge",
+                "JointTargetAngle": 1.5
+            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
 
-        #     # for cabinet
-        #     # agent.set_task_parameters({"ReachObjectA": "hand"})
-        #     # agent.set_task_parameters({"ReachObjectB": "box_right"})
-        #     # agent.set_task_parameters({"MoveAwayObjectA": "box_right"})
-        #     # agent.set_task_parameters({"MoveAwayObjectB": "doorhandle"})
-        #     # agent.set_task_parameters({"MoveAwayDistance": 0.4})
-        #     # agent.set_cost_weights(
-        #     #     {"Reach": 1, "Joint Target": 0, "Move Away": 1.0}
-        #     # )
+            return succ
 
-        #     # for kitchen move kettle
-        #     agent.set_task_parameters({"ReachObjectA": "hand"})
-        #     agent.set_task_parameters({"ReachObjectB": "kettle_handle"})
-        #     agent.set_task_parameters({"FingerTouchObject": "kettle_handle"})
-        #     agent.set_task_parameters({"MoveAwayObjectA": "kettle_center"})
-        #     agent.set_task_parameters({"MoveAwayObjectB": "microwave_handle"})
-        #     agent.set_task_parameters({"MoveAwayDistance": 0.7})
-        #     agent.set_cost_weights(
-        #         {"Pinch": 0.0, "Finger Touch": 0, "Reach": 0.2, "Reach2": 0.0, "Joint Target": 0, "Move Away": 1, "Default Pose": 0}
-        #     )
+        def run_custom(viewer=None):
+            succ = run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
+            cost_limit=0.02 * sum(list(COST_WEIGHTS.values())), num_retries=3, viewer=viewer)
 
-        #     agent.reset()
-        #     environment_reset(model, data)
+            return succ
 
-        #     print(agent.get_task_parameters())
-        #     print(agent.get_cost_term_values())
-        #     print(agent.get_cost_weights())
-
-        #     # print(data.qpos)
-        #     succ = plan(cost_limit=0.01, viewer=viewer, cost_name="Move Away")
-        #     # return succ
-        #     if not succ:
-        #         return False
-
-        #     # default pose
-        #     agent.set_cost_weights(
-        #         {"Pinch": 0.0, "Finger Touch": 0, "Reach": 0, "Reach2": 0.0, "Joint Target": 0, "Move Away": 0, "Default Pose": 1}
-        #     )
-
-        #     # agent.reset()
-        #     # environment_reset(model, data)
-
-        #     print(agent.get_task_parameters())
-        #     print(agent.get_cost_term_values())
-        #     print(agent.get_cost_weights())
-
-        #     # print(data.qpos)
-        #     succ = plan(cost_limit=0.01, viewer=viewer, cost_name="Default Pose")
-        #     # return succ
-        #     if not succ:
-        #         return False
-
-        #     # # open cabinet
-        #     # agent.set_task_parameters({"ReachObjectA": "hand"})
-        #     # agent.set_task_parameters({"ReachObjectB": "doorhandle"})
-        #     # agent.set_task_parameters({"JointTarget": "rightdoorhinge"})
-        #     # agent.set_task_parameters({"JointTargetAngle": 1.0})
-        #     # agent.set_cost_weights(
-        #     #     {"Reach": 1, "Joint Target": 0.5, "Move Away": 0.0}
-        #     # )
-
-        #     # open microwave
-        #     # agent.set_task_parameters({"PinchForce": 50.0})
-        #     agent.set_task_parameters({"FingerTouchObject": "microwave_handle"})
-        #     agent.set_task_parameters({"ReachObjectA": "hand"})
-        #     agent.set_task_parameters({"ReachObjectB": "microwave_handle"})
-        #     agent.set_task_parameters({"JointTarget": "micro0joint"})
-        #     # agent.set_task_parameters({"ReachObjectB": "cabinet_doorhandle_r"})
-        #     # agent.set_task_parameters({"JointTarget": "rightdoorhinge"})
-        #     agent.set_task_parameters({"JointTargetAngle": 1.2})
-        #     agent.set_cost_weights(
-        #         {"Pinch": 0.0, "Finger Touch": 0, "Reach": 1, "Reach2": 0.0, "Joint Target": 1, "Move Away": 0, "Default Pose": 0}
-        #     )
-
-        #     print(agent.get_task_parameters())
-        #     print(agent.get_total_cost())
-        #     print(agent.get_cost_weights())
-
-        #     # print(data.qpos)
-
-        #     succ = plan(cost_limit=0.1, viewer=viewer, cost_name="Joint Target")
-        #     if not succ:
-        #         return False
-
-        #     # default pose
-        #     agent.set_cost_weights(
-        #         {"Pinch": 0.0, "Finger Touch": 0, "Reach": 0, "Reach2": 0.0, "Joint Target": 0, "Move Away": 0, "Default Pose": 1}
-        #     )
-
-        #     # agent.reset()
-        #     # environment_reset(model, data)
-
-        #     print(agent.get_task_parameters())
-        #     print(agent.get_cost_term_values())
-        #     print(agent.get_cost_weights())
-
-        #     # print(data.qpos)
-        #     succ = plan(cost_limit=0.01, viewer=viewer, cost_name="Default Pose")
-        #     # return succ
-        #     if not succ:
-        #         return False
-            
-        #     # open microwave
-        #     # agent.set_task_parameters({"PinchForce": 50.0})
-        #     agent.set_task_parameters({"FingerTouchObject": "box"})
-        #     agent.set_task_parameters({"ReachObjectA": "hand"})
-        #     agent.set_task_parameters({"ReachObjectB": "box"})
-        #     agent.set_task_parameters({"Reach2ObjectA": "box"})
-        #     agent.set_task_parameters({"Reach2ObjectB": "target_position"})
-        #     agent.set_task_parameters({"MoveAwayObjectA": "box"})
-        #     agent.set_task_parameters({"MoveAwayObjectB": "microwave_center"})
-        #     agent.set_task_parameters({"MoveAwayDistance": 0.7})
-        #     agent.set_cost_weights(
-        #         {"Pinch": 0.0, "Finger Touch": 0, "Reach": 1, "Reach2": 1.0, "Joint Target": 0, "Move Away": 0, "Default Pose": 0}
-        #     )
-
-        #     print(agent.get_task_parameters())
-        #     print(agent.get_total_cost())
-        #     print(agent.get_cost_weights())
-
-        #     # print(data.qpos)
-
-        #     succ = plan(cost_limit=0.1, viewer=viewer, cost_name="Move Away")
-        #     if not succ:
-        #         return False
-
-        #     return succ
-
-        if task == "kitchen":
-            run_fn = run_kitchen_cabinet
-        elif task == "cabinet":
-            run_fn = run_cabinet
+        if custom:
+            run_fn = run_custom
         else:
-            raise NotImplementedError()
+            if task == "kitchen":
+                run_fn = run_kitchen_cabinet
+            elif task == "cabinet":
+                run_fn = run_cabinet_test1
+            else:
+                raise NotImplementedError()
 
         if use_viewer:
             with mujoco.viewer.launch_passive(model, data) as viewer:
@@ -372,16 +329,41 @@ def test(task="kitchen", use_viewer=True):
         else:
             ret = run_fn(viewer=None)
 
-        images = np.stack(images, 0)
-        vidwrite("output.mp4", images, 240)
+        if save_video:
+            images = np.stack(images, 0)
+            vidwrite("output.mp4", images, 240)
+
+        if save_last_img:
+            im = mj_viewer.read_pixels(camid=0)
+            cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
+
+        # joblib.dump(data, "data.joblib")
 
         return ret
 
 
+def execute_plan():
+    try:
+        init_data = joblib.load("data.joblib")
+    except FileNotFoundError:
+        init_data = None
+
+    print(TASK_PARAMS)
+    print(COST_WEIGHTS)
+    
+    print(int(_execute("cabinet", custom=True, use_viewer=False, save_video=False, save_last_img=True, init_data=init_data)))
+
+
 if __name__ == "__main__":
+
+    try:
+        init_data = joblib.load("data.joblib")
+    except FileNotFoundError:
+        init_data = None
+
     T = 1
     n_succ = 0
     for _ in range(T):
-        n_succ += int(test("cabinet", use_viewer=True))
+        n_succ += int(_execute("cabinet", use_viewer=False, save_video=False, save_last_img=True, init_data=init_data))
     
     print(n_succ)
