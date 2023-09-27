@@ -198,12 +198,33 @@ def test(task="kitchen", use_viewer=True):
                 "ReachObjectB": "box_right",
                 "MoveAwayObjectA": "box_right",
                 "MoveAwayObjectB": "rightdoorhandle",
-                "MoveAwayDistance": 0.7
+                "MoveAwayDistance": 0.6
             }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
             cost_limit=0.02, cost_name="Move Away", num_retries=3, viewer=viewer)
 
             if not succ:
                 return False
+            
+            succ = run_with_retries("open door", task_parameters={
+                "ReachObjectA": "hand",
+                "ReachObjectB": "rightdoorhandle",
+                "JointTarget": "rightdoorhinge",
+                "JointTargetAngle": 1.5
+            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
+
+            if not succ:
+                return False
+            
+            succ = run_with_retries("move cube", task_parameters={
+                "ReachObjectA": "hand",
+                "ReachObjectB": "target",
+                "Reach2ObjectA": "target",
+                "Reach2ObjectB": "target_position"
+            }, cost_weights={"Reach": 1.0, "Reach2": 1.0},
+            cost_limit=0.02, cost_name="Reach2", num_retries=3, viewer=viewer)
+
+            return succ
             
             return succ
         

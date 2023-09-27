@@ -14,18 +14,23 @@
     <numeric name="gradient_spline_points" data="6" />
 
     <numeric name="residual_select_ReachObjectA" data="0"/>
-    <text name="residual_list_ReachObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
+    <text name="residual_list_ReachObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|target_position"/>
     <numeric name="residual_select_ReachObjectB" data="4"/>
-    <text name="residual_list_ReachObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
+    <text name="residual_list_ReachObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|target_position"/>
+
+    <numeric name="residual_select_Reach2ObjectA" data="0"/>
+    <text name="residual_list_Reach2ObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|target_position"/>
+    <numeric name="residual_select_Reach2ObjectB" data="0"/>
+    <text name="residual_list_Reach2ObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|target_position"/>
 
     <numeric name="residual_select_JointTarget" data="0"/>
     <text name="residual_list_JointTarget" data="leftdoorhinge|rightdoorhinge"/>
     <numeric name="residual_JointTargetAngle" data="1 0 1"/>
 
     <numeric name="residual_select_MoveAwayObjectA" data="1"/>
-    <text name="residual_list_MoveAwayObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
+    <text name="residual_list_MoveAwayObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|target_position"/>
     <numeric name="residual_select_MoveAwayObjectB" data="4"/>
-    <text name="residual_list_MoveAwayObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target"/>
+    <text name="residual_list_MoveAwayObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|target_position"/>
     <numeric name="residual_MoveAwayDistance" data="0.5 0.1 2"/>
   </custom>
 
@@ -56,14 +61,17 @@
   </asset>
 
   <worldbody>
-    <!-- <camera pos="1.237 -1.307 1.277" xyaxes="0.875 0.485 -0.000 -0.220 0.397 0.891"/> -->
-
     <site name="world"/>
     <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
         directional="true" castshadow="true"/>
+
+    <!-- <camera pos="0.151 -0.631 0.883" xyaxes="1.000 -0.031 -0.000 0.015 0.507 0.862"/> -->
+    <!-- <camera pos="0.477 -1.143 1.296" xyaxes="0.932 0.362 -0.000 -0.205 0.528 0.824"/> -->
+    <camera pos="-0.222 -1.523 1.620" xyaxes="0.988 -0.152 -0.000 0.087 0.567 0.819"/>
+
     <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" material="blue_grid"/>
 
-    <body name="box" pos="0.0 0.65 0.2">
+    <body name="box" pos="0.0 0.65 0.16">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.20 0.02 0.02" mass=".3"/>
       <!-- <geom material="M_hinge_blue" pos="0 0 0" size="0.20 0.02 0.02" type="box"/> -->
@@ -80,8 +88,12 @@
       <site name="target" type="box" pos="0 0 0" size="0.03 0.03 0.03"/>
     </body>
 
-    <body name="hingecabinet" pos="0 1 .25" >
+    <body name="hingecabinet" pos="0 1 .21" >
       <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
+    </body>
+
+    <body name="target_position" pos="0.20 0.9 0.06">
+      <site name="target_position" type="box" pos="0 0 0" size="0.05 0.05 0.001"/>
     </body>
 
 	<!--
@@ -116,12 +128,14 @@
     <user name="Reach Box" dim="3" user="2 .1 0 1 0.01"/>
     <user name="Move Box" dim="1" user="2 1 0 5 0.003"/> -->
     <user name="Reach" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Reach2" dim="3" user="2 1 0 5 0.01"/>
     <user name="Joint Target" dim="1" user="2 0 0 1 0.003"/>
     <!-- <user name="Move Away Temp" dim="2" user="2 0 0 5 0.01"/> -->
     <user name="Move Away" dim="1" user="2 1 0 5 0.01"/>
     <user name="Default Pose" dim="3" user="2 0 0 5 0.01"/>
     <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
     <framepos name="hand" objtype="site" objname="eeff"/>
+    <framepos name="target_position" objtype="site" objname="target_position"/>
     <framepos name="rightdoorhandle" objtype="site" objname="rightdoor_site"/>
     <framepos name="leftdoorhandle" objtype="site" objname="leftdoor_site"/>
     <framepos name="box" objtype="site" objname="box"/>

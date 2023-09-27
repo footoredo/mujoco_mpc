@@ -28,8 +28,8 @@ std::string Cabinet::XmlPath() const {
   return GetModelPath("panda/cabinet/task.xml");
 }
 std::string Cabinet::Name() const { return "Panda Cabinet"; }
-const std::array<std::string, 7> object_names = {
-    "hand", "leftdoorhandle", "rightdoorhandle", "box", "box_left", "box_right", "target"
+const std::array<std::string, 8> object_names = {
+    "hand", "leftdoorhandle", "rightdoorhandle", "box", "box_left", "box_right", "target", "target_position"
 };
 
 const std::array<std::string, 2> joint_names = {
@@ -63,6 +63,21 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   mju_sub3(residual + counter, obj_a, obj_b);
   // printf("%.2f %.2f %.2f\n", obj_a[counter], obj_a[counter + 1], obj_a[2]);
   // printf("%.2f %.2f %.2f\n", obj_b[counter], obj_b[counter + 1], obj_b[2]);
+  // mju_copy(residual + counter, hand, 3);
+  counter += 3;
+
+
+  int obj_2_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
+  int obj_2_b_id = ReinterpretAsInt(parameters_[param_counter ++]);
+
+  // reach2
+  // double* hand = SensorByName(model, data, "hand");
+  double* obj_2_a = SensorByName(model, data, object_names[obj_2_a_id]);
+  // double* box = SensorByName(model, data, "box");
+  // double* handle = SensorByName(model, data, "doorhandle");
+  double* obj_2_b = SensorByName(model, data, object_names[obj_2_b_id]);
+  // printf("%d %d\n", object_a_, object_b_);
+  mju_sub3(residual + counter, obj_2_a, obj_2_b);
   // mju_copy(residual + counter, hand, 3);
   counter += 3;
 
