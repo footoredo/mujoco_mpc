@@ -55,7 +55,7 @@ def environment_reset(model, data):
 
 ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = False
+SAVE_VIDEO = True
 IS_COP = False
 
 REWARD_CNT = {
@@ -86,14 +86,14 @@ CABINET_NAME_MAPPING = {
 
 KITCHEN_NAME_MAPPING = {
     "palm": "hand",
-    "left_cabinet_handle": "cabinet_doorhandle_l",
+    "cabinet_handle": "cabinet_doorhandle_l",
     "right_cabinet_handle": "cabinet_doorhandle_r",
-    "left_cabinet": "leftdoorhinge",
+    "cabinet": "leftdoorhinge",
     "right_cabinet": "rightdoorhinge",
     "microwave_handle": "microwave_handle",
     "microwave": "micro0joint",
     "blue_kettle_handle": "kettle_handle",
-    "cube": "box",
+    "green_apple": "box",
     "target_position": "target_position"
 }
 
@@ -150,7 +150,7 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
         cnt = ""
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
-    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 1.6
+    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 1.0
     COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
 
     if primary_reward:
@@ -276,7 +276,7 @@ class Runner:
             # viewer.render()
             num_steps += 1
             last_updated += 1
-            if last_updated > 10 and num_steps > step_limit:
+            if last_updated > 20 and num_steps > step_limit:
                 break
         return False
         
@@ -471,9 +471,9 @@ class Runner:
             if self.task == "kitchen":
                 # run_fn = self.run_kitchen_cabinet_both
                 # run_fn = self.run_kitchen_dummy
-                run_fn = self.run_reset
+                run_fn = self.run_reset_no_obstruction
             elif self.task == "cabinet":
-                run_fn = self.run_reset
+                run_fn = self.run_reset_no_obstruction
             else:
                 raise NotImplementedError()
             

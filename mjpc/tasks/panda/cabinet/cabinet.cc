@@ -81,6 +81,20 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // mju_copy(residual + counter, hand, 3);
   counter += 3;
 
+  int obj_3_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
+  int obj_3_b_id = ReinterpretAsInt(parameters_[param_counter ++]);
+
+  // reach3
+  // double* hand = SensorByName(model, data, "hand");
+  double* obj_3_a = SensorByName(model, data, object_names[obj_3_a_id]);
+  // double* box = SensorByName(model, data, "box");
+  // double* handle = SensorByName(model, data, "doorhandle");
+  double* obj_3_b = SensorByName(model, data, object_names[obj_3_b_id]);
+  // printf("%d %d\n", object_a_, object_b_);
+  mju_sub3(residual + counter, obj_3_a, obj_3_b);
+  // mju_copy(residual + counter, hand, 3);
+  counter += 3;
+
   // joint
   int joint_id = ReinterpretAsInt(parameters_[param_counter ++]);
   double joint_target = parameters_[param_counter ++];
@@ -165,8 +179,9 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   }
 
   // default position
-  double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-  for (int i = 0; i < 3; i ++) {
+  // double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+  double panda_joints_default[8] = {0.000162331, 1.48074, -0.690224, -0.106001, -2.4659, -0.0792418, 1.14184, -1.48384};
+  for (int i = 0; i < 6; i ++) {
     double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));
     // std::cout << panda_joints[i] << " ";
     residual[counter ++] = panda_joints_default[i] - joint_i;
@@ -175,6 +190,7 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // default position no obstruction
   // double panda_joints_default_no_obstruction[8] = {-0.00149581, 0.0010889, -0.000380885, -2.96704, -3.06744, -2.9606, 0.342783, 2.96783};
   double panda_joints_default_no_obstruction[8] = {0.00, 0.00 -0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+  // double panda_joints_default[8] = {0.000162331, 1.48074, -0.690224, -0.106001, -2.4659, -0.0792418, 1.14184, -1.48384};
   // double panda_hand_default[3] = {0.0576433, 0.00168072, 0.579432};
   for (int i = 0; i < 8; i ++) {
     double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));

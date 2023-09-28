@@ -138,8 +138,8 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // std::cout << std::endl;
 
   // default position no obstruction
-  // double panda_joints_default_no_obstruction[8] = {-0.00149581, 0.0010889, -0.000380885, -2.96704, -3.06744, -2.9606, 0.342783, 2.96783};
-  double panda_joints_default_no_obstruction[8] = {-0.000378825, 0.176042, -0.700116, -0.460413, -2.55436, 0.424858, 0.346362, -0.18275};
+  // double panda_joints_default_no_obstruction[8] = {-0.000378825, 0.176042, -0.700116, -0.460413, -2.55436, 0.424858, 0.346362, -0.18275};
+  double panda_joints_default_no_obstruction[8] = {3.51141e-07, -0.00079561, -0.343923, -0.000648898, -1.28048, 0.00331369, 0.39396, -0.176195};
   // double panda_joints_default[8] = {0.00260707, 0.267844, -0.580238, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_joints_default[8] = {0.00, 0.00 -0.00, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_hand_default[3] = {0.0576433, 0.00168072, 0.579432};
