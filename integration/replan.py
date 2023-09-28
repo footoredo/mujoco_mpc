@@ -11,9 +11,11 @@ LLM_WORKDIR = pathlib.Path("/home/footoredo/playground/RePlan")
 MPC_WORKDIR = pathlib.Path("/home/footoredo/playground/mujoco_mpc/integration")
 
 MPC_RUN_HEADER = f"""from core import reset_reward, minimize_l2_distance_reward, maximize_l2_distance_reward, \\
-    set_joint_fraction_reward, execute_plan, set_env
+    set_joint_fraction_reward, execute_plan, set_env, runner_init
 
 set_env('{ENV}')
+runner_init()
+
 """
 
 
@@ -117,7 +119,34 @@ execute_plan()
 """
     ]
 
-    reward_code_list = reward_code_tests_cabinet
+    reward_code_tests_cabinet_new = [
+"""reset_reward()
+minimize_l2_distance_reward("palm", "yellow_cube")
+execute_plan()""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "right_wooden_cabinet_handle")
+set_joint_fraction_reward("right_wooden_cabinet", 1.0, primary_reward=True)
+execute_plan()""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "red_block_right_side")
+execute_plan()
+""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "red_block_right_side")
+maximize_l2_distance_reward("red_block_right_side", "right_wooden_cabinet_handle", primary_reward=True)
+execute_plan()""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "right_wooden_cabinet_handle")
+set_joint_fraction_reward("right_wooden_cabinet", 1.0, primary_reward=True)
+execute_plan()""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "yellow_cube")
+minimize_l2_distance_reward("yellow_cube", "right_wooden_cabinet_inside", primary_reward=True)
+set_joint_fraction_reward("right_wooden_cabinet", 1.0)
+execute_plan()"""
+    ]
+
+    reward_code_list = reward_code_tests_cabinet_new
 
     clean_mpc()
 

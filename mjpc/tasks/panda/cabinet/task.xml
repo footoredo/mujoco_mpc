@@ -32,6 +32,10 @@
     <numeric name="residual_select_MoveAwayObjectB" data="4"/>
     <text name="residual_list_MoveAwayObjectB" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|target_position"/>
     <numeric name="residual_MoveAwayDistance" data="0.5 0.1 2"/>
+
+    <numeric name="residual_EndEffectorTo1" data="0.0 -10 10"/>
+    <numeric name="residual_EndEffectorTo2" data="0.0 -10 10"/>
+    <numeric name="residual_EndEffectorTo3" data="0.0 0 10"/>
   </custom>
 
   <statistic extent="1.5" center="0.1 0.2 0.3"/>
@@ -135,6 +139,7 @@
     <user name="Joint Target" dim="1" user="2 0 0 1 0.003"/>
     <!-- <user name="Move Away Temp" dim="2" user="2 0 0 5 0.01"/> -->
     <user name="Move Away" dim="1" user="2 1 0 5 0.01"/>
+    <user name="End-Effector To" dim="3" user="2 1 0 5 0.01"/>
     <user name="Default Pose" dim="3" user="2 0 0 5 0.01"/>
 	  <user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
     <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->

@@ -175,315 +175,348 @@ def set_primary_reward(reward_index):
 
 last_primary = None
 
-def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save_video=True, save_last_img=False, verbose=False):
-    # ctx = mujoco.GLContext(1920, 1080)
-    # ctx.make_current()
 
-    model_path = (
-        pathlib.Path(__file__).parent.parent
-        / f"build/mjpc/tasks/panda/{task}/task.xml"
-    )
-    model = mujoco.MjModel.from_xml_path(str(model_path))
-    if init_data is None:
-        data = mujoco.MjData(model)
-    else:
-        data = init_data
+class Runner:
+    def __init__(self, task="kitchen", use_viewer=True, init_data=None, save_video=True, save_last_img=False, verbose=False):
+        self.task = task
+        self.use_viewer = use_viewer
+        self.init_data = init_data
+        self.save_video = save_video
+        self.save_last_img = save_last_img
+        self.verbose = verbose
 
-    mj_viewer = mujoco_viewer.MujocoViewer(model, data, 'offscreen', width=1280, height=960)
-    # mj_viewer = mujoco_viewer.MujocoViewer(model, data, 'offscreen', width=640, height=480)
-
-    # viewer = mujoco_viewer.MujocoViewer(model, data)
-
-    # img = viewer.read_pixels(camid=2)
-    # img = Image.fromarray(img)
-    # img.save("initial.png")
-
-    # viewer.render()
-
-    # input()
-
-    repeats = 5
-    control_timestep = model.opt.timestep * repeats
-
-    actions = []
-    observations = []
-
-    images = []
-
-    # "<camera pos="1.353 -0.887 1.285" xyaxes="0.556 0.831 0.000 -0.559 0.374 0.740"/>"
-
-    with agent_lib.Agent(task_id=f"Panda {task.capitalize()}", model=model) as agent:
-        def plan(step_limit=500, cost_limit=None, cost_name=None, viewer=None):
-            global last_primary
-            if cost_name.startswith("Default Pose"):
-                last_primary = None
-            else:
-                last_primary = cost_name
-            for i in range(step_limit):
-                agent.set_state(
-                    time=data.time,
-                    qpos=data.qpos,
-                    qvel=data.qvel,
-                    act=data.act,
-                    mocap_pos=data.mocap_pos,
-                    mocap_quat=data.mocap_quat,
-                    userdata=data.userdata,
-                )
-                agent.planner_step()
-                # print(i)
-                # actions.append(agent.get_action(averaging_duration=control_timestep))
-                actions.append(agent.get_action())
-                # print(i)
-                for _ in range(repeats):
-                    observations.append(environment_step(model, data, actions[-1]))
-                    if viewer is not None:
-                        viewer.sync()
-                if save_video:
-                    img = mj_viewer.read_pixels(camid=0)
-                    images.append(img)
-                    # total_cost += agent.get_total_cost()
-                if cost_name is None:
-                    cost = agent.get_total_cost()
-                else:
-                    cost = agent.get_cost_term_values()[cost_name]
-                if i % 20 == 0 and verbose:
-                    # print(i, cost)
-                    print(i, f"{agent.get_total_cost():.2f} {cost:.2f}", agent.get_cost_term_values())
-                # agent.planner_step()
-                if cost_limit is not None and cost <= cost_limit:
-                    return True
-                # observations.append(environment_step(model, data, actions[-1]))
-                # viewer.render()
-            return False
-        
-        def run_once(task_parameters, cost_weights, cost_limit, cost_name=None, step_limit=1000, viewer=None):
-            if task_parameters is not None:
-                agent.set_task_parameters(task_parameters)
-            cost_names = agent.get_cost_term_values().keys()
-            zeroed_cost_weights = {
-                key: cost_weights.get(key, 0.0) for key in cost_names
-            }
-            agent.set_cost_weights(zeroed_cost_weights)
-            return plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit, viewer=viewer)
-        
-        def run_reset(viewer=None):
-            print(last_primary)
-            succ = run_once(task_parameters=None, cost_weights={
-                "Default Pose": 1, last_primary: 1
-            }, cost_limit=0.02, cost_name="Default Pose", viewer=viewer, step_limit=200)
-            return succ
-
-        def run_reset_no_obstruction(viewer=None):
-            succ = run_once(task_parameters=None, cost_weights={
-                "Default Pose No-Obstruction": 1, last_primary: 1
-            }, cost_limit=0.02, cost_name="Default Pose No-Obstruction", viewer=viewer, step_limit=200)
-            return succ
-
-        def run_with_retries(task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, step_limit=1000, viewer=None):
-            for i in range(num_retries):
-                print(f"Task [{task_name}] retry #{i} ...")
-                run_reset(viewer=viewer)
-                succ = run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, step_limit=step_limit, viewer=viewer)
-                costs = agent.get_cost_term_values()
-                for name in sorted(cost_weights.keys()):
-                    print(name, costs[name])
-                print()
-                if succ:
-                    return True
-            return False
-        
-        def run_kitchen(viewer=None):
-            succ = run_with_retries("move kettle", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "kettle_handle",
-                "MoveAwayObjectA": "kettle_center",
-                "MoveAwayObjectB": "microwave_handle",
-                "MoveAwayDistance": 0.7
-            }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
-            cost_limit=0.02, cost_name="Move Away", num_retries=3, viewer=viewer)
-
-            if not succ:
-                return False
-
-            succ = run_with_retries("open microwave", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "microwave_handle",
-                "JointTarget": "micro0joint",
-                "JointTargetAngle": 1.2
-            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
-            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
-
-            if not succ:
-                return False
-
-            succ = run_with_retries("move cube", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "box",
-                "Reach2ObjectA": "box",
-                "Reach2ObjectB": "target_position"
-            }, cost_weights={"Reach": 1.0, "Reach2": 1.0},
-            cost_limit=0.02, cost_name="Reach2", num_retries=3, viewer=viewer)
-
-            return succ
-        
-        def run_kitchen_cabinet_l(viewer=None):
-            succ = run_with_retries("open cabinet_l", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "cabinet_doorhandle_l",
-                "JointTarget": "leftdoorhinge",
-                "JointTargetAngle": 1.5
-            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
-            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
-
-            return succ
-
-        def run_kitchen_cabinet_r(viewer=None):
-            succ = run_with_retries("open cabinet_r", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "cabinet_doorhandle_r",
-                "JointTarget": "rightdoorhinge",
-                "JointTargetAngle": 1.5
-            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
-            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
-
-            return succ
-        
-        def run_kitchen_cabinet_both(viewer=None):
-            succ = run_kitchen_cabinet_r(viewer)
-            if not succ:
-                return False
-            succ = run_kitchen_cabinet_l(viewer)
-            run_reset_no_obstruction(viewer=viewer)
-            return succ
-
-        def run_kitchen_dummy(viewer=None):
-            succ = run_reset(viewer)
-            return succ
-
-        def run_cabinet(viewer=None):
-            succ = run_with_retries("remove stick", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "box_right",
-                "MoveAwayObjectA": "box_right",
-                "MoveAwayObjectB": "rightdoorhandle",
-                "MoveAwayDistance": 0.6
-            }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
-            cost_limit=0.02, cost_name="Move Away", num_retries=3, viewer=viewer)
-
-            if not succ:
-                return False
-            
-            succ = run_with_retries("open door", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "rightdoorhandle",
-                "JointTarget": "rightdoorhinge",
-                "JointTargetAngle": 1.5
-            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
-            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
-
-            if not succ:
-                return False
-            
-            succ = run_with_retries("move cube", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "target",
-                "Reach2ObjectA": "target",
-                "Reach2ObjectB": "target_position"
-            }, cost_weights={"Reach": 1.0, "Reach2": 1.0},
-            cost_limit=0.02, cost_name="Reach2", num_retries=3, viewer=viewer)
-
-            return succ
-        
-        def run_cabinet_test1(viewer=None):
-            succ = run_with_retries("remove stick", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "box_right",
-                "MoveAwayObjectA": "box_right",
-                "MoveAwayObjectB": "rightdoorhandle",
-                "MoveAwayDistance": 0.6
-            }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
-            cost_limit=0.02, cost_name="Move Away", num_retries=3, viewer=viewer)
-
-            return succ
-        
-        def run_cabinet_test2(viewer=None):
-            succ = run_with_retries("open door", task_parameters={
-                "ReachObjectA": "hand",
-                "ReachObjectB": "rightdoorhandle",
-                "JointTarget": "rightdoorhinge",
-                "JointTargetAngle": 1.5
-            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
-            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
-
-            return succ
-
-        def run_cabinet_dummy(viewer=None):
-            succ = run_with_retries("remove stick", task_parameters={
-                "ReachObjectA": "rightdoorhandle",
-                "ReachObjectB": "leftdoorhandle",
-            }, cost_weights={"Reach": 1.0},
-            cost_limit=0.02, cost_name="Reach", num_retries=1, step_limit=50, viewer=viewer)
-            input()
-
-            return succ
-
-        def run_custom(viewer=None):
-            if PRIMARY_REWARD is None:
-                cost_limit = 0.01 * sum(list(COST_WEIGHTS.values()))
-            else:
-                cost_limit = 0.02
-            succ = run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-            cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=3, viewer=viewer)
-
-            run_reset_no_obstruction(viewer)
-
-            return succ
-
-        if custom:
-            run_fn = run_custom
+        model_path = (
+            pathlib.Path(__file__).parent.parent
+            / f"build/mjpc/tasks/panda/{task}/task.xml"
+        )
+        self.model = mujoco.MjModel.from_xml_path(str(model_path))
+        if init_data is None:
+            self.data = mujoco.MjData(self.model)
         else:
-            if task == "kitchen":
-                run_fn = run_kitchen_cabinet_both
+            self.data = init_data
+
+        print(self.data.site("eeff").xpos)
+
+        self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
+
+        if self.use_viewer:
+            self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
+        else:
+            self.viewer = None
+
+        self.repeats = 5
+
+        self.actions = []
+        self.observations = []
+
+        self.images = []
+
+        self.agent = agent_lib.Agent(task_id=f"Panda {self.task.capitalize()}", model=self.model)
+
+    def plan(self, step_limit=500, cost_limit=None, cost_name=None):
+        global last_primary
+        if cost_name is not None and cost_name.startswith("Default Pose"):
+            last_primary = None
+        else:
+            last_primary = cost_name
+        for i in range(step_limit):
+            self.agent.set_state(
+                time=self.data.time,
+                qpos=self.data.qpos,
+                qvel=self.data.qvel,
+                act=self.data.act,
+                mocap_pos=self.data.mocap_pos,
+                mocap_quat=self.data.mocap_quat,
+                userdata=self.data.userdata,
+            )
+            self.agent.planner_step()
+            # print(i)
+            # actions.append(agent.get_action(averaging_duration=control_timestep))
+            self.actions.append(self.agent.get_action())
+            # print(i)
+            for _ in range(self.repeats):
+                self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
+                # print("hand xpos:", data.site("eeff").xpos)
+                if self.viewer is not None:
+                    self.viewer.sync()
+            if self.save_video:
+                img = self.mj_viewer.read_pixels(camid=0)
+                self.images.append(img)
+                # total_cost += agent.get_total_cost()
+            if cost_name is None:
+                cost = self.agent.get_total_cost()
+            else:
+                cost = self.agent.get_cost_term_values()[cost_name]
+            if i % 20 == 0 and self.verbose:
+                # print(i, cost)
+                print(i, f"{self.agent.get_total_cost():.2f} {cost:.2f}", self.agent.get_cost_term_values())
+            # agent.planner_step()
+            if cost_limit is not None and cost <= cost_limit:
+                return True
+            # observations.append(environment_step(model, data, actions[-1]))
+            # viewer.render()
+        return False
+        
+    def run_once(self, task_parameters, cost_weights, cost_limit, cost_name=None, step_limit=1000):
+        if task_parameters is not None:
+            self.agent.set_task_parameters(task_parameters)
+        cost_names = self.agent.get_cost_term_values().keys()
+        zeroed_cost_weights = {
+            key: cost_weights.get(key, 0.0) for key in cost_names
+        }
+        self.agent.set_cost_weights(zeroed_cost_weights)
+        return self.plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit)
+        
+    def run_reset(self):
+        print(last_primary)
+        succ = self.run_once(task_parameters=None, cost_weights={
+            "Default Pose": 1, last_primary: 1
+        }, cost_limit=0.02, cost_name="Default Pose", step_limit=200)
+        return succ
+
+    def run_reset_no_obstruction(self):
+        succ = self.run_once(task_parameters=None, cost_weights={
+            "Default Pose No-Obstruction": 1, last_primary: 1
+        }, cost_limit=0.02, cost_name="Default Pose No-Obstruction", step_limit=200)
+        return succ
+
+    def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, step_limit=1000):
+        for i in range(num_retries):
+            print(f"Task [{task_name}] retry #{i} ...")
+            self.run_reset()
+            succ = self.run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, step_limit=step_limit)
+            costs = self.agent.get_cost_term_values()
+            for name in sorted(cost_weights.keys()):
+                print(name, costs[name])
+            print()
+            if succ:
+                return True
+        return False
+        
+    def run_kitchen(self):
+        succ = self.run_with_retries("move kettle", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "kettle_handle",
+            "MoveAwayObjectA": "kettle_center",
+            "MoveAwayObjectB": "microwave_handle",
+            "MoveAwayDistance": 0.7
+        }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
+        cost_limit=0.02, cost_name="Move Away", num_retries=3)
+
+        if not succ:
+            return False
+
+        succ = self.run_with_retries("open microwave", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "microwave_handle",
+            "JointTarget": "micro0joint",
+            "JointTargetAngle": 1.2
+        }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+        cost_limit=0.02, cost_name="Joint Target", num_retries=3)
+
+        if not succ:
+            return False
+
+        succ = self.run_with_retries("move cube", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "box",
+            "Reach2ObjectA": "box",
+            "Reach2ObjectB": "target_position"
+        }, cost_weights={"Reach": 1.0, "Reach2": 1.0},
+        cost_limit=0.02, cost_name="Reach2", num_retries=3)
+
+        return succ
+        
+    def run_kitchen_cabinet_l(self):
+        succ = self.run_with_retries("open cabinet_l", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "cabinet_doorhandle_l",
+            "JointTarget": "leftdoorhinge",
+            "JointTargetAngle": 1.5
+        }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+        cost_limit=0.02, cost_name="Joint Target", num_retries=3)
+
+        return succ
+
+    def run_kitchen_cabinet_r(self):
+        succ = self.run_with_retries("open cabinet_r", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "cabinet_doorhandle_r",
+            "JointTarget": "rightdoorhinge",
+            "JointTargetAngle": 1.5
+        }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+        cost_limit=0.02, cost_name="Joint Target", num_retries=3)
+
+        return succ
+        
+    def run_kitchen_cabinet_both(self):
+        succ = self.run_kitchen_cabinet_r()
+        if not succ:
+            return False
+        succ = self.run_kitchen_cabinet_l()
+        self.run_reset_no_obstruction()
+        return succ
+
+    def run_kitchen_dummy(self):
+        succ = self.run_reset()
+        return succ
+
+    def run_cabinet(self):
+        succ = self.run_with_retries("remove stick", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "box_right",
+            "MoveAwayObjectA": "box_right",
+            "MoveAwayObjectB": "rightdoorhandle",
+            "MoveAwayDistance": 0.6
+        }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
+        cost_limit=0.02, cost_name="Move Away", num_retries=3)
+
+        if not succ:
+            return False
+        
+        succ = self.run_with_retries("open door", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "rightdoorhandle",
+            "JointTarget": "rightdoorhinge",
+            "JointTargetAngle": 1.5
+        }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+        cost_limit=0.02, cost_name="Joint Target", num_retries=3)
+
+        if not succ:
+            return False
+        
+        succ = self.run_with_retries("move cube", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "target",
+            "Reach2ObjectA": "target",
+            "Reach2ObjectB": "target_position"
+        }, cost_weights={"Reach": 1.0, "Reach2": 1.0},
+        cost_limit=0.02, cost_name="Reach2", num_retries=3)
+
+        return succ
+        
+    def run_cabinet_test1(self):
+        succ = self.run_with_retries("remove stick", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "box_right",
+            "MoveAwayObjectA": "box_right",
+            "MoveAwayObjectB": "rightdoorhandle",
+            "MoveAwayDistance": 0.6
+        }, cost_weights={"Reach": 1.0, "Move Away": 1.0},
+        cost_limit=0.02, cost_name="Move Away", num_retries=3)
+
+        return succ
+        
+    def run_cabinet_test2(self):
+        succ = self.run_with_retries("open door", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "rightdoorhandle",
+            "JointTarget": "rightdoorhinge",
+            "JointTargetAngle": 1.5
+        }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+        cost_limit=0.02, cost_name="Joint Target", num_retries=3)
+
+        return succ
+
+    def run_cabinet_dummy(self):
+        succ = self.run_with_retries("remove stick", task_parameters={
+            "ReachObjectA": "rightdoorhandle",
+            "ReachObjectB": "leftdoorhandle",
+        }, cost_weights={"Reach": 1.0},
+        cost_limit=0.02, cost_name="Reach", num_retries=1, step_limit=50)
+        input()
+
+        return succ
+
+    def run_custom(self):
+        if PRIMARY_REWARD is None:
+            cost_limit = 0.01 * sum(list(COST_WEIGHTS.values()))
+        else:
+            cost_limit = 0.02
+        succ = self.run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
+        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=3)
+
+        self.run_reset_no_obstruction()
+
+        return succ
+    
+    def execute(self, custom=False):
+        if custom:
+            run_fn = self.run_custom
+        else:
+            if self.task == "kitchen":
+                run_fn = self.run_kitchen_cabinet_both
                 # run_fn = run_kitchen_dummy
-            elif task == "cabinet":
-                run_fn = run_cabinet_dummy
+            elif self.task == "cabinet":
+                run_fn = self.run_cabinet_dummy
             else:
                 raise NotImplementedError()
 
-        if use_viewer:
-            with mujoco.viewer.launch_passive(model, data) as viewer:
-                ret = run_fn(viewer=viewer)
-                input()
-        else:
-            ret = run_fn(viewer=None)
+        self.outcome = run_fn()
+        return self.outcome
 
-        if save_video:
-            images = np.stack(images, 0)
+    def finish(self):
+        if self.save_video:
+            images = np.stack(self.images, 0)
             vidwrite("output.mp4", images, 240)
 
-        if save_last_img:
-            im = mj_viewer.read_pixels(camid=0)
+        if self.save_last_img:
+            im = self.mj_viewer.read_pixels(camid=0)
             cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
 
-        joblib.dump(data, "data.joblib")
+        joblib.dump(self.data, "data.joblib")
 
         with open("outcome", "w") as outcome_f:
-            outcome_f.write(str(int(ret)))
-
-        return ret
+            outcome_f.write(str(int(self.outcome)))
 
 
-def execute_plan(duration=None):
+RUNNER = None
+
+
+def runner_init():
     try:
         init_data = joblib.load("data.joblib")
     except FileNotFoundError:
         init_data = None
 
+    global RUNNER
+    RUNNER = Runner(ENV, use_viewer=True, save_video=SAVE_VIDEO, save_last_img=True, init_data=init_data)
+
+
+def execute_plan(duration=None, finish=True):
     print(TASK_PARAMS)
     print(COST_WEIGHTS)
     print(PRIMARY_REWARD)
     
-    print(int(_execute(ENV, custom=True, use_viewer=False, save_video=SAVE_VIDEO, save_last_img=True, init_data=init_data)))
+    print(int(RUNNER.execute(custom=True)))
+    if finish:
+        RUNNER.finish()
+
+
+def end_effector_to(position):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+
+    TASK_PARAMS["EndEffectorTo1"] = position[0]
+    TASK_PARAMS["EndEffectorTo2"] = position[1]
+    TASK_PARAMS["EndEffectorTo3"] = position[2]
+    COST_WEIGHTS["End-Effector To"] = 1.
+    PRIMARY_REWARD = "End-Effector To"
+
+    execute_plan(finish=False)
+
+
+def get_object_position(obj_name):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+
+    mapped_name = map_name(obj_name)
+    if mapped_name == "palm":
+        mapped_name = "eeff"
+
+    return RUNNER.data.site(mapped_name).xpos.copy()
+
+
+def finish():
+    RUNNER.finish()
 
 
 if __name__ == "__main__":
@@ -495,9 +528,11 @@ if __name__ == "__main__":
     # except FileNotFoundError:
     #     init_data = None
 
+    RUNNER = Runner("cabinet", use_viewer=True, save_video=False, save_last_img=True, init_data=init_data)
+
     T = 1
     n_succ = 0
     for _ in range(T):
-        n_succ += int(_execute("kitchen", use_viewer=True, save_video=False, save_last_img=True, init_data=init_data))
+        n_succ += int(RUNNER.execute(custom=False))
     
     print(n_succ)

@@ -140,6 +140,13 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // mju_copy(residual + counter, data->actuator_force, model->nu);
   // counter += model->nu;
 
+  // end effector to
+  double ee_target[3] = {parameters_[param_counter], parameters_[param_counter + 1], parameters_[param_counter + 2]};
+  param_counter += 3;
+  double* ee_position = SensorByName(model, data, "hand");
+  mju_sub3(residual + counter, ee_position, ee_target);
+  counter += 3;
+
   // default position
   double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
   for (int i = 0; i < 3; i ++) {
