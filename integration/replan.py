@@ -4,14 +4,16 @@ import pathlib
 import subprocess
 
 
-RUN_NAME = "test_cabinet1"
+RUN_NAME = "test1"
+ENV = "cabinet"
 
 LLM_WORKDIR = pathlib.Path("/home/footoredo/playground/RePlan")
 MPC_WORKDIR = pathlib.Path("/home/footoredo/playground/mujoco_mpc/integration")
 
-MPC_RUN_HEADER = """from core import reset_reward, minimize_l2_distance_reward, maximize_l2_distance_reward, \\
-    set_joint_fraction_reward, execute_plan
+MPC_RUN_HEADER = f"""from core import reset_reward, minimize_l2_distance_reward, maximize_l2_distance_reward, \\
+    set_joint_fraction_reward, execute_plan, set_env
 
+set_env('{ENV}')
 """
 
 
@@ -33,7 +35,7 @@ def run_mpc(step, reward_code):
     with open(log_filename, "w") as log_f:
         subprocess.check_call(["python", code_filename], cwd=MPC_WORKDIR, stdout=log_f)
 
-    logdir = MPC_WORKDIR / "logs" / RUN_NAME / f"step-{step}"
+    logdir = MPC_WORKDIR / "logs" / ENV / RUN_NAME / f"step-{step}"
     os.makedirs(logdir, exist_ok=True)
 
     image_filename = MPC_WORKDIR / "output.png"
@@ -115,7 +117,7 @@ execute_plan()
 """
     ]
 
-    reward_code_list =reward_code_tests_cabinet
+    reward_code_list = reward_code_tests_cabinet
 
     clean_mpc()
 

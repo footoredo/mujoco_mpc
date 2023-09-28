@@ -100,6 +100,11 @@ PRIMARY_REWARD = None
 COST_NAMES_REQUIRED = []
 
 
+def set_env(env):
+    global ENV
+    ENV = env
+
+
 def reset_reward():
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     for key in REWARD_CNT.keys():
