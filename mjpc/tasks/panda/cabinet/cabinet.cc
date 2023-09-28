@@ -148,6 +148,17 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
     residual[counter ++] = panda_joints_default[i] - joint_i;
   }
 
+  // default position no obstruction
+  // double panda_joints_default_no_obstruction[8] = {-0.00149581, 0.0010889, -0.000380885, -2.96704, -3.06744, -2.9606, 0.342783, 2.96783};
+  double panda_joints_default_no_obstruction[8] = {0.00, 0.00 -0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+  // double panda_hand_default[3] = {0.0576433, 0.00168072, 0.579432};
+  for (int i = 0; i < 8; i ++) {
+    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));
+    // std::cout << joint_i << " ";
+    residual[counter ++] = panda_joints_default_no_obstruction[i] - joint_i;
+  }
+  // std::cout << std::endl;
+
   // sensor dim sanity check
   // TODO: use this pattern everywhere and make this a utility function
   int user_sensor_dim = 0;

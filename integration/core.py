@@ -53,8 +53,9 @@ def environment_reset(model, data):
   return get_observation(model, data)
 
 
-# ENV = "cabinet"
-ENV = "kitchen"
+ENV = "cabinet"
+# ENV = "kitchen"
+SAVE_VIDEO = True
 
 REWARD_CNT = {
     "min_l2": 0,
@@ -75,7 +76,7 @@ CABINET_NAME_MAPPING = {
     "left_wooden_cabinet": "leftdoorhinge",
     "right_wooden_cabinet": "rightdoorhinge",
     "yellow_cube": "target",
-    "right_wooden_cabinet_center": "target_position"
+    "right_wooden_cabinet_inside": "target_position"
 }
 
 KITCHEN_NAME_MAPPING = {
@@ -86,7 +87,7 @@ KITCHEN_NAME_MAPPING = {
     "right_cabinet": "rightdoorhinge",
     "microwave_handle": "microwave_handle",
     "microwave": "micro0joint",
-    "kettle": "kettle_handle"
+    "blue_kettle_handle": "kettle_handle"
 }
 
 NAME_MAPPING = {
@@ -96,14 +97,17 @@ NAME_MAPPING = {
 
 PRIMARY_REWARD = None
 
+COST_NAMES_REQUIRED = []
+
 
 def reset_reward():
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     for key in REWARD_CNT.keys():
         REWARD_CNT[key] = 0
     TASK_PARAMS = {}
     COST_WEIGHTS = {}
     PRIMARY_REWARD = None
+    COST_NAMES_REQUIRED = []
 
 
 def map_name(name):
@@ -111,7 +115,7 @@ def map_name(name):
 
 
 def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     REWARD_CNT["min_l2"] += 1
     cnt = REWARD_CNT["min_l2"]
     if cnt == 1:
@@ -123,9 +127,11 @@ def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
     if primary_reward:
         PRIMARY_REWARD = f"Reach{cnt}"
 
+    COST_NAMES_REQUIRED.append(f"Reach{cnt}")
+
 
 def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     REWARD_CNT["max_l2"] += 1
     cnt = REWARD_CNT["max_l2"]
     if cnt == 1:
@@ -138,9 +144,11 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     if primary_reward:
         PRIMARY_REWARD = f"Move Away{cnt}"
 
+    COST_NAMES_REQUIRED.append(f"Move Away{cnt}")
+
 
 def set_joint_fraction_reward(obj, fraction, primary_reward=False):
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     REWARD_CNT["joint"] += 1
     cnt = REWARD_CNT["joint"]
     if cnt == 1:
@@ -152,6 +160,15 @@ def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     if primary_reward:
         PRIMARY_REWARD = f"Joint Target{cnt}"
 
+    COST_NAMES_REQUIRED.append(f"Joint Target{cnt}")
+
+
+def set_primary_reward(reward_index):
+    global PRIMARY_REWARD
+    PRIMARY_REWARD = COST_NAMES_REQUIRED[reward_index]
+
+
+last_primary = None
 
 def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save_video=True, save_last_img=False, verbose=False):
     # ctx = mujoco.GLContext(1920, 1080)
@@ -191,7 +208,12 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
     # "<camera pos="1.353 -0.887 1.285" xyaxes="0.556 0.831 0.000 -0.559 0.374 0.740"/>"
 
     with agent_lib.Agent(task_id=f"Panda {task.capitalize()}", model=model) as agent:
-        def plan(step_limit=1000, cost_limit=None, cost_name=None, viewer=None):
+        def plan(step_limit=500, cost_limit=None, cost_name=None, viewer=None):
+            global last_primary
+            if cost_name.startswith("Default Pose"):
+                last_primary = None
+            else:
+                last_primary = cost_name
             for i in range(step_limit):
                 agent.set_state(
                     time=data.time,
@@ -240,9 +262,17 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
             return plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit, viewer=viewer)
         
         def run_reset(viewer=None):
-            run_once(task_parameters=None, cost_weights={
-                "Default Pose": 1
-            }, cost_limit=0.02, cost_name="Default Pose", viewer=viewer)
+            print(last_primary)
+            succ = run_once(task_parameters=None, cost_weights={
+                "Default Pose": 1, last_primary: 1
+            }, cost_limit=0.02, cost_name="Default Pose", viewer=viewer, step_limit=200)
+            return succ
+
+        def run_reset_no_obstruction(viewer=None):
+            succ = run_once(task_parameters=None, cost_weights={
+                "Default Pose No-Obstruction": 1, last_primary: 1
+            }, cost_limit=0.02, cost_name="Default Pose No-Obstruction", viewer=viewer, step_limit=200)
+            return succ
 
         def run_with_retries(task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, step_limit=1000, viewer=None):
             for i in range(num_retries):
@@ -290,16 +320,39 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
             cost_limit=0.02, cost_name="Reach2", num_retries=3, viewer=viewer)
 
             return succ
-
-        def run_kitchen_cabinet(viewer=None):
-            succ = run_with_retries("open microwave", task_parameters={
+        
+        def run_kitchen_cabinet_l(viewer=None):
+            succ = run_with_retries("open cabinet_l", task_parameters={
                 "ReachObjectA": "hand",
                 "ReachObjectB": "cabinet_doorhandle_l",
                 "JointTarget": "leftdoorhinge",
-                "JointTargetAngle": 1.0
+                "JointTargetAngle": 1.5
             }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
             cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
 
+            return succ
+
+        def run_kitchen_cabinet_r(viewer=None):
+            succ = run_with_retries("open cabinet_r", task_parameters={
+                "ReachObjectA": "hand",
+                "ReachObjectB": "cabinet_doorhandle_r",
+                "JointTarget": "rightdoorhinge",
+                "JointTargetAngle": 1.5
+            }, cost_weights={"Reach": 1.0, "Joint Target": 1.0},
+            cost_limit=0.02, cost_name="Joint Target", num_retries=3, viewer=viewer)
+
+            return succ
+        
+        def run_kitchen_cabinet_both(viewer=None):
+            succ = run_kitchen_cabinet_r(viewer)
+            if not succ:
+                return False
+            succ = run_kitchen_cabinet_l(viewer)
+            run_reset_no_obstruction(viewer=viewer)
+            return succ
+
+        def run_kitchen_dummy(viewer=None):
+            succ = run_reset(viewer)
             return succ
 
         def run_cabinet(viewer=None):
@@ -377,13 +430,16 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
             succ = run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
             cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=3, viewer=viewer)
 
+            run_reset_no_obstruction(viewer)
+
             return succ
 
         if custom:
             run_fn = run_custom
         else:
             if task == "kitchen":
-                run_fn = run_kitchen_cabinet
+                run_fn = run_kitchen_cabinet_both
+                # run_fn = run_kitchen_dummy
             elif task == "cabinet":
                 run_fn = run_cabinet_dummy
             else:
@@ -392,6 +448,7 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
         if use_viewer:
             with mujoco.viewer.launch_passive(model, data) as viewer:
                 ret = run_fn(viewer=viewer)
+                input()
         else:
             ret = run_fn(viewer=None)
 
@@ -404,6 +461,9 @@ def _execute(task="kitchen", custom=False, use_viewer=True, init_data=None, save
             cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
 
         joblib.dump(data, "data.joblib")
+
+        with open("outcome", "w") as outcome_f:
+            outcome_f.write(str(int(ret)))
 
         return ret
 
@@ -418,7 +478,7 @@ def execute_plan(duration=None):
     print(COST_WEIGHTS)
     print(PRIMARY_REWARD)
     
-    print(int(_execute(ENV, custom=True, use_viewer=False, save_video=False, save_last_img=True, init_data=init_data)))
+    print(int(_execute(ENV, custom=True, use_viewer=False, save_video=SAVE_VIDEO, save_last_img=True, init_data=init_data)))
 
 
 if __name__ == "__main__":
@@ -433,6 +493,6 @@ if __name__ == "__main__":
     T = 1
     n_succ = 0
     for _ in range(T):
-        n_succ += int(_execute("cabinet", use_viewer=True, save_video=False, save_last_img=True, init_data=init_data))
+        n_succ += int(_execute("kitchen", use_viewer=True, save_video=False, save_last_img=True, init_data=init_data))
     
     print(n_succ)

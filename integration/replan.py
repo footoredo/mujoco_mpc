@@ -4,7 +4,7 @@ import pathlib
 import subprocess
 
 
-RUN_NAME = "test1"
+RUN_NAME = "test_cabinet1"
 
 LLM_WORKDIR = pathlib.Path("/home/footoredo/playground/RePlan")
 MPC_WORKDIR = pathlib.Path("/home/footoredo/playground/mujoco_mpc/integration")
@@ -37,19 +37,89 @@ def run_mpc(step, reward_code):
     os.makedirs(logdir, exist_ok=True)
 
     image_filename = MPC_WORKDIR / "output.png"
+    video_filename = MPC_WORKDIR / "output.mp4"
     data_filename = MPC_WORKDIR / "data.joblib"
+    outcome_filename = MPC_WORKDIR / "outcome"
 
-    for fn in [code_filename, log_filename, image_filename, data_filename]:
-        shutil.copyfile(fn, logdir / fn.name)
+    with open(outcome_filename, "r") as outcome_f:
+        outcome = int(outcome_f.readline().strip())
+
+    for fn in [code_filename, log_filename, image_filename, video_filename, data_filename, outcome_filename]:
+        try:
+            shutil.copyfile(fn, logdir / fn.name)
+        except FileNotFoundError:
+            print(f"[{fn.name}] not found. skip copying.")
+
+    return outcome
 
 
 if __name__ == "__main__":
+    reward_code_tests_kitchen = [
+"""reset_reward()
+minimize_l2_distance_reward("palm", "right_cabinet_handle")
+set_joint_fraction_reward("right_cabinet", 1, primary_reward=True)
 
-    reward_code_test = """reset_reward()
+execute_plan(2)""", 
+"""reset_reward()
 minimize_l2_distance_reward("palm", "left_cabinet_handle")
-set_joint_fraction_reward("left_cabinet", 1.0, primary_reward=True)
+set_joint_fraction_reward("left_cabinet", 1, primary_reward=True)
 
-execute_plan(2)"""
+execute_plan()""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "microwave_handle")
+set_joint_fraction_reward("microwave", 1, primary_reward=True)
+
+execute_plan(2)""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "blue_kettle_handle")
+maximize_l2_distance_reward("blue_kettle_handle", "microwave_handle", primary_reward=True)
+execute_plan(2)
+""", """reset_reward()
+minimize_l2_distance_reward("palm", "microwave_handle")
+set_joint_fraction_reward("microwave", 1, primary_reward=True)
+
+execute_plan(2)"""]
+
+    reward_code_tests_cabinet = [
+"""reset_reward()
+minimize_l2_distance_reward("palm", "yellow_cube", primary_reward=True)
+minimize_l2_distance_reward("yellow_cube", "yellow_cube")
+execute_plan(2)
+""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "right_wooden_cabinet_handle")
+set_joint_fraction_reward("right_wooden_cabinet", 1, primary_reward=True)
+
+execute_plan(2)
+""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "yellow_cube", primary_reward=True)
+execute_plan(2)
+""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "red_block_right_side")
+maximize_l2_distance_reward("red_block_right_side", "right_wooden_cabinet_handle", primary_reward=True)
+execute_plan()
+""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "right_wooden_cabinet_handle")
+set_joint_fraction_reward("right_wooden_cabinet", 1, primary_reward=True)
+
+execute_plan(2)
+""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "yellow_cube")
+minimize_l2_distance_reward("yellow_cube", "right_wooden_cabinet_inside", primary_reward=True)
+set_joint_fraction_reward("right_wooden_cabinet", 1)
+execute_plan()
+"""
+    ]
+
+    reward_code_list =reward_code_tests_cabinet
 
     clean_mpc()
-    run_mpc(1, reward_code_test)
+
+    for i in range(len(reward_code_list)):
+        print(f"Running step-{i + 1} ...")
+        outcome = run_mpc(i + 1, reward_code_list[i])
+        print(f"Step-{i + 1} outcome:", ["fail", "success"][outcome])

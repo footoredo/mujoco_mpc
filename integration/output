@@ -1,8 +1,10 @@
-{'ReachObjectA': 'hand', 'ReachObjectB': 'cabinet_doorhandle_l', 'JointTarget': 'leftdoorhinge', 'JointTargetAngle': 1.5}
-{'Reach': 1.0, 'Joint Target': 1.0}
-Joint Target
+{'ReachObjectA': 'hand', 'ReachObjectB': 'target', 'Reach2ObjectA': 'target', 'Reach2ObjectB': 'target_position', 'JointTarget': 'rightdoorhinge', 'JointTargetAngle': 1.5}
+{'Reach': 1.0, 'Reach2': 1.0, 'Joint Target': 1.0}
+Reach2
 Task [custom] retry #0 ...
-Joint Target 0.011217560123576283
-Reach 0.008343853418054034
+None
+Joint Target 0.00353475945890716
+Reach 0.0016353216906444291
+Reach2 0.019993319460008666
 
 1
