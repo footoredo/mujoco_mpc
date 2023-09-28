@@ -1,0 +1,9 @@
+[ 0.23193348 -0.0020132   0.76491123]
+{'ReachObjectA': 'hand', 'ReachObjectB': 'rightdoorhandle', 'JointTarget': 'rightdoorhinge', 'JointTargetAngle': 1.5}
+{'Reach': 1.0, 'Joint Target': 1.0}
+Joint Target
+Task [custom] retry #0 ...
+Joint Target 1.2907292492309317
+Reach 0.005422728875286362
+
+Task [custom] retry #1 ...

@@ -55,7 +55,8 @@ def environment_reset(model, data):
 
 ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = True
+SAVE_VIDEO = False
+IS_COP = False
 
 REWARD_CNT = {
     "min_l2": 0,
@@ -71,12 +72,16 @@ CABINET_NAME_MAPPING = {
     "red_block": "box",
     "red_block_left_side": "box_left",
     "red_block_right_side": "box_right",
-    "left_wooden_cabinet_handle": "leftdoorhandle",
-    "right_wooden_cabinet_handle": "rightdoorhandle",
-    "left_wooden_cabinet": "leftdoorhinge",
-    "right_wooden_cabinet": "rightdoorhinge",
     "yellow_cube": "target",
-    "right_wooden_cabinet_inside": "target_position"
+    # "left_wooden_cabinet_handle": "leftdoorhandle",
+    # "right_wooden_cabinet_handle": "rightdoorhandle",
+    # "left_wooden_cabinet": "leftdoorhinge",
+    # "right_wooden_cabinet": "rightdoorhinge",
+    # "right_wooden_cabinet_inside": "right_target_position",
+    # "left_wooden_cabinet_inside": "left_target_position"
+    "wooden_cabinet_handle": "rightdoorhandle",
+    "wooden_cabinet": "rightdoorhinge",
+    "wooden_cabinet_inside": "right_target_position",
 }
 
 KITCHEN_NAME_MAPPING = {
@@ -87,7 +92,9 @@ KITCHEN_NAME_MAPPING = {
     "right_cabinet": "rightdoorhinge",
     "microwave_handle": "microwave_handle",
     "microwave": "micro0joint",
-    "blue_kettle_handle": "kettle_handle"
+    "blue_kettle_handle": "kettle_handle",
+    "cube": "box",
+    "target_position": "target_position"
 }
 
 NAME_MAPPING = {
@@ -143,7 +150,7 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
         cnt = ""
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
-    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.2
+    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 1.6
     COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
 
     if primary_reward:
@@ -213,13 +220,21 @@ class Runner:
 
         self.agent = agent_lib.Agent(task_id=f"Panda {self.task.capitalize()}", model=self.model)
 
+    # def get_joints(self):
+    #     joints = []
+    #     for i in range(8):
+    #         joints.append(self.data.joint(f"joint{i}"))
+
     def plan(self, step_limit=500, cost_limit=None, cost_name=None):
         global last_primary
         if cost_name is not None and cost_name.startswith("Default Pose"):
             last_primary = None
         else:
             last_primary = cost_name
-        for i in range(step_limit):
+        num_steps = 0
+        best_cost = 1e9
+        last_updated = 0
+        while True:
             self.agent.set_state(
                 time=self.data.time,
                 qpos=self.data.qpos,
@@ -247,14 +262,22 @@ class Runner:
                 cost = self.agent.get_total_cost()
             else:
                 cost = self.agent.get_cost_term_values()[cost_name]
-            if i % 20 == 0 and self.verbose:
+            if cost < best_cost - 1e-2:
+                best_cost = cost
+                last_updated = 0
+            if num_steps % 20 == 0 and self.verbose:
                 # print(i, cost)
-                print(i, f"{self.agent.get_total_cost():.2f} {cost:.2f}", self.agent.get_cost_term_values())
+                print(num_steps, f"{self.agent.get_total_cost():.2f} {cost:.2f}", self.agent.get_cost_term_values())
             # agent.planner_step()
-            if cost_limit is not None and cost <= cost_limit:
-                return True
+            if num_steps > 20:
+                if cost_limit is not None and cost <= cost_limit:
+                    return True
             # observations.append(environment_step(model, data, actions[-1]))
             # viewer.render()
+            num_steps += 1
+            last_updated += 1
+            if last_updated > 10 and num_steps > step_limit:
+                break
         return False
         
     def run_once(self, task_parameters, cost_weights, cost_limit, cost_name=None, step_limit=1000):
@@ -268,7 +291,7 @@ class Runner:
         return self.plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit)
         
     def run_reset(self):
-        print(last_primary)
+        # print(last_primary)
         succ = self.run_once(task_parameters=None, cost_weights={
             "Default Pose": 1, last_primary: 1
         }, cost_limit=0.02, cost_name="Default Pose", step_limit=200)
@@ -282,13 +305,13 @@ class Runner:
 
     def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, step_limit=1000):
         for i in range(num_retries):
-            print(f"Task [{task_name}] retry #{i} ...")
+            print(f"Task [{task_name}] retry #{i} ...", flush=True)
             self.run_reset()
             succ = self.run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, step_limit=step_limit)
             costs = self.agent.get_cost_term_values()
             for name in sorted(cost_weights.keys()):
-                print(name, costs[name])
-            print()
+                print(name, costs[name], flush=True)
+            print(flush=True)
             if succ:
                 return True
         return False
@@ -354,7 +377,7 @@ class Runner:
         if not succ:
             return False
         succ = self.run_kitchen_cabinet_l()
-        self.run_reset_no_obstruction()
+        # self.run_reset_no_obstruction()
         return succ
 
     def run_kitchen_dummy(self):
@@ -429,30 +452,39 @@ class Runner:
         return succ
 
     def run_custom(self):
-        if PRIMARY_REWARD is None:
-            cost_limit = 0.01 * sum(list(COST_WEIGHTS.values()))
+        if IS_COP:
+            cost_limit = 0.002
         else:
-            cost_limit = 0.02
+            if PRIMARY_REWARD is None:
+                cost_limit = 0.01 * sum(list(COST_WEIGHTS.values()))
+            else:
+                cost_limit = 0.02
         succ = self.run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=3)
-
-        self.run_reset_no_obstruction()
+        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=2 if ENV == "cabinet" else 3, step_limit=500)
 
         return succ
     
-    def execute(self, custom=False):
+    def execute(self, custom=False, reset_after_done=True):
         if custom:
             run_fn = self.run_custom
         else:
             if self.task == "kitchen":
-                run_fn = self.run_kitchen_cabinet_both
-                # run_fn = run_kitchen_dummy
+                # run_fn = self.run_kitchen_cabinet_both
+                # run_fn = self.run_kitchen_dummy
+                run_fn = self.run_reset
             elif self.task == "cabinet":
-                run_fn = self.run_cabinet_dummy
+                run_fn = self.run_reset
             else:
                 raise NotImplementedError()
-
+            
         self.outcome = run_fn()
+
+        # if not custom:
+        #     input()
+        
+        if reset_after_done:
+            self.run_reset_no_obstruction()
+
         return self.outcome
 
     def finish(self):
@@ -473,22 +505,31 @@ class Runner:
 RUNNER = None
 
 
-def runner_init():
-    try:
-        init_data = joblib.load("data.joblib")
-    except FileNotFoundError:
+def runner_init(load_init=True):
+    if load_init:
+        try:
+            init_data = joblib.load("data.joblib")
+        except FileNotFoundError:
+            init_data = None
+    else:
         init_data = None
 
     global RUNNER
     RUNNER = Runner(ENV, use_viewer=True, save_video=SAVE_VIDEO, save_last_img=True, init_data=init_data)
 
 
-def execute_plan(duration=None, finish=True):
+def cop_runner_init():
+    global IS_COP
+    IS_COP = True
+    runner_init(load_init=False)
+
+
+def execute_plan(duration=None, finish=True, reset_after_done=True):
     print(TASK_PARAMS)
     print(COST_WEIGHTS)
     print(PRIMARY_REWARD)
     
-    print(int(RUNNER.execute(custom=True)))
+    print(int(RUNNER.execute(custom=True, reset_after_done=reset_after_done)))
     if finish:
         RUNNER.finish()
 
@@ -496,13 +537,36 @@ def execute_plan(duration=None, finish=True):
 def end_effector_to(position):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
 
+    reset_reward()
     TASK_PARAMS["EndEffectorTo1"] = position[0]
     TASK_PARAMS["EndEffectorTo2"] = position[1]
     TASK_PARAMS["EndEffectorTo3"] = position[2]
     COST_WEIGHTS["End-Effector To"] = 1.
     PRIMARY_REWARD = "End-Effector To"
 
-    execute_plan(finish=False)
+    COST_WEIGHTS["Control"] = 3.
+
+    execute_plan(finish=False, reset_after_done=False)
+
+
+def end_effector_open():
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+
+    reset_reward()
+    COST_WEIGHTS["End-Effector Open"] = 1.
+    PRIMARY_REWARD = "End-Effector Open"
+
+    execute_plan(finish=False, reset_after_done=False)
+
+
+def end_effector_close():
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+
+    reset_reward()
+    COST_WEIGHTS["End-Effector Close"] = 1.
+    PRIMARY_REWARD = "End-Effector Close"
+
+    execute_plan(finish=False, reset_after_done=False)
 
 
 def get_object_position(obj_name):
@@ -519,6 +583,10 @@ def finish():
     RUNNER.finish()
 
 
+def run_dummy():
+    RUNNER.execute(custom=False, reset_after_done=False)
+
+
 if __name__ == "__main__":
 
     init_data = None
@@ -528,11 +596,11 @@ if __name__ == "__main__":
     # except FileNotFoundError:
     #     init_data = None
 
-    RUNNER = Runner("cabinet", use_viewer=True, save_video=False, save_last_img=True, init_data=init_data)
+    RUNNER = Runner("kitchen", use_viewer=True, save_video=False, save_last_img=True, init_data=init_data)
 
     T = 1
     n_succ = 0
     for _ in range(T):
-        n_succ += int(RUNNER.execute(custom=False))
+        n_succ += int(RUNNER.execute(custom=False, reset_after_done=False))
     
     print(n_succ)

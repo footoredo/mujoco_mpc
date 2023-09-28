@@ -4,10 +4,11 @@ import pathlib
 import subprocess
 
 
-RUN_NAME = "test1"
-ENV = "cabinet"
+RUN_NAME = "test-newdefault"
+# ENV = "cabinet"
+ENV = "kitchen"
 
-LLM_WORKDIR = pathlib.Path("/home/footoredo/playground/RePlan")
+LLM_WORKDIR = pathlib.Path("/home/footoredo/playground/adaptivereplanning")
 MPC_WORKDIR = pathlib.Path("/home/footoredo/playground/mujoco_mpc/integration")
 
 MPC_RUN_HEADER = f"""from core import reset_reward, minimize_l2_distance_reward, maximize_l2_distance_reward, \\
@@ -54,6 +55,8 @@ def run_mpc(step, reward_code):
         except FileNotFoundError:
             print(f"[{fn.name}] not found. skip copying.")
 
+    shutil.copyfile(image_filename, LLM_WORKDIR / "run_images" / "step.png")
+
     return outcome
 
 
@@ -81,6 +84,11 @@ execute_plan(2)
 """, """reset_reward()
 minimize_l2_distance_reward("palm", "microwave_handle")
 set_joint_fraction_reward("microwave", 1, primary_reward=True)
+
+execute_plan(2)""",
+"""reset_reward()
+minimize_l2_distance_reward("palm", "cube")
+minimize_l2_distance_reward("cube", "target_position", primary_reward=True)
 
 execute_plan(2)"""]
 
@@ -146,11 +154,12 @@ set_joint_fraction_reward("right_wooden_cabinet", 1.0)
 execute_plan()"""
     ]
 
-    reward_code_list = reward_code_tests_cabinet_new
+    # reward_code_list = reward_code_tests_cabinet_new
+    reward_code_list = reward_code_tests_kitchen
 
     clean_mpc()
 
-    for i in range(len(reward_code_list)):
+    for i in range(0, len(reward_code_list)):
         print(f"Running step-{i + 1} ...")
         outcome = run_mpc(i + 1, reward_code_list[i])
         print(f"Step-{i + 1} outcome:", ["fail", "success"][outcome])

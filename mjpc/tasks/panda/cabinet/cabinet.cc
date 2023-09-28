@@ -28,8 +28,8 @@ std::string Cabinet::XmlPath() const {
   return GetModelPath("panda/cabinet/task.xml");
 }
 std::string Cabinet::Name() const { return "Panda Cabinet"; }
-const std::array<std::string, 8> object_names = {
-    "hand", "leftdoorhandle", "rightdoorhandle", "red_block", "box_left", "box_right", "target", "target_position"
+const std::array<std::string, 9> object_names = {
+    "hand", "leftdoorhandle", "rightdoorhandle", "red_block", "box_left", "box_right", "target", "left_target_position", "right_target_position"
 };
 
 const std::array<std::string, 2> joint_names = {
@@ -146,6 +146,23 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   double* ee_position = SensorByName(model, data, "hand");
   mju_sub3(residual + counter, ee_position, ee_target);
   counter += 3;
+
+  // end effector finger
+  double finger_1 = *SensorByName(model, data, "finger_joint1");
+  double finger_2 = *SensorByName(model, data, "finger_joint2");
+
+  residual[counter ++] = (0.0407 * 2 - finger_1 - finger_2) * 20;
+  residual[counter ++] = (finger_1 + finger_2) * 20;
+
+  // std::cout << finger_1 << " " << finger_2 << std::endl;
+
+  // counter += 2;
+
+  // control cost
+
+  for (int i = 0; i < model->nu; i++) {
+    residual[counter ++] = data->actuator_force[i] / model->actuator_gainprm[i * mjNGAIN];
+  }
 
   // default position
   double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
