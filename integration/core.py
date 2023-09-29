@@ -131,6 +131,8 @@ def map_name(name):
 
 def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+    if REWARD_CNT["min_l2"] >= 3:
+        return
     REWARD_CNT["min_l2"] += 1
     cnt = REWARD_CNT["min_l2"]
     if cnt == 1:
@@ -147,6 +149,8 @@ def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
 
 def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+    if REWARD_CNT["max_l2"] >= 1:
+        return
     REWARD_CNT["max_l2"] += 1
     cnt = REWARD_CNT["max_l2"]
     if cnt == 1:
@@ -164,6 +168,8 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
 
 def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+    if REWARD_CNT["joint"] >= 1:
+        return
     REWARD_CNT["joint"] += 1
     cnt = REWARD_CNT["joint"]
     if cnt == 1:

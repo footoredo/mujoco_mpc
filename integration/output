@@ -1,5 +1,0 @@
-[ 0.43008085 -0.00722361  0.5672338 ]
-{'ReachObjectA': 'hand', 'ReachObjectB': 'rightdoorhandle', 'JointTarget': 'rightdoorhinge', 'JointTargetAngle': 1.5}
-{'Reach': 1.0, 'Joint Target': 1.0}
-Joint Target
-Task [custom] retry #0 ...
