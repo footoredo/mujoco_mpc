@@ -99,7 +99,7 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   int joint_id = ReinterpretAsInt(parameters_[param_counter ++]);
   double joint_target = parameters_[param_counter ++];
   double *joint = SensorByName(model, data, joint_names[joint_id]);
-  residual[counter++] = *joint - joint_target;
+  residual[counter++] = std::max(joint_target - *joint, 0.0);
   // printf("%.2f %.2f\n", joint_target, *joint);
 
   // move away
@@ -219,6 +219,13 @@ void Cabinet::TransitionLocked(mjModel* model, mjData* data) {
   double residuals[100];
   residual_.Residual(model, data, residuals);
   // double bring_dist = (mju_norm3(residuals+3) + mju_norm3(residuals+6)) / 2;
+
+  // data->qpos[15] = 1.57;
+
+  // for (int i = 0; i < model->nq; i ++) {
+  //   std::cout << data->qpos[i] << ", ";
+  // }
+  // std::cout << std::endl;
 
   // reset:
   // if (data->time > 0 && bring_dist < .015) {

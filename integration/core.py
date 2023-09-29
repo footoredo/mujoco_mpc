@@ -45,6 +45,8 @@ def get_observation(model, data):
 def environment_step(model, data, action):
   data.ctrl[:] = action
   mujoco.mj_step(model, data)
+  if ENV == "cabinet" and OPENED_CABINET:
+    data.qpos[15] = 1.57
   return get_observation(model, data)
 
 
@@ -55,7 +57,8 @@ def environment_reset(model, data):
 
 ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = True
+SAVE_VIDEO = False
+OPENED_CABINET = False
 IS_COP = False
 
 REWARD_CNT = {
@@ -249,34 +252,43 @@ class Runner:
             # actions.append(agent.get_action(averaging_duration=control_timestep))
             self.actions.append(self.agent.get_action())
             # print(i)
+            satisfied = False
             for _ in range(self.repeats):
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
                 if self.viewer is not None:
                     self.viewer.sync()
+
+                if cost_name is None:
+                    cost = self.agent.get_total_cost()
+                else:
+                    cost = self.agent.get_cost_term_values()[cost_name]
+                if cost < best_cost - 1e-2:
+                    best_cost = cost
+                    last_updated = 0
+                # agent.planner_step()
+                if num_steps > 20:
+                    if cost_limit is not None and cost <= cost_limit:
+                        satisfied = True
+
             if self.save_video:
                 img = self.mj_viewer.read_pixels(camid=0)
                 self.images.append(img)
                 # total_cost += agent.get_total_cost()
-            if cost_name is None:
-                cost = self.agent.get_total_cost()
-            else:
-                cost = self.agent.get_cost_term_values()[cost_name]
-            if cost < best_cost - 1e-2:
-                best_cost = cost
-                last_updated = 0
+            
             if num_steps % 20 == 0 and self.verbose:
                 # print(i, cost)
                 print(num_steps, f"{self.agent.get_total_cost():.2f} {cost:.2f}", self.agent.get_cost_term_values())
-            # agent.planner_step()
-            if num_steps > 20:
-                if cost_limit is not None and cost <= cost_limit:
-                    return True
+
+            if satisfied:
+                return True
+
             # observations.append(environment_step(model, data, actions[-1]))
             # viewer.render()
             num_steps += 1
             last_updated += 1
-            if last_updated > 20 and num_steps > step_limit:
+            # print(last_updated, best_cost)
+            if last_updated > 50 and num_steps > step_limit:
                 break
         return False
         
@@ -440,6 +452,17 @@ class Runner:
         cost_limit=0.02, cost_name="Joint Target", num_retries=3)
 
         return succ
+    
+    def run_cabinet_move_cube(self):
+        succ = self.run_with_retries("move cube", task_parameters={
+            "ReachObjectA": "hand",
+            "ReachObjectB": "target",
+            "Reach2ObjectA": "target",
+            "Reach2ObjectB": "right_target_position"
+        }, cost_weights={"Reach": 1.0, "Reach2": 1.0},
+        cost_limit=0.02, cost_name="Reach2", num_retries=3)
+
+        return succ
 
     def run_cabinet_dummy(self):
         succ = self.run_with_retries("remove stick", task_parameters={
@@ -460,7 +483,7 @@ class Runner:
             else:
                 cost_limit = 0.02
         succ = self.run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=2 if ENV == "cabinet" else 3, step_limit=500)
+        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=3 if ENV == "cabinet" else 3, step_limit=500)
 
         return succ
     
@@ -474,6 +497,7 @@ class Runner:
                 run_fn = self.run_reset_no_obstruction
             elif self.task == "cabinet":
                 run_fn = self.run_reset_no_obstruction
+                # run_fn = self.run_cabinet_move_cube
             else:
                 raise NotImplementedError()
             
