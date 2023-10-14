@@ -47,6 +47,8 @@ def environment_step(model, data, action):
   mujoco.mj_step(model, data)
   if ENV == "cabinet" and OPENED_CABINET:
     data.qpos[15] = 1.57
+  if ENV == "cabinet" and NO_LOCK:
+    data.qpos[0] = 100
   return get_observation(model, data)
 
 
@@ -55,10 +57,12 @@ def environment_reset(model, data):
   return get_observation(model, data)
 
 
-ENV = "cabinet"
+ENV = "blocks"
+# ENV = "cabinet"
 # ENV = "kitchen"
 SAVE_VIDEO = False
 OPENED_CABINET = False
+NO_LOCK = False
 IS_COP = False
 
 REWARD_CNT = {
@@ -69,6 +73,12 @@ REWARD_CNT = {
 
 TASK_PARAMS = {}
 COST_WEIGHTS = {}
+
+BLOCKS_NAME_MAPPING = {
+    "palm": "hand",
+    "yellow_block": "yellow_block",
+    "red_block": "red_block"
+}
 
 CABINET_NAME_MAPPING = {
     "palm": "hand",
@@ -101,6 +111,7 @@ KITCHEN_NAME_MAPPING = {
 }
 
 NAME_MAPPING = {
+    "blocks": BLOCKS_NAME_MAPPING,
     "cabinet": CABINET_NAME_MAPPING,
     "kitchen": KITCHEN_NAME_MAPPING
 }
@@ -220,7 +231,7 @@ class Runner:
         else:
             self.viewer = None
 
-        self.repeats = 5
+        self.repeats = 1
 
         self.actions = []
         self.observations = []

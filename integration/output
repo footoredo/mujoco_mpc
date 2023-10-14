@@ -1,0 +1,9 @@
+[ 0.21845342 -0.01107813  0.77238506]
+{'ReachObjectA': 'hand', 'ReachObjectB': 'box_right', 'MoveAwayObjectA': 'box_right', 'MoveAwayObjectB': 'right_target_position', 'MoveAwayDistance': 0.5}
+{'Reach': 1.0, 'Move Away': 1.0}
+Move Away
+Task [custom] retry #0 ...
+Move Away 0.16397360458430466
+Reach 0.004447752331441138
+
+Task [custom] retry #1 ...

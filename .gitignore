@@ -37,3 +37,6 @@ python/dist/
 furniture_sim
 *.mp4
 integration/logs/
+integration/logs-iclr-24/
+*.tar.gz
+*.joblib

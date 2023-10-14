@@ -4,13 +4,7 @@ from core import reset_reward, minimize_l2_distance_reward, maximize_l2_distance
 set_env('cabinet')
 runner_init()
 
-import numpy as np
-
 reset_reward()
-minimize_l2_distance_reward("palm", "yellow_cube")
-minimize_l2_distance_reward("yellow_cube", "wooden_cabinet_handle")
-set_joint_fraction_reward("wooden_cabinet", 1)
-minimize_l2_distance_reward("yellow_cube", "wooden_cabinet_inside")
-set_joint_fraction_reward("wooden_cabinet", 0)
-
-execute_plan(2)
+minimize_l2_distance_reward("palm", "red_block_right_side")
+maximize_l2_distance_reward("red_block_right_side", "wooden_cabinet_inside", distance=0.5, primary_reward=True)
+execute_plan()
