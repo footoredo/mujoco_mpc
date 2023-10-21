@@ -69,6 +69,7 @@ REWARD_CNT = {
     "min_l2": 0,
     "max_l2": 0,
     "joint": 0,
+    "pinch": 0
 }
 
 TASK_PARAMS = {}
@@ -85,6 +86,9 @@ CABINET_NAME_MAPPING = {
     "red_block": "box",
     "red_block_left_side": "box_left",
     "red_block_right_side": "box_right",
+    "red_bar": "box",
+    "red_bar_left_side": "box_left",
+    "red_bar_right_side": "box_right",
     "yellow_cube": "target",
     # "left_wooden_cabinet_handle": "leftdoorhandle",
     # "right_wooden_cabinet_handle": "rightdoorhandle",
@@ -140,6 +144,25 @@ def map_name(name):
     return NAME_MAPPING[ENV][name]
 
 
+def pinch_finger(object, primary_reward=False):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+    if REWARD_CNT["pinch"] >= 1:
+        return
+    REWARD_CNT["pinch"] += 1
+    cnt = REWARD_CNT["pinch"]
+    if cnt == 1:
+        cnt = ""
+    TASK_PARAMS[f"FingerTouch{cnt}Object"] = map_name(object)
+    COST_WEIGHTS[f"Pinch{cnt}"] = 1.0
+    # print(COST_WEIGHTS)
+
+    if primary_reward:
+        PRIMARY_REWARD = f"Pinch{cnt}"
+
+    COST_NAMES_REQUIRED.append(f"Pinch{cnt}")
+
+
+
 def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["min_l2"] >= 3:
@@ -168,7 +191,7 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
         cnt = ""
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
-    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 1.0
+    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 0.8
     COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
 
     if primary_reward:
@@ -231,7 +254,7 @@ class Runner:
         else:
             self.viewer = None
 
-        self.repeats = 1
+        self.repeats = 5
 
         self.actions = []
         self.observations = []
@@ -305,7 +328,7 @@ class Runner:
             num_steps += 1
             last_updated += 1
             # print(last_updated, best_cost)
-            if last_updated > 50 and num_steps > step_limit:
+            if last_updated > 200 and num_steps > step_limit:
                 break
         return False
         
@@ -332,17 +355,29 @@ class Runner:
         }, cost_limit=0.02, cost_name="Default Pose No-Obstruction", step_limit=200)
         return succ
 
-    def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=3, step_limit=1000):
-        for i in range(num_retries):
-            print(f"Task [{task_name}] retry #{i} ...", flush=True)
+    def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=5, step_limit=1000):
+        retries = 0
+        while True:
+            print(f"Task [{task_name}] retry #{retries} ...", flush=True)
             self.run_reset()
+            costs = self.agent.get_cost_term_values()
+            if PRIMARY_REWARD is not None:
+                primary_cost_before = costs[PRIMARY_REWARD]
+            improved = False
             succ = self.run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, step_limit=step_limit)
             costs = self.agent.get_cost_term_values()
             for name in sorted(cost_weights.keys()):
                 print(name, costs[name], flush=True)
             print(flush=True)
+            if PRIMARY_REWARD is not None:
+                primary_cost_after = costs[PRIMARY_REWARD]
+                if primary_cost_before - primary_cost_after > 0.1:
+                    improved = True
             if succ:
                 return True
+            retries += 1
+            if retries > num_retries and not improved:
+                break
         return False
         
     def run_kitchen(self):
@@ -500,7 +535,7 @@ class Runner:
             else:
                 cost_limit = 0.02
         succ = self.run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=3 if ENV == "cabinet" else 3, step_limit=500)
+        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=2 if ENV == "cabinet" else 2, step_limit=500)
 
         return succ
     
@@ -531,7 +566,7 @@ class Runner:
     def finish(self):
         if self.save_video:
             images = np.stack(self.images, 0)
-            vidwrite("output.mp4", images, 240)
+            vidwrite("output.mp4", images, 240 * 5)
 
         if self.save_last_img:
             im = self.mj_viewer.read_pixels(camid=0)

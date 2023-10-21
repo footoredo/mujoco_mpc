@@ -1,9 +1,9 @@
-[ 0.21845342 -0.01107813  0.77238506]
-{'ReachObjectA': 'hand', 'ReachObjectB': 'box_right', 'MoveAwayObjectA': 'box_right', 'MoveAwayObjectB': 'right_target_position', 'MoveAwayDistance': 0.5}
-{'Reach': 1.0, 'Move Away': 1.0}
-Move Away
+[ 0.19393603 -0.00100279  0.71816052]
+{'ReachObjectA': 'hand', 'ReachObjectB': 'microwave_handle', 'JointTarget': 'micro0joint', 'JointTargetAngle': 1.5}
+{'Reach': 1.0, 'Joint Target': 1.0}
+Joint Target
 Task [custom] retry #0 ...
-Move Away 0.16397360458430466
-Reach 0.004447752331441138
+Joint Target 0.0
+Reach 0.3638478621319061
 
-Task [custom] retry #1 ...
+1

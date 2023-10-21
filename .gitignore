@@ -40,3 +40,4 @@ integration/logs/
 integration/logs-iclr-24/
 *.tar.gz
 *.joblib
+*.zip

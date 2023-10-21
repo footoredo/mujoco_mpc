@@ -55,8 +55,9 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
 
   // double* left_finger_force = SensorByName(model, data, "leftfingerforce");
   // double* right_finger_force = SensorByName(model, data, "rightfingerforce");
-  // // std::cout << *force << std::endl;
+  // std::cout << *left_finger_force << " " << *right_finger_force << std::endl;
   // double pinch_force_target = parameters_[param_counter ++];
+  // double finger_force = std::max(std::min(*left_finger_force, -*right_finger_force), 0.0);
   param_counter ++;
   // residual[counter++] = std::max(pinch_force_target - std::min(abs(*left_finger_force), abs(*right_finger_force)), 0.0);
 
@@ -73,7 +74,16 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
   double length2 = std::max(mju_norm3(residual + counter - 3), 0.01);
   double dot = mju_dot3(residual + counter - 6, residual + counter - 3);
   // std::cout << length1 << " " << length2 << std::endl;
-  residual[counter ++] = std::max(dot / length1 / length2 + 0.8, 0.0);
+  double angle_goal = std::max(dot / length1 / length2 + 0.8, 0.0);
+  // residual[counter ++] = std::max(dot / length1 / length2 + 0.8, 0.0);
+  // std::cout << std::max(0.0, finger_force - 0.08) * 100 << std::endl;
+  // std::cout << angle_goal << " " << (length1 + length2) * std::exp(-angle_goal) << std::endl;
+  residual[counter ++] = (length1 + length2) * std::exp(-angle_goal - std::max(0.0, 0 - 0.08) * 100) + angle_goal;
+
+  // pinch
+  // double* finger_joint = SensorByName(model, data, "fingerjoint");
+  // residual[counter ++] = *finger_joint;
+
 
   int obj_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
   int obj_b_id = ReinterpretAsInt(parameters_[param_counter ++]);
@@ -85,9 +95,11 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // double* handle = SensorByName(model, data, "doorhandle");
   double* obj_b = SensorByName(model, data, object_names[obj_b_id]);
   // printf("%d %d\n", object_a_, object_b_);
-  mju_sub3(residual + counter, obj_a, obj_b);
+  double dist = mju_dist3(obj_a, obj_b);
+  // mju_sub3(residual + counter, obj_a, obj_b);
   // mju_copy(residual + counter, hand, 3);
-  counter += 3;
+  // counter += 3;
+  residual[counter++] = std::max(dist - 0.00, 0.0);
   // std::cout << obj_a[0] << " " << obj_a[1] << " " << obj_a[2] << std::endl;
 
   int obj_2_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
@@ -99,10 +111,13 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // double* box = SensorByName(model, data, "box");
   // double* handle = SensorByName(model, data, "doorhandle");
   double* obj_2_b = SensorByName(model, data, object_names[obj_2_b_id]);
+  // double dist2 = mju_dist3(obj_2_a, obj_2_b);
   // printf("%d %d\n", object_a_, object_b_);
   mju_sub3(residual + counter, obj_2_a, obj_2_b);
+  // residual[counter + 2] = 0;
   // mju_copy(residual + counter, hand, 3);
   counter += 3;
+  // residual[counter++] = std::max(dist2 - 0.00, 0.0);
 
   // joint
   int joint_id = ReinterpretAsInt(parameters_[param_counter ++]);
@@ -122,7 +137,8 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
 
   // default position
   // double panda_joints_default[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  double panda_joints_default[6] = {-0.000378825, 0.176042, -0.700116, -0.460413, -2.55436, 0.424858};
+  double panda_joints_default[6] = {-0.000378825, -1.57, -0.700116, -0.460413, -2.55436, 0.424858};
+  // double panda_joints_default[6] = {-0.000378825, 0.176042, -0.700116, -0.460413, -2.55436, 0.424858};
   // double panda_joints_default[8] = {0.00260707, 0.267844, -0.580238, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_joints_default[8] = {0.00, 0.00 -0.00, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_hand_default[3] = {0.0576433, 0.00168072, 0.579432};
