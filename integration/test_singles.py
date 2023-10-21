@@ -9,6 +9,7 @@ name = sys.argv[2]
 outcomes = []
 
 for i in range(T):
+    print(f"------ TEST {i} ------")
     try:
         # os.remove("data.joblib")
         shutil.copyfile(f"{name}.data.joblib", "data.joblib")
