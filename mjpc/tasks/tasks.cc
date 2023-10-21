@@ -53,6 +53,7 @@ std::vector<std::shared_ptr<Task>> GetTasks() {
     std::make_shared<Quadrotor>(),
     std::make_shared<QuadrupedFlat>(),
     std::make_shared<QuadrupedHill>(),
+    std::make_shared<QuadrupedClimber>(),
     std::make_shared<Swimmer>(),
     std::make_shared<Walker>(),
   };
