@@ -11,8 +11,8 @@ outcomes = []
 for i in range(T):
     print(f"------ TEST {i} ------")
     try:
-        # os.remove("data.joblib")
-        shutil.copyfile(f"{name}.data.joblib", "data.joblib")
+        os.remove("data.joblib")
+        # shutil.copyfile(f"{name}.data.joblib", "data.joblib")
     except FileNotFoundError:
         try:
             os.remove("data.joblib")

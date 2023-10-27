@@ -93,24 +93,29 @@
 	  	<include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
 	  </body>
 	  <!-- <body name="microwave" pos="-0.750 -0.025 1.6" euler="0 0 0.0"> -->
-	  <body name="microwave" pos="-0.850 0.25 1.6" euler="0 0 0.3">
+	  <body name="microwave" pos="-0.800 0.25 1.6" euler="0 0 0.3">
 	  	<site name="microwave_center" type="box" pos="-0.2 0.0 0.02" size="0.01 0.01 0.01"/>
 	  	<include file="../furniture_sim/microwave/microwave_body0.xml"/>
 	  </body>
     </body>
     <!-- <body name="box" pos="0.0 1.0 0.2"> -->
-	<body name="box" pos="0.85 0.25 0.2">
+	<!-- <body name="box" pos="0.85 0.25 0.2">
       <joint type="free"/>
       <geom class="kettle_collision" type="box" size="0.025 0.025 0.025" priority="1" condim="6" friction="1 .01 .003"/>
-      <!-- <geom material="kettle_Gmetal" pos="0 0 0" size="0.052 0.052 0.052" type="box"/> -->
 	  <geom material="kettle_green" pos="0 0 0" size="0.026 0.026 0.026" type="box"/>
       <site name="box" type="box" pos="0 0 0" size="0.025 0.025 0.025"/>
+    </body> -->
+	<body name="box" pos="0.80 0.25 0.2">
+      <joint type="free"/>
+      <geom class="kettle_collision" type="box" size="0.03 0.03 0.03" mass=".3"/>
+	  <geom material="kettle_green" pos="0 0 0" size="0.032 0.032 0.032" type="box"/>
+      <site name="box" type="box" pos="0 0 0" size="0.03 0.03 0.03"/>
     </body>
-	<body name="target_position" pos="0.5 0.1 0.0005">
+	<body name="target_position" pos="0.4 0.1 0.0005">
       <site name="target_position" type="box" pos="0 0 0" size="0.05 0.05 0.001"/>
     </body>
  	<!-- <body name="kettle" pos="-100.12 0.58 0.026" axisangle="0 0 1 -1.57079"> -->
-	<body name="kettle" pos="0.38 -0.02 0.026" axisangle="0 0 1 -1.57079">
+	<body name="kettle" pos="0.38 -0.02 0.026" axisangle="0 0 1 1.57079">
 	  <freejoint/>
 	  <include file="../furniture_sim/kettle/kettle_body0.xml"/>
 	  <site type="sphere" name="kettle_center" pos="0 0 0.15" size=".01"/>

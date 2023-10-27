@@ -58,6 +58,7 @@ def environment_reset(model, data):
 
 
 ENV = "blocks"
+REPEATS = 5
 # ENV = "cabinet"
 # ENV = "kitchen"
 SAVE_VIDEO = False
@@ -69,7 +70,9 @@ REWARD_CNT = {
     "min_l2": 0,
     "max_l2": 0,
     "joint": 0,
-    "pinch": 0
+    "pinch": 0,
+    "stack": 0,
+    "lift": 0
 }
 
 TASK_PARAMS = {}
@@ -78,7 +81,8 @@ COST_WEIGHTS = {}
 BLOCKS_NAME_MAPPING = {
     "palm": "hand",
     "yellow_block": "yellow_block",
-    "red_block": "red_block"
+    "red_block": "red_block",
+    "blue_block": "blue_block"
 }
 
 CABINET_NAME_MAPPING = {
@@ -111,6 +115,7 @@ KITCHEN_NAME_MAPPING = {
     "microwave": "micro0joint",
     "blue_kettle_handle": "kettle_handle",
     "green_apple": "box",
+    "green_cube": "box",
     "target_position": "target_position"
 }
 
@@ -128,6 +133,11 @@ COST_NAMES_REQUIRED = []
 def set_env(env):
     global ENV
     ENV = env
+    
+    
+def set_repeats(repeats):
+    global REPEATS
+    REPEATS = repeats
 
 
 def reset_reward():
@@ -141,7 +151,26 @@ def reset_reward():
 
 
 def map_name(name):
-    return NAME_MAPPING[ENV][name]
+    return NAME_MAPPING[ENV].get(name, name)
+
+
+def lift(object, height=1.0, primary_reward=False):
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+    if REWARD_CNT["lift"] >= 1:
+        return
+    REWARD_CNT["lift"] += 1
+    cnt = REWARD_CNT["lift"]
+    if cnt == 1:
+        cnt = ""
+    TASK_PARAMS[f"Lift{cnt}Object"] = map_name(object)
+    TASK_PARAMS[f"Lift{cnt}Height"] = height
+    COST_WEIGHTS[f"Lift{cnt}"] = 1.0
+    # print(COST_WEIGHTS)
+
+    if primary_reward:
+        PRIMARY_REWARD = f"Lift{cnt}"
+
+    COST_NAMES_REQUIRED.append(f"Lift{cnt}")
 
 
 def pinch_finger(object, primary_reward=False):
@@ -161,6 +190,23 @@ def pinch_finger(object, primary_reward=False):
 
     COST_NAMES_REQUIRED.append(f"Pinch{cnt}")
 
+
+def stack_reward(obj1, obj2, primary_reward=False):  # stack obj1 on top of obj2
+    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+    if REWARD_CNT["stack"] >= 1:
+        return
+    REWARD_CNT["stack"] += 1
+    cnt = REWARD_CNT["stack"]
+    if cnt == 1:
+        cnt = ""
+    TASK_PARAMS[f"Stack{cnt}ObjectA"] = map_name(obj1)
+    TASK_PARAMS[f"Stack{cnt}ObjectB"] = map_name(obj2)
+    COST_WEIGHTS[f"Stack{cnt}"] = 1.0
+
+    if primary_reward:
+        PRIMARY_REWARD = f"Stack{cnt}"
+
+    COST_NAMES_REQUIRED.append(f"Stack{cnt}")
 
 
 def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
@@ -254,7 +300,7 @@ class Runner:
         else:
             self.viewer = None
 
-        self.repeats = 5
+        self.repeats = REPEATS
 
         self.actions = []
         self.observations = []
@@ -376,7 +422,7 @@ class Runner:
             if succ:
                 return True
             retries += 1
-            if retries > num_retries and not improved:
+            if retries >= num_retries and not improved:
                 break
         return False
         

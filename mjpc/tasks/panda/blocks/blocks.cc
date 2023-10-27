@@ -28,8 +28,8 @@ std::string Blocks::XmlPath() const {
   return GetModelPath("panda/blocks/task.xml");
 }
 std::string Blocks::Name() const { return "Panda Blocks"; }
-const std::array<std::string, 3> object_names = {
-    "hand", "yellow_block", "red_block"
+const std::array<std::string, 5> object_names = {
+    "hand", "yellow_block", "red_block", "blue_block", "blue_bin"
 };
 
 // const std::array<std::string, 2> joint_names = {
@@ -48,6 +48,23 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
                      double* residual) const {
   int counter = 0;
   int param_counter = 0;
+
+
+  int lift_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
+  double *lift_obj = SensorByName(model, data, object_names[lift_obj_id]);
+  double lift_height = parameters_[param_counter ++];
+  residual[counter ++] = lift_obj[2] - lift_height;
+
+
+  int stack_obj_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
+  int stack_obj_b_id = ReinterpretAsInt(parameters_[param_counter ++]);
+  double* stack_obj_a = SensorByName(model, data, object_names[stack_obj_a_id]);
+  double* stack_obj_b = SensorByName(model, data, object_names[stack_obj_b_id]);
+
+  mju_sub3(residual + counter, stack_obj_a, stack_obj_b);
+  residual[counter + 2] -= 0.062;
+  counter += 3;
+
 
   int obj_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
   int obj_b_id = ReinterpretAsInt(parameters_[param_counter ++]);

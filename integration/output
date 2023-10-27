@@ -1,9 +1,8 @@
-[ 0.19393603 -0.00100279  0.71816052]
-{'ReachObjectA': 'hand', 'ReachObjectB': 'microwave_handle', 'JointTarget': 'micro0joint', 'JointTargetAngle': 1.5}
+[ 1.87521230e-01 -3.08587326e-05  7.25530660e-01]
+{'ReachObjectA': 'hand', 'ReachObjectB': 'cabinet_doorhandle_l', 'JointTarget': 'leftdoorhinge', 'JointTargetAngle': 1.5}
 {'Reach': 1.0, 'Joint Target': 1.0}
 Joint Target
 Task [custom] retry #0 ...
-Joint Target 0.0
-Reach 0.3638478621319061
+Joint Target 0.013854443070619855
+Reach 0.002429182723404616
 
-1
