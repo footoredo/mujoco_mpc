@@ -21,6 +21,9 @@
 #include "mjpc/utilities.h"
 
 namespace mjpc {
+const std::array<std::string, 14> object_names = {
+	"position", "box1", "box2", "FL", "FR", "RL", "RR"
+};
 std::string QuadrupedHill::XmlPath() const {
   return GetModelPath("quadruped/task_hill.xml");
 }
@@ -876,6 +879,24 @@ void QuadrupedClimber::ResidualFn::Residual(const mjModel* model,
 
   // ---------- Residual (3) ----------
   mju_copy(residual + 13, data->ctrl, model->nu);
+
+  int counter = 14;
+  int param_counter = 1;
+
+  int obj_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
+  int obj_b_id = ReinterpretAsInt(parameters_[param_counter ++]);
+
+  // reach1
+  // double* hand = SensorByName(model, data, "hand");
+  double* obj_a = SensorByName(model, data, object_names[obj_a_id]);
+  // double* box = SensorByName(model, data, "box");
+  // double* handle = SensorByName(model, data, "doorhandle");
+  double* obj_b = SensorByName(model, data, object_names[obj_b_id]);
+  // printf("%d %d\n", object_a_, object_b_);
+  mju_sub3(residual + counter, obj_a, obj_b);
+  // mju_copy(residual + counter, hand, 3);
+  counter += 3;
+
 }
 
 // -------- Transition for quadruped task --------
