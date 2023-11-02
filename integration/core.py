@@ -85,6 +85,9 @@ BLOCKS_NAME_MAPPING = {
     "blue_block": "blue_block"
 }
 
+
+## add sanity check for variable validity
+
 CABINET_NAME_MAPPING = {
     "palm": "hand",
     "red_block": "box",
@@ -154,15 +157,22 @@ def map_name(name):
     return NAME_MAPPING[ENV].get(name, name)
 
 
-def lift(object, height=1.0, primary_reward=False):
+def is_joint(obj):
+    name = map_name(obj)
+    return name.endswith("joint") or name.endswith("hinge")
+
+
+def lift(obj, height=1.0, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["lift"] >= 1:
+        return
+    if is_joint(obj):
         return
     REWARD_CNT["lift"] += 1
     cnt = REWARD_CNT["lift"]
     if cnt == 1:
         cnt = ""
-    TASK_PARAMS[f"Lift{cnt}Object"] = map_name(object)
+    TASK_PARAMS[f"Lift{cnt}Object"] = map_name(obj)
     TASK_PARAMS[f"Lift{cnt}Height"] = height
     COST_WEIGHTS[f"Lift{cnt}"] = 1.0
     # print(COST_WEIGHTS)
@@ -173,15 +183,17 @@ def lift(object, height=1.0, primary_reward=False):
     COST_NAMES_REQUIRED.append(f"Lift{cnt}")
 
 
-def pinch_finger(object, primary_reward=False):
+def pinch_finger(obj, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["pinch"] >= 1:
+        return
+    if is_joint(obj):
         return
     REWARD_CNT["pinch"] += 1
     cnt = REWARD_CNT["pinch"]
     if cnt == 1:
         cnt = ""
-    TASK_PARAMS[f"FingerTouch{cnt}Object"] = map_name(object)
+    TASK_PARAMS[f"FingerTouch{cnt}Object"] = map_name(obj)
     COST_WEIGHTS[f"Pinch{cnt}"] = 1.0
     # print(COST_WEIGHTS)
 
@@ -194,6 +206,8 @@ def pinch_finger(object, primary_reward=False):
 def stack_reward(obj1, obj2, primary_reward=False):  # stack obj1 on top of obj2
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["stack"] >= 1:
+        return
+    if is_joint(obj):
         return
     REWARD_CNT["stack"] += 1
     cnt = REWARD_CNT["stack"]
@@ -213,6 +227,8 @@ def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["min_l2"] >= 3:
         return
+    if is_joint(obj1) or is_joint(obj2):
+        return
     REWARD_CNT["min_l2"] += 1
     cnt = REWARD_CNT["min_l2"]
     if cnt == 1:
@@ -230,6 +246,8 @@ def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
 def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["max_l2"] >= 1:
+        return
+    if is_joint(obj1) or is_joint(obj2):
         return
     REWARD_CNT["max_l2"] += 1
     cnt = REWARD_CNT["max_l2"]
@@ -249,6 +267,8 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
 def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["joint"] >= 1:
+        return
+    if not is_joint(obj):
         return
     REWARD_CNT["joint"] += 1
     cnt = REWARD_CNT["joint"]

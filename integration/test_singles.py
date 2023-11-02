@@ -12,12 +12,12 @@ for i in range(T):
     print(f"------ TEST {i} ------")
     try:
         os.remove("data.joblib")
-        # shutil.copyfile(f"{name}.data.joblib", "data.joblib")
     except FileNotFoundError:
-        try:
-            os.remove("data.joblib")
-        except FileNotFoundError:
-            pass
+        pass
+    try:
+        shutil.copyfile(f"{name}.data.joblib", "data.joblib")
+    except FileNotFoundError:
+        pass
     # subprocess.check_call(["python", "run_step.py"])
     subprocess.check_call(["python", f"run_step_{name}.py"])
     with open("outcome") as o:

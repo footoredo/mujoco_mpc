@@ -5,5 +5,7 @@ set_env('kitchen')
 runner_init()
 
 reset_reward()
-minimize_l2_distance_reward("palm", "blue_kettle_handle", primary_reward=True)
+minimize_l2_distance_reward("palm", "microwave_handle")
+minimize_l2_distance_reward("microwave_handle", "microwave")
+set_joint_fraction_reward("microwave", 1.0, primary_reward=True)
 execute_plan()
