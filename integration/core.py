@@ -207,7 +207,7 @@ def stack_reward(obj1, obj2, primary_reward=False):  # stack obj1 on top of obj2
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
     if REWARD_CNT["stack"] >= 1:
         return
-    if is_joint(obj):
+    if is_joint(obj1) or is_joint(obj2):
         return
     REWARD_CNT["stack"] += 1
     cnt = REWARD_CNT["stack"]
