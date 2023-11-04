@@ -108,6 +108,12 @@ CABINET_NAME_MAPPING = {
     "wooden_cabinet_inside": "right_target_position",
 }
 
+CABINET_SITE_MAPPING = {
+    "hand": "eeff",
+    "rightdoorhandle": "rightdoor_site",
+    "leftdoorhandle": "leftdoor_site"
+}
+
 KITCHEN_NAME_MAPPING = {
     "palm": "hand",
     "cabinet_handle": "cabinet_doorhandle_l",
@@ -122,10 +128,23 @@ KITCHEN_NAME_MAPPING = {
     "target_position": "target_position"
 }
 
+KITCHEN_SITE_MAPPING = {
+    "cabinet_doorhandle_r": "rightdoor_site",
+    "cabinet_doorhandle_l": "leftdoor_site",
+    "kettle_handle": "kettle_site0",
+    "microwave_handle": "microhandle_site",
+    "hand": "eeff"
+}
+
 NAME_MAPPING = {
     "blocks": BLOCKS_NAME_MAPPING,
     "cabinet": CABINET_NAME_MAPPING,
     "kitchen": KITCHEN_NAME_MAPPING
+}
+
+SITE_MAPPING = {
+    "cabinet": CABINET_SITE_MAPPING,
+    "kitchen": KITCHEN_SITE_MAPPING
 }
 
 PRIMARY_REWARD = None
@@ -155,6 +174,10 @@ def reset_reward():
 
 def map_name(name):
     return NAME_MAPPING[ENV].get(name, name)
+
+
+def map_site(name):
+    return SITE_MAPPING[ENV].get(name, name)
 
 
 def is_joint(obj):
@@ -249,13 +272,18 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
         return
     if is_joint(obj1) or is_joint(obj2):
         return
+    original_distance = get_object_distance(obj1, obj2)
+    print("original_distance:", original_distance)
     REWARD_CNT["max_l2"] += 1
     cnt = REWARD_CNT["max_l2"]
     if cnt == 1:
         cnt = ""
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
-    TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 0.8
+    # TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 0.8
+    move_away_distance = original_distance + 0.5 if ENV == "kitchen" else original_distance + 0.3
+    move_away_distance = min(move_away_distance, 0.8 if ENV == "kitchen" else 0.6)
+    TASK_PARAMS[f"MoveAwayDistance"] = move_away_distance
     COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
 
     if primary_reward:
@@ -423,12 +451,13 @@ class Runner:
 
     def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=5, step_limit=1000):
         retries = 0
+        best_primary_cost = 1e9
         while True:
             print(f"Task [{task_name}] retry #{retries} ...", flush=True)
             self.run_reset()
             costs = self.agent.get_cost_term_values()
-            if PRIMARY_REWARD is not None:
-                primary_cost_before = costs[PRIMARY_REWARD]
+            # if PRIMARY_REWARD is not None:
+            #     primary_cost_before = costs[PRIMARY_REWARD]
             improved = False
             succ = self.run_once(task_parameters, cost_weights, cost_limit, cost_name=cost_name, step_limit=step_limit)
             costs = self.agent.get_cost_term_values()
@@ -437,8 +466,9 @@ class Runner:
             print(flush=True)
             if PRIMARY_REWARD is not None:
                 primary_cost_after = costs[PRIMARY_REWARD]
-                if primary_cost_before - primary_cost_after > 0.1:
+                if best_primary_cost - primary_cost_after > 0.05:
                     improved = True
+                    best_primary_cost = primary_cost_after
             if succ:
                 return True
             retries += 1
@@ -715,10 +745,16 @@ def get_object_position(obj_name):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
 
     mapped_name = map_name(obj_name)
-    if mapped_name == "palm":
-        mapped_name = "eeff"
+    site_name = map_site(mapped_name)
 
-    return RUNNER.data.site(mapped_name).xpos.copy()
+    return RUNNER.data.site(site_name).xpos.copy()
+
+
+def get_object_distance(obj1, obj2):
+    pos1 = get_object_position(obj1)
+    pos2 = get_object_position(obj2)
+    
+    return np.linalg.norm(pos1 - pos2)
 
 
 def finish():
