@@ -29,7 +29,7 @@ std::string Blocks::XmlPath() const {
 }
 std::string Blocks::Name() const { return "Panda Blocks"; }
 const std::array<std::string, 5> object_names = {
-    "hand", "yellow_block", "red_block", "blue_block", "blue_bin"
+    "hand", "yellow_block", "red_block", "blue_block", "red_bin"
 };
 
 // const std::array<std::string, 2> joint_names = {
