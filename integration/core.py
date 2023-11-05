@@ -45,8 +45,11 @@ def get_observation(model, data):
 def environment_step(model, data, action):
   data.ctrl[:] = action
   mujoco.mj_step(model, data)
+#   print(data.joint("rightdoorhandle").qpos)
   if ENV == "cabinet" and OPENED_CABINET:
     data.qpos[15] = 1.57
+  if ENV == "locklock" and get_joint_value("red_lever_joint") < 1.5:
+    data.joint("rightdoorhinge").qpos[0] = 0.
   if ENV == "cabinet" and NO_LOCK:
     data.qpos[0] = 100
   return get_observation(model, data)
@@ -59,9 +62,10 @@ def environment_reset(model, data):
 
 ENV = "blocks"
 REPEATS = 5
+RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = False
+SAVE_VIDEO = True
 OPENED_CABINET = False
 NO_LOCK = False
 IS_COP = False
@@ -85,8 +89,20 @@ BLOCKS_NAME_MAPPING = {
     "blue_block": "blue_block"
 }
 
+LOCKLOCK_NAME_MAPPING = {
+    "palm": "hand",
+    "yellow_block": "yellow_block",
+    "red_block": "red_block",
+    "red_lever_joint": "red_lever_joint",
+    "blue_block": "blue_block"
+}
 
-## add sanity check for variable validity
+LOCKLOCK_SITE_MAPPING = {
+    "hand": "eeff",
+    "red_lever_joint": "lever",
+    "rightdoorhandle": "rightdoorhinge",
+    "leftdoorhandle": "leftdoorhinge"
+}
 
 CABINET_NAME_MAPPING = {
     "palm": "hand",
@@ -137,12 +153,14 @@ KITCHEN_SITE_MAPPING = {
 }
 
 NAME_MAPPING = {
+    "locklock": LOCKLOCK_NAME_MAPPING,
     "blocks": BLOCKS_NAME_MAPPING,
     "cabinet": CABINET_NAME_MAPPING,
     "kitchen": KITCHEN_NAME_MAPPING
 }
 
 SITE_MAPPING = {
+    "locklock": LOCKLOCK_SITE_MAPPING,
     "cabinet": CABINET_SITE_MAPPING,
     "kitchen": KITCHEN_SITE_MAPPING
 }
@@ -160,6 +178,11 @@ def set_env(env):
 def set_repeats(repeats):
     global REPEATS
     REPEATS = repeats
+    
+    
+def set_retries(retries):
+    global RETRIES
+    RETRIES = retries
 
 
 def reset_reward():
@@ -178,6 +201,27 @@ def map_name(name):
 
 def map_site(name):
     return SITE_MAPPING[ENV].get(name, name)
+
+
+def get_object_position(obj_name):
+    mapped_name = map_name(obj_name)
+    site_name = map_site(mapped_name)
+
+    return RUNNER.data.site(site_name).xpos.copy()
+
+
+def get_object_distance(obj1, obj2):
+    pos1 = get_object_position(obj1)
+    pos2 = get_object_position(obj2)
+    
+    return np.linalg.norm(pos1 - pos2)
+
+
+def get_joint_value(obj):
+    mapped_name = map_name(obj)
+    site_name = map_site(mapped_name)
+    
+    return RUNNER.data.joint(site_name).qpos[0]
 
 
 def is_joint(obj):
@@ -631,7 +675,7 @@ class Runner:
             else:
                 cost_limit = 0.02
         succ = self.run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=2 if ENV == "cabinet" else 2, step_limit=500)
+        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=RETRIES, step_limit=500)
 
         return succ
     
@@ -739,22 +783,6 @@ def end_effector_close():
     PRIMARY_REWARD = "End-Effector Close"
 
     execute_plan(finish=False, reset_after_done=False)
-
-
-def get_object_position(obj_name):
-    global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
-
-    mapped_name = map_name(obj_name)
-    site_name = map_site(mapped_name)
-
-    return RUNNER.data.site(site_name).xpos.copy()
-
-
-def get_object_distance(obj1, obj2):
-    pos1 = get_object_position(obj1)
-    pos2 = get_object_position(obj2)
-    
-    return np.linalg.norm(pos1 - pos2)
 
 
 def finish():

@@ -58,6 +58,8 @@ add_library(
   tasks/panda/kitchen/kitchen.h
   tasks/panda/blocks/blocks.cc
   tasks/panda/blocks/blocks.h
+  tasks/panda/locklock/locklock.cc
+  tasks/panda/locklock/locklock.h
   tasks/particle/particle.cc
   tasks/particle/particle.h
   tasks/quadrotor/quadrotor.cc

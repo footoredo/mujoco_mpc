@@ -1,0 +1,243 @@
+<mujoco model="Panda">
+  <include file="../../common.xml"/>
+
+  <size memory="1M"/>
+
+  <custom>
+    <numeric name="agent_planner" data="0" />
+    <numeric name="agent_horizon" data="0.5" />
+    <numeric name="agent_timestep" data="0.009" />
+    <numeric name="agent_policy_width" data="0.0035" />
+    <numeric name="sampling_trajectories" data="60"/>
+    <numeric name="sampling_spline_points" data="7" />
+    <numeric name="sampling_exploration" data="0.1" />
+    <numeric name="gradient_spline_points" data="6" />
+
+    <numeric name="residual_select_LiftObject" data="0"/>
+    <text name="residual_list_LiftObject" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_LiftHeight" data="2.0 0.1 5"/>
+
+    <numeric name="residual_select_StackObjectA" data="0"/>
+    <text name="residual_list_StackObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_StackObjectB" data="2"/>
+    <text name="residual_list_StackObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+
+    <numeric name="residual_select_ReachObjectA" data="0"/>
+    <text name="residual_list_ReachObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_ReachObjectB" data="2"/>
+    <text name="residual_list_ReachObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+
+    <numeric name="residual_select_Reach2ObjectA" data="0"/>
+    <text name="residual_list_Reach2ObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_Reach2ObjectB" data="0"/>
+    <text name="residual_list_Reach2ObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+
+    <numeric name="residual_select_Reach3ObjectA" data="0"/>
+    <text name="residual_list_Reach3ObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_Reach3ObjectB" data="0"/>
+    <text name="residual_list_Reach3ObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+
+    <numeric name="residual_select_JointTarget" data="0"/>
+    <text name="residual_list_JointTarget" data="red_lever_joint|leftdoorhinge|rightdoorhinge"/>
+    <numeric name="residual_JointTargetAngle" data="1 0 1"/>
+
+    <numeric name="residual_select_MoveAwayObjectA" data="1"/>
+    <text name="residual_list_MoveAwayObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_MoveAwayObjectB" data="2"/>
+    <text name="residual_list_MoveAwayObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_MoveAwayDistance" data="0.5 0.1 2"/>
+
+    <numeric name="residual_EndEffectorTo1" data="0.0 -10 10"/>
+    <numeric name="residual_EndEffectorTo2" data="0.0 -10 10"/>
+    <numeric name="residual_EndEffectorTo3" data="0.0 0 10"/>
+  </custom>
+
+  <statistic extent="1.5" center="0.1 0.2 0.3"/>
+
+  <visual>
+    <quality shadowsize="8192"/>
+    <global azimuth="180" elevation="-30"/>
+    <scale framelength=".3" framewidth=".03"/>
+  </visual>
+
+  <default>
+    <geom solref=".001 1"/>
+  </default>
+
+  <compiler angle="radian"/>
+  <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/>
+  <include file="../furniture_sim/bin/bin_asset.xml"/>
+  <asset>
+    <texture name="T_Green" type="cube" height="1" width="1" file="../furniture_sim/common/textures/green.png" />
+    <texture name="T_Blue" type="cube" height="1" width="1" file="../furniture_sim/common/textures/blue.png" />
+    <texture name="T_Red" type="cube" height="1" width="1" file="../furniture_sim/common/textures/red.png" />
+    <texture name="T_Yellow" type="cube" height="1" width="1" file="../furniture_sim/common/textures/yellow.png" />
+
+    <material name="kettle_green" rgba="1 1 1 1" texture="T_Green" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+    <material name="kettle_red" rgba="1 1 1 1" texture="T_Red" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+    <material name="kettle_yellow" rgba="1 1 1 1" texture="T_Yellow" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+    <material name="kettle_blue" rgba="1 1 1 1" texture="T_Blue" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+  </asset>
+
+  <worldbody>
+    <site name="world"/>
+    <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
+        directional="true" castshadow="true"/>
+
+    <camera pos="-0.539 -0.757 0.589" xyaxes="0.864 -0.504 0.000 0.118 0.202 0.972"/>
+
+
+    <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" material="blue_grid"/>
+
+    <body name="hingecabinet" pos="0 1 .21" >
+      <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
+    </body>
+
+    <!-- <body name="target" pos="0.2 0.0 0.2"> -->
+    <body name="yellow_block" pos="-1000.5 0.5 0.032">
+      <joint type="free"/>
+      <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
+      <geom material="kettle_yellow" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
+      <site name="yellow_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
+    </body>
+
+    <body name="red_block" pos="0.5 0.0 0.16" axisangle="0 0 1 -1.57079">
+
+      <geom class="hinge_collision" type="box" pos="0 0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
+      <geom material="kettle_red" pos="0 0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
+
+      <geom class="hinge_collision" type="box" pos="0 -0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
+      <geom material="kettle_red" pos="0 -0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
+
+      <geom class="hinge_collision" type="box" pos="-0.07 0.0 -0.14" size="0.010 0.040 0.010" mass=".3"/>
+      <geom material="kettle_red" pos="-0.07 0.00 -0.14" size="0.011 0.041 0.011" type="box"/>
+
+      <geom class="hinge_collision" type="box" pos="0.07 0.0 -0.14" size="0.010 0.040 0.010" mass=".3"/>
+      <geom material="kettle_red" pos="0.07 0.00 -0.14" size="0.011 0.041 0.011" type="box"/>
+
+      <body name="lever" pos="0 0 0.02">
+        <joint type="hinge" name="lever" axis="0 1 0" pos="0 0 -0.13" frictionloss="0.5"/>
+        <geom class="hinge_collision" type="cylinder" size="0.020 0.150" mass=".3" condim="6" friction="1 .01 .003"/>
+        <geom material="kettle_red" pos="0 0 0" size="0.021 0.151" type="cylinder"/>
+        <site name="red_block" type="box" pos="0 0 0.075" size="0.0030 0.0030 0.0030"/>
+      </body>
+    </body>
+
+    <body name="blue_block" pos="1000.5 0.5 0.032">
+      <joint type="free"/>
+      <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
+      <geom material="kettle_blue" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
+      <site name="blue_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
+    </body>
+
+    <body name="bin" pos="1000 0.7 .01" >
+      <!-- <geom class="viz_stl_Metal_bin" type="mesh" mesh="bin" euler="-1.57 0 3.14" group="1" contype="0" conaffinity="0" /> -->
+      <geom name="bottom" type="box" size="0.06 0.06 0.01" material="kettle_blue" />
+      <geom name="leftWall" pos="0.06 0 0.03" type="box" size="0.01 0.06 0.03" material="kettle_blue"/>
+      <geom name="rightWall" pos="-0.06 0 0.03" type="box" size="0.01 0.06 0.03" material="kettle_blue"/>
+      <geom name="backWall" pos="0 -0.06 0.03" type="box" size="0.06 0.01 0.03" material="kettle_blue"/>
+      <geom name="frontWall" pos="0 0.06 0.03" type="box" size="0.06 0.01 0.03" material="kettle_blue"/>
+      <site name="blue_bin" type="box" pos="0 0 0" size="0.001 0.001 0.001"/>
+    </body>
+
+    <!-- <body name="hingecabinet" pos="0 1 .21" >
+      <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
+    </body>
+
+    <body name="right_target_position" pos="0.17 0.85 0.0775">
+      <site name="right_target_position" type="box" pos="0 0 0" size="0.035 0.035 0.035" rgba=".5 .5 .5 .2"/>
+    </body>
+
+    <body name="left_target_position" pos="-0.17 0.85 0.06">
+      <site name="left_target_position" type="box" pos="0 0 0" size="0.05 0.05 0.001"/>
+    </body> -->
+
+	<!--
+    <body name="target" mocap="true" pos="0.6 0.4 0.05">
+      <geom name="target"  type="box" size="0.02 0.03 0.02" contype="0" conaffinity="0" rgba=".5 .5 .5 .3"/>
+      <site name="target1" type="box" pos="0  .026 0" size="0.021 0.005 0.021" rgba="1 .1 .1 .3"/>
+      <site name="target2" type="box" pos="0 -.026 0" size="0.021 0.005 0.021" rgba=".1 .1 1 .3"/>
+    </body>
+
+    <body name="box" pos="0.4 0.5 0.2">
+      <freejoint/>
+      <geom name="box"  type="box" size="0.02 0.03 0.02" priority="1" condim="6" friction="1 .01 .003"/>
+      <site name="box1" type="box" pos="0  .026 0" size="0.021 0.005 0.021" rgba="1 .1 .1 1"/>
+      <site name="box2" type="box" pos="0 -.026 0" size="0.021 0.005 0.021" rgba=".1 .1 1 1"/>
+    </body>
+	-->
+  </worldbody>
+
+  <contact>
+    <exclude body1="world" body2="left_finger"/>
+    <exclude body1="world" body2="right_finger"/>
+    <exclude body1="left_finger" body2="right_finger"/>
+  </contact>
+
+  <!-- <keyframe>
+    <key name="home" qpos="0.0 0.7 0.4 0.0 0.0 0.0 0.0 0.0 0.0 -0.026895 0.391451 0.0199961 0.959693 0 0 -0.281049 1.00714 0.42312"/>
+  </keyframe> -->
+
+  <!-- <keyframe>
+    <key name="home" qpos="100.0000 0.6500 0.0210 1.0000 0.0000 -0.0000 -0.0000 -0.1000 0.2000 0.0410 1.0000 0.0000 -0.0000 0.0000 0.0000 1.5700 0.0000 0.0013 0.0134 -0.0529 -1.6816 -0.0012 1.5955 -1.5308 0.0050 0.0050"/>
+  </keyframe> -->
+
+  <sensor>
+    <!-- <user name="Reach Door" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Open Door" dim="1" user="2 .1 0 1 0.003"/>
+    <user name="Reach Box" dim="3" user="2 .1 0 1 0.01"/>
+    <user name="Move Box" dim="1" user="2 1 0 5 0.003"/> -->
+    <user name="Lift" dim="1" user="2 1 0 5 0.01"/>
+    <user name="Stack" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Reach" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Reach2" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Reach3" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Joint Target" dim="1" user="2 0 0 1 0.003"/>
+    <!-- <user name="Move Away Temp" dim="2" user="2 0 0 5 0.01"/> -->
+    <user name="Move Away" dim="1" user="2 1 0 5 0.01"/>
+    <user name="End-Effector To" dim="3" user="2 1 0 5 0.001"/>
+    <user name="End-Effector Open" dim="1" user="2 1 0 5 0.01"/>
+    <user name="End-Effector Close" dim="1" user="2 1 0 5 0.01"/>
+	  <user name="Control" dim="9" user="2 0 0 5 0.01"/>
+    <user name="Default Pose" dim="6" user="2 0 0 5 0.01"/>
+	  <user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
+    <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
+    <framepos name="hand" objtype="site" objname="eeff"/>
+    <framepos name="rightdoorhandle" objtype="site" objname="rightdoor_site"/>
+    <framepos name="leftdoorhandle" objtype="site" objname="leftdoor_site"/>
+    <framepos name="yellow_block" objtype="site" objname="yellow_block"/>
+    <framepos name="red_block" objtype="site" objname="red_block"/>
+    <framepos name="blue_block" objtype="site" objname="blue_block"/>
+    <framepos name="blue_bin" objtype="site" objname="blue_bin"/>
+    <jointpos name='red_lever_joint' joint= 'lever'/>
+    <jointpos name="leftdoorhinge" joint="leftdoorhinge"/>
+    <jointpos name="rightdoorhinge" joint="rightdoorhinge"/>
+
+    <jointpos name='panda_joint0' joint= 'joint0'/>
+    <jointpos name='panda_joint1' joint= 'joint1'/>
+    <jointpos name='panda_joint2' joint= 'joint2'/>
+    <jointpos name='panda_joint3' joint= 'joint3'/>
+    <jointpos name='panda_joint4' joint= 'joint4'/>
+    <jointpos name='panda_joint5' joint= 'joint5'/>
+    <jointpos name='panda_joint6' joint= 'joint6'/>
+    <jointpos name='panda_joint7' joint= 'joint7'/>
+
+    <jointpos name='finger_joint1' joint='finger_joint1'/>
+    <jointpos name='finger_joint2' joint='finger_joint2'/>
+
+	<!--
+    <framepos name="box" objtype="geom" objname="box"/>
+    <framepos name="box1" objtype="site" objname="box1"/>
+    <framepos name="box2" objtype="site" objname="box2"/>
+    <framepos name="target" objtype="geom" objname="target"/>
+    <framepos name="target1" objtype="site" objname="target1"/>
+    <framepos name="target2" objtype="site" objname="target2"/>
+	-->
+    <framepos name="trace0" objtype="site" objname="touch_left"/>
+    <framepos name="trace1" objtype="site" objname="touch_right"/>
+  </sensor>
+
+  <!-- <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/> -->
+
+  <include file="panda.xml"/>
+</mujoco>
