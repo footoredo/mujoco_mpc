@@ -48,8 +48,8 @@ def environment_step(model, data, action):
 #   print(data.joint("rightdoorhandle").qpos)
   if ENV == "cabinet" and OPENED_CABINET:
     data.qpos[15] = 1.57
-  if ENV == "locklock" and get_joint_value("red_lever_joint") < 1.5:
-    data.joint("rightdoorhinge").qpos[0] = 0.
+#   if ENV == "locklock" and get_joint_value("red_lever_joint") < 1.5:
+#     data.joint("rightdoorhinge").qpos[0] = 0.
   if ENV == "cabinet" and NO_LOCK:
     data.qpos[0] = 100
   return get_observation(model, data)
@@ -65,7 +65,7 @@ REPEATS = 5
 RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = True
+SAVE_VIDEO = False
 OPENED_CABINET = False
 NO_LOCK = False
 IS_COP = False

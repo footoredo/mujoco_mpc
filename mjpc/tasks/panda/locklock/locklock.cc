@@ -243,18 +243,33 @@ void Locklock::ResidualFn::Residual(const mjModel* model, const mjData* data,
   }
 }
 
+double* JointByName(const mjModel* m, const mjData* d,
+                    const std::string& name) {
+  int id = mj_name2id(m, mjOBJ_JOINT, name.c_str());
+  if (id == -1) {
+    std::cerr << "joint \"" << name << "\" not found.\n";
+    return nullptr;
+  } else {
+    return d->qpos + m->jnt_qposadr[id];
+  }
+}
+
 void Locklock::TransitionLocked(mjModel* model, mjData* data) {
   double residuals[100];
   // std::cout << 1111 << std::endl;
   residual_.Residual(model, data, residuals);
-  // double bring_dist = (mju_norm3(residuals+3) + mju_norm3(residuals+6)) / 2;
+  
+  double* lever_joint = JointByName(model, data, "lever");
+  double* left_door_hinge = JointByName(model, data, "leftdoorhinge");
+  double* right_door_hinge = JointByName(model, data, "rightdoorhinge");
 
-  // data->qpos[15] = 1.57;
+  // std::cout << lever_joint[0] << " " << left_door_hinge[0] << " " << right_door_hinge[0] << std::endl;
 
-  // for (int i = 0; i < model->nq; i ++) {
-  //   std::cout << data->qpos[i] << ", ";
-  // }
-  // std::cout << std::endl;
+  if (lever_joint[0] < 1.5) {
+    left_door_hinge[0] = 0.0;
+    right_door_hinge[0] = 0.0;
+  }
+
 
   // reset:
   // if (data->time > 0 && bring_dist < .015) {
