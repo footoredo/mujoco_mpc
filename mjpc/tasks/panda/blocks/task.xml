@@ -14,37 +14,37 @@
     <numeric name="gradient_spline_points" data="6" />
 
     <numeric name="residual_select_LiftObject" data="0"/>
-    <text name="residual_list_LiftObject" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_LiftObject" data="hand|yellow_block|red_block|blue_block|red_bin"/>
     <numeric name="residual_LiftHeight" data="2.0 0.1 5"/>
 
     <numeric name="residual_select_StackObjectA" data="0"/>
-    <text name="residual_list_StackObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_StackObjectA" data="hand|yellow_block|red_block|blue_block|red_bin"/>
     <numeric name="residual_select_StackObjectB" data="2"/>
-    <text name="residual_list_StackObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_StackObjectB" data="hand|yellow_block|red_block|blue_block|red_bin"/>
 
     <numeric name="residual_select_ReachObjectA" data="0"/>
-    <text name="residual_list_ReachObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_ReachObjectA" data="hand|yellow_block|red_block|blue_block|red_bin"/>
     <numeric name="residual_select_ReachObjectB" data="2"/>
-    <text name="residual_list_ReachObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_ReachObjectB" data="hand|yellow_block|red_block|blue_block|red_bin"/>
 
     <numeric name="residual_select_Reach2ObjectA" data="0"/>
-    <text name="residual_list_Reach2ObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_Reach2ObjectA" data="hand|yellow_block|red_block|blue_block|red_bin"/>
     <numeric name="residual_select_Reach2ObjectB" data="0"/>
-    <text name="residual_list_Reach2ObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_Reach2ObjectB" data="hand|yellow_block|red_block|blue_block|red_bin"/>
 
     <numeric name="residual_select_Reach3ObjectA" data="0"/>
-    <text name="residual_list_Reach3ObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_Reach3ObjectA" data="hand|yellow_block|red_block|blue_block|red_bin"/>
     <numeric name="residual_select_Reach3ObjectB" data="0"/>
-    <text name="residual_list_Reach3ObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_Reach3ObjectB" data="hand|yellow_block|red_block|blue_block|red_bin"/>
 
     <!-- <numeric name="residual_select_JointTarget" data="0"/>
     <text name="residual_list_JointTarget" data="leftdoorhinge|rightdoorhinge"/>
     <numeric name="residual_JointTargetAngle" data="1 0 1"/> -->
 
     <numeric name="residual_select_MoveAwayObjectA" data="1"/>
-    <text name="residual_list_MoveAwayObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_MoveAwayObjectA" data="hand|yellow_block|red_block|blue_block|red_bin"/>
     <numeric name="residual_select_MoveAwayObjectB" data="2"/>
-    <text name="residual_list_MoveAwayObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin"/>
+    <text name="residual_list_MoveAwayObjectB" data="hand|yellow_block|red_block|blue_block|red_bin"/>
     <numeric name="residual_MoveAwayDistance" data="0.5 0.1 2"/>
 
     <numeric name="residual_EndEffectorTo1" data="0.0 -10 10"/>
@@ -90,35 +90,36 @@
     <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" material="blue_grid"/>
 
     <!-- <body name="target" pos="0.2 0.0 0.2"> -->
-    <body name="yellow_block" pos="0 0.5 0.032">
+			<!-- <body name="yellow_block" pos="0 0.5 0.032"> -->
+    <body name="yellow_block" pos="0.5 0.0 .04">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
       <geom material="kettle_yellow" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
       <site name="yellow_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
 
-    <body name="red_block" pos="1000 0.5 0.094">
+    <body name="red_block" pos="0.4 0.2 0.04">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
       <geom material="kettle_red" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
       <site name="red_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
 
-    <body name="blue_block" pos="0.5 0.5 0.032">
+    <body name="blue_block" pos="0.4 -0.2 0.032">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
       <geom material="kettle_blue" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
       <site name="blue_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
 
-    <body name="bin" pos="0 0.7 .01" >
+    <body name="bin" pos="0.5 0.0 .001" >
       <!-- <geom class="viz_stl_Metal_bin" type="mesh" mesh="bin" euler="-1.57 0 3.14" group="1" contype="0" conaffinity="0" /> -->
-      <geom name="bottom" type="box" size="0.06 0.06 0.01" material="kettle_blue" />
-      <geom name="leftWall" pos="0.06 0 0.03" type="box" size="0.01 0.06 0.03" material="kettle_blue"/>
-      <geom name="rightWall" pos="-0.06 0 0.03" type="box" size="0.01 0.06 0.03" material="kettle_blue"/>
-      <geom name="backWall" pos="0 -0.06 0.03" type="box" size="0.06 0.01 0.03" material="kettle_blue"/>
-      <geom name="frontWall" pos="0 0.06 0.03" type="box" size="0.06 0.01 0.03" material="kettle_blue"/>
-      <site name="blue_bin" type="box" pos="0 0 0" size="0.001 0.001 0.001"/>
+      <geom name="bottom" type="box" size="0.06 0.06 0.001" material="kettle_red" />
+      <geom name="leftWall" pos="0.06 0 0.015" type="box" size="0.01 0.06 0.015" material="kettle_red"/>
+      <geom name="rightWall" pos="-0.06 0 0.015" type="box" size="0.01 0.06 0.015" material="kettle_red"/>
+      <geom name="backWall" pos="0 -0.06 0.015" type="box" size="0.06 0.01 0.015" material="kettle_red"/>
+      <geom name="frontWall" pos="0 0.06 0.015" type="box" size="0.06 0.01 0.015" material="kettle_red"/>
+      <site name="red_bin" type="box" pos="0 0 0" size="0.001 0.001 0.001"/>
     </body>
 
     <!-- <body name="hingecabinet" pos="0 1 .21" >
@@ -187,7 +188,7 @@
     <framepos name="yellow_block" objtype="site" objname="yellow_block"/>
     <framepos name="red_block" objtype="site" objname="red_block"/>
     <framepos name="blue_block" objtype="site" objname="blue_block"/>
-    <framepos name="blue_bin" objtype="site" objname="blue_bin"/>
+    <framepos name="red_bin" objtype="site" objname="red_bin"/>
 
     <jointpos name='panda_joint0' joint= 'joint0'/>
     <jointpos name='panda_joint1' joint= 'joint1'/>
