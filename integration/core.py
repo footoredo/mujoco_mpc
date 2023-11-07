@@ -48,8 +48,8 @@ def environment_step(model, data, action):
 #   print(data.joint("rightdoorhandle").qpos)
   if ENV == "cabinet" and OPENED_CABINET:
     data.qpos[15] = 1.57
-#   if ENV == "locklock" and get_joint_value("red_lever_joint") < 1.5:
-#     data.joint("rightdoorhinge").qpos[0] = 0.
+  if ENV == "locklock" and get_joint_value("red_switch_handle_joint") < 1.5:
+    data.joint("rightdoorhinge").qpos[0] = 0.
   if ENV == "cabinet" and NO_LOCK:
     data.qpos[0] = 100
   return get_observation(model, data)
@@ -91,17 +91,21 @@ BLOCKS_NAME_MAPPING = {
 
 LOCKLOCK_NAME_MAPPING = {
     "palm": "hand",
-    "yellow_block": "yellow_block",
-    "red_block": "red_block",
-    "red_lever_joint": "red_lever_joint",
-    "blue_block": "blue_block"
+    "wooden_cabinet": "cabinet",
+    "wooden_cabinet_door_handle": "rightdoorhandle",
+    "wooden_cabinet_door_hinge": "rightdoorhinge",
+    "wooden_cabinet_inside": "right_target_position",
+    "red_lever_handle": "red_switch_handle",
+    "red_lever": "red_switch",
+    "red_lever_joint": "red_switch_handle_joint"
 }
 
 LOCKLOCK_SITE_MAPPING = {
     "hand": "eeff",
-    "red_lever_joint": "lever",
     "rightdoorhandle": "rightdoorhinge",
-    "leftdoorhandle": "leftdoorhinge"
+    "leftdoorhandle": "leftdoorhinge",
+    "rightdoorhandle": "rightdoor_site",
+    "leftdoorhandle": "leftdoor_site"
 }
 
 CABINET_NAME_MAPPING = {
@@ -326,7 +330,14 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
     # TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 0.8
     move_away_distance = original_distance + 0.5 if ENV == "kitchen" else original_distance + 0.3
-    move_away_distance = min(move_away_distance, 0.8 if ENV == "kitchen" else 0.6)
+    if ENV == "kitchen":
+        max_distance = 0.8
+    elif ENV == "cabinet":
+        max_distance = 0.6
+    else:
+        max_distance = 1.0
+    print(move_away_distance, max_distance)
+    move_away_distance = min(move_away_distance, max_distance)
     TASK_PARAMS[f"MoveAwayDistance"] = move_away_distance
     COST_WEIGHTS[f"Move Away{cnt}"] = 1.0
 
@@ -691,7 +702,7 @@ class Runner:
                 run_fn = self.run_reset_no_obstruction
                 # run_fn = self.run_cabinet_move_cube
             else:
-                raise NotImplementedError()
+                run_fn = self.run_reset_no_obstruction
             
         self.outcome = run_fn()
 

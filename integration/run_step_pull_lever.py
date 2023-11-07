@@ -16,19 +16,19 @@ runner_init()
 # print("joint", get_joint_value("red_lever_joint"))
 
 
-reset_reward()
-minimize_l2_distance_reward("palm", "rightdoorhandle")
-set_joint_fraction_reward("rightdoorhinge", 1, primary_reward=True)
-execute_plan(finish=False, reset_after_done=False)
+# reset_reward()
+# minimize_l2_distance_reward("palm", "rightdoorhandle")
+# set_joint_fraction_reward("rightdoorhinge", 1, primary_reward=True)
+# execute_plan(finish=False, reset_after_done=False)
 
 
 reset_reward()
-minimize_l2_distance_reward("palm", "red_block")
-set_joint_fraction_reward("red_lever_joint", 1, primary_reward=True)
-execute_plan(finish=False, reset_after_done=False)
+minimize_l2_distance_reward("palm", "red_switch_handle")
+set_joint_fraction_reward("red_switch_handle_joint", 1, primary_reward=True)
+# execute_plan(finish=False, reset_after_done=False)
 
 
-reset_reward()
-minimize_l2_distance_reward("palm", "rightdoorhandle")
-set_joint_fraction_reward("rightdoorhinge", 1, primary_reward=True)
+# reset_reward()
+# minimize_l2_distance_reward("palm", "rightdoorhandle")
+# set_joint_fraction_reward("rightdoorhinge", 1, primary_reward=True)
 execute_plan()

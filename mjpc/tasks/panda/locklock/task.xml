@@ -14,37 +14,37 @@
     <numeric name="gradient_spline_points" data="6" />
 
     <numeric name="residual_select_LiftObject" data="0"/>
-    <text name="residual_list_LiftObject" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_LiftObject" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
     <numeric name="residual_LiftHeight" data="2.0 0.1 5"/>
 
     <numeric name="residual_select_StackObjectA" data="0"/>
-    <text name="residual_list_StackObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_StackObjectA" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
     <numeric name="residual_select_StackObjectB" data="2"/>
-    <text name="residual_list_StackObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_StackObjectB" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
 
     <numeric name="residual_select_ReachObjectA" data="0"/>
-    <text name="residual_list_ReachObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
-    <numeric name="residual_select_ReachObjectB" data="2"/>
-    <text name="residual_list_ReachObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_ReachObjectA" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_ReachObjectB" data="0"/>
+    <text name="residual_list_ReachObjectB" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
 
     <numeric name="residual_select_Reach2ObjectA" data="0"/>
-    <text name="residual_list_Reach2ObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_Reach2ObjectA" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
     <numeric name="residual_select_Reach2ObjectB" data="0"/>
-    <text name="residual_list_Reach2ObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_Reach2ObjectB" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
 
     <numeric name="residual_select_Reach3ObjectA" data="0"/>
-    <text name="residual_list_Reach3ObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_Reach3ObjectA" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
     <numeric name="residual_select_Reach3ObjectB" data="0"/>
-    <text name="residual_list_Reach3ObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <text name="residual_list_Reach3ObjectB" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
 
     <numeric name="residual_select_JointTarget" data="0"/>
-    <text name="residual_list_JointTarget" data="red_lever_joint|leftdoorhinge|rightdoorhinge"/>
+    <text name="residual_list_JointTarget" data="red_switch_handle_joint|leftdoorhinge|rightdoorhinge"/>
     <numeric name="residual_JointTargetAngle" data="1 0 1"/>
 
-    <numeric name="residual_select_MoveAwayObjectA" data="1"/>
-    <text name="residual_list_MoveAwayObjectA" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
-    <numeric name="residual_select_MoveAwayObjectB" data="2"/>
-    <text name="residual_list_MoveAwayObjectB" data="hand|yellow_block|red_block|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_MoveAwayObjectA" data="0"/>
+    <text name="residual_list_MoveAwayObjectA" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
+    <numeric name="residual_select_MoveAwayObjectB" data="0"/>
+    <text name="residual_list_MoveAwayObjectB" data="hand|cabinet|red_switch|red_switch_handle|blue_block|blue_bin|leftdoorhandle|rightdoorhandle"/>
     <numeric name="residual_MoveAwayDistance" data="0.5 0.1 2"/>
 
     <numeric name="residual_EndEffectorTo1" data="0.0 -10 10"/>
@@ -68,6 +68,7 @@
   <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/>
   <include file="../furniture_sim/bin/bin_asset.xml"/>
   <asset>
+
     <texture name="T_Green" type="cube" height="1" width="1" file="../furniture_sim/common/textures/green.png" />
     <texture name="T_Blue" type="cube" height="1" width="1" file="../furniture_sim/common/textures/blue.png" />
     <texture name="T_Red" type="cube" height="1" width="1" file="../furniture_sim/common/textures/red.png" />
@@ -84,88 +85,52 @@
     <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
         directional="true" castshadow="true"/>
 
-    <camera pos="-0.539 -0.757 0.589" xyaxes="0.864 -0.504 0.000 0.118 0.202 0.972"/>
-
+    <!-- <camera pos="-0.539 -0.757 0.589" xyaxes="0.864 -0.504 0.000 0.118 0.202 0.972"/> -->
+    <camera pos="-0.561 -0.925 0.969" xyaxes="0.912 -0.411 -0.000 0.169 0.374 0.912"/>
 
     <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" material="blue_grid"/>
 
     <body name="hingecabinet" pos="0 1 .21" >
+      <site name="cabinet" type="box" pos="0 0 0" size="0.0030 0.0030 0.0030"/>
       <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
-    </body>
 
-    <!-- <body name="target" pos="0.2 0.0 0.2"> -->
-    <body name="yellow_block" pos="-1000.5 0.5 0.032">
-      <joint type="free"/>
-      <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
-      <geom material="kettle_yellow" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
-      <site name="yellow_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
-    </body>
+      <!-- <body name="red_switch" pos="0 -0.15 0.36" axisangle="0 0 1 0"> -->
+      <body name="red_switch" pos="-0.5 -0.25 -0.05" axisangle="0 0 1 -1.57079">
+        <site name="red_switch" type="box" pos="0 0 0" size="0.0030 0.0030 0.0030"/>
 
-    <body name="red_block" pos="0.5 0.0 0.16" axisangle="0 0 1 -1.57079">
+        <geom class="hinge_collision" type="box" pos="0 0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
+        <geom material="kettle_red" pos="0 0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
 
-      <geom class="hinge_collision" type="box" pos="0 0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
-      <geom material="kettle_red" pos="0 0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
+        <geom class="hinge_collision" type="box" pos="0 -0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
+        <geom material="kettle_red" pos="0 -0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
 
-      <geom class="hinge_collision" type="box" pos="0 -0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
-      <geom material="kettle_red" pos="0 -0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
+        <geom class="hinge_collision" type="box" pos="-0.07 0.0 -0.14" size="0.010 0.040 0.020" mass=".3"/>
+        <geom material="kettle_red" pos="-0.07 0.00 -0.14" size="0.011 0.041 0.021" type="box"/>
 
-      <geom class="hinge_collision" type="box" pos="-0.07 0.0 -0.14" size="0.010 0.040 0.010" mass=".3"/>
-      <geom material="kettle_red" pos="-0.07 0.00 -0.14" size="0.011 0.041 0.011" type="box"/>
+        <geom class="hinge_collision" type="box" pos="0.07 0.0 -0.14" size="0.010 0.040 0.020" mass=".3"/>
+        <geom material="kettle_red" pos="0.07 0.00 -0.14" size="0.011 0.041 0.021" type="box"/>
 
-      <geom class="hinge_collision" type="box" pos="0.07 0.0 -0.14" size="0.010 0.040 0.010" mass=".3"/>
-      <geom material="kettle_red" pos="0.07 0.00 -0.14" size="0.011 0.041 0.011" type="box"/>
+        <body name="red_switch_handle" pos="0 0 0.02">
+          <joint type="hinge" name="red_switch_handle_joint" axis="0 1 0" pos="0 0 -0.13" frictionloss="1"/>
+          <geom class="hinge_collision" type="cylinder" size="0.010 0.130" mass=".3" condim="6" friction="1 .01 .003"/>
+          <geom material="M_hinge_metal" pos="0 0 0" size="0.011 0.131" type="cylinder"/>
 
-      <body name="lever" pos="0 0 0.02">
-        <joint type="hinge" name="lever" axis="0 1 0" pos="0 0 -0.13" frictionloss="0.5"/>
-        <geom class="hinge_collision" type="cylinder" size="0.020 0.150" mass=".3" condim="6" friction="1 .01 .003"/>
-        <geom material="kettle_red" pos="0 0 0" size="0.021 0.151" type="cylinder"/>
-        <site name="red_block" type="box" pos="0 0 0.075" size="0.0030 0.0030 0.0030"/>
+          <geom class="hinge_collision" type="cylinder" pos="0 0 0.1" size="0.020 0.040" mass=".3" condim="6" friction="1 .01 .003"/>
+          <geom material="kettle_red" pos="0 0 0.1" size="0.021 0.041" type="cylinder"/>
+
+          <site name="red_switch_handle" type="box" pos="0 0 0.075" size="0.0030 0.0030 0.0030"/>
+        </body>
       </body>
     </body>
 
-    <body name="blue_block" pos="1000.5 0.5 0.032">
+
+    <body name="blue_block" pos="0.17 0.85 0.0775">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
       <geom material="kettle_blue" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
       <site name="blue_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
 
-    <body name="bin" pos="1000 0.7 .01" >
-      <!-- <geom class="viz_stl_Metal_bin" type="mesh" mesh="bin" euler="-1.57 0 3.14" group="1" contype="0" conaffinity="0" /> -->
-      <geom name="bottom" type="box" size="0.06 0.06 0.01" material="kettle_blue" />
-      <geom name="leftWall" pos="0.06 0 0.03" type="box" size="0.01 0.06 0.03" material="kettle_blue"/>
-      <geom name="rightWall" pos="-0.06 0 0.03" type="box" size="0.01 0.06 0.03" material="kettle_blue"/>
-      <geom name="backWall" pos="0 -0.06 0.03" type="box" size="0.06 0.01 0.03" material="kettle_blue"/>
-      <geom name="frontWall" pos="0 0.06 0.03" type="box" size="0.06 0.01 0.03" material="kettle_blue"/>
-      <site name="blue_bin" type="box" pos="0 0 0" size="0.001 0.001 0.001"/>
-    </body>
-
-    <!-- <body name="hingecabinet" pos="0 1 .21" >
-      <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
-    </body>
-
-    <body name="right_target_position" pos="0.17 0.85 0.0775">
-      <site name="right_target_position" type="box" pos="0 0 0" size="0.035 0.035 0.035" rgba=".5 .5 .5 .2"/>
-    </body>
-
-    <body name="left_target_position" pos="-0.17 0.85 0.06">
-      <site name="left_target_position" type="box" pos="0 0 0" size="0.05 0.05 0.001"/>
-    </body> -->
-
-	<!--
-    <body name="target" mocap="true" pos="0.6 0.4 0.05">
-      <geom name="target"  type="box" size="0.02 0.03 0.02" contype="0" conaffinity="0" rgba=".5 .5 .5 .3"/>
-      <site name="target1" type="box" pos="0  .026 0" size="0.021 0.005 0.021" rgba="1 .1 .1 .3"/>
-      <site name="target2" type="box" pos="0 -.026 0" size="0.021 0.005 0.021" rgba=".1 .1 1 .3"/>
-    </body>
-
-    <body name="box" pos="0.4 0.5 0.2">
-      <freejoint/>
-      <geom name="box"  type="box" size="0.02 0.03 0.02" priority="1" condim="6" friction="1 .01 .003"/>
-      <site name="box1" type="box" pos="0  .026 0" size="0.021 0.005 0.021" rgba="1 .1 .1 1"/>
-      <site name="box2" type="box" pos="0 -.026 0" size="0.021 0.005 0.021" rgba=".1 .1 1 1"/>
-    </body>
-	-->
   </worldbody>
 
   <contact>
@@ -205,11 +170,11 @@
     <framepos name="hand" objtype="site" objname="eeff"/>
     <framepos name="rightdoorhandle" objtype="site" objname="rightdoor_site"/>
     <framepos name="leftdoorhandle" objtype="site" objname="leftdoor_site"/>
-    <framepos name="yellow_block" objtype="site" objname="yellow_block"/>
-    <framepos name="red_block" objtype="site" objname="red_block"/>
+    <framepos name="cabinet" objtype="site" objname="cabinet"/>
+    <framepos name="red_switch" objtype="site" objname="red_switch"/>
+    <framepos name="red_switch_handle" objtype="site" objname="red_switch_handle"/>
     <framepos name="blue_block" objtype="site" objname="blue_block"/>
-    <framepos name="blue_bin" objtype="site" objname="blue_bin"/>
-    <jointpos name='red_lever_joint' joint= 'lever'/>
+    <jointpos name='red_switch_handle_joint' joint= 'red_switch_handle_joint'/>
     <jointpos name="leftdoorhinge" joint="leftdoorhinge"/>
     <jointpos name="rightdoorhinge" joint="rightdoorhinge"/>
 

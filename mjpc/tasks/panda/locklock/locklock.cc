@@ -28,12 +28,12 @@ std::string Locklock::XmlPath() const {
   return GetModelPath("panda/locklock/task.xml");
 }
 std::string Locklock::Name() const { return "Panda Locklock"; }
-const std::array<std::string, 7> object_names = {
-    "hand", "yellow_block", "red_block", "blue_block", "blue_bin", "leftdoorhandle", "rightdoorhandle"
+const std::array<std::string, 8> object_names = {
+    "hand", "cabinet", "red_switch", "red_switch_handle", "blue_block", "blue_bin", "leftdoorhandle", "rightdoorhandle"
 };
 
 const std::array<std::string, 3> joint_names = {
-    "red_lever_joint", "leftdoorhinge", "rightdoorhinge"
+    "red_switch_handle_joint", "leftdoorhinge", "rightdoorhinge"
 };
 
 // ---------- Residuals for in-panda manipulation task ---------
@@ -259,7 +259,7 @@ void Locklock::TransitionLocked(mjModel* model, mjData* data) {
   // std::cout << 1111 << std::endl;
   residual_.Residual(model, data, residuals);
   
-  double* lever_joint = JointByName(model, data, "lever");
+  double* lever_joint = JointByName(model, data, "red_switch_handle_joint");
   double* left_door_hinge = JointByName(model, data, "leftdoorhinge");
   double* right_door_hinge = JointByName(model, data, "rightdoorhinge");
 
