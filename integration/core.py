@@ -93,8 +93,10 @@ LOCKLOCK_NAME_MAPPING = {
     "palm": "hand",
     "wooden_cabinet": "cabinet",
     "wooden_cabinet_door_handle": "rightdoorhandle",
+    "wooden_cabinet_door": "rightdoorhinge",
     "wooden_cabinet_door_hinge": "rightdoorhinge",
     "wooden_cabinet_inside": "right_target_position",
+    "blue_cube": "blue_block",
     "red_lever_handle": "red_switch_handle",
     "red_lever": "red_switch",
     "red_lever_joint": "red_switch_handle_joint"
@@ -126,6 +128,8 @@ CABINET_NAME_MAPPING = {
     "wooden_cabinet_handle": "rightdoorhandle",
     "wooden_cabinet": "rightdoorhinge",
     "wooden_cabinet_inside": "right_target_position",
+    "target_position_in_cabinet": "right_target_position",
+    "target_position": "right_target_position"
 }
 
 CABINET_SITE_MAPPING = {
@@ -329,11 +333,11 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
     # TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 0.8
-    move_away_distance = original_distance + 0.5 if ENV == "kitchen" else original_distance + 0.3
+    move_away_distance = original_distance + 0.6 if ENV == "kitchen" else original_distance + 0.3
     if ENV == "kitchen":
-        max_distance = 0.8
+        max_distance = 2.0
     elif ENV == "cabinet":
-        max_distance = 0.6
+        max_distance = 0.8
     else:
         max_distance = 1.0
     print(move_away_distance, max_distance)
@@ -507,6 +511,18 @@ class Runner:
     def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=5, step_limit=1000):
         retries = 0
         best_primary_cost = 1e9
+        
+        # if len(cost_weights) == 0:
+        #     return True
+        # elif len(cost_weights) == 1:
+        #     if "Reach" in cost_weights:
+        #         if task_parameters["ReachObjectA"] == "hand" or task_parameters["ReachObjectB"] == "hand":
+        #             return True
+        #         else:
+        #             return False
+        #     else:
+        #         return False
+        
         while True:
             print(f"Task [{task_name}] retry #{retries} ...", flush=True)
             self.run_reset()
@@ -690,6 +706,19 @@ class Runner:
 
         return succ
     
+    def check_goal_completed(self):
+        if self.task == "kitchen":
+            microwave_joint = self.data.joint("micro0joint").qpos[0]
+            # print(microwave_joint)
+            return microwave_joint < -1.4
+        elif self.task == "cabinet":
+            distance = get_object_distance("wooden_cabinet_inside", "yellow_cube")
+            return distance < 0.05
+        elif self.task == "locklock":
+            # distance = get_object_distance("wooden_cabinet_inside", "blue_cube")
+            door_hinge = self.data.joint("rightdoorhinge").qpos[0]
+            return door_hinge > 1.4
+    
     def execute(self, custom=False, reset_after_done=True):
         if custom:
             run_fn = self.run_custom
@@ -705,6 +734,7 @@ class Runner:
                 run_fn = self.run_reset_no_obstruction
             
         self.outcome = run_fn()
+        self.goal_completed = self.check_goal_completed()
 
         # if not custom:
         #     input()
@@ -727,6 +757,9 @@ class Runner:
 
         with open("outcome", "w") as outcome_f:
             outcome_f.write(str(int(self.outcome)))
+            
+        with open("goal_completed", "w") as gc_f:
+            gc_f.write(str(int(self.goal_completed)))
 
 
 RUNNER = None
