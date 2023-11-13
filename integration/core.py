@@ -66,8 +66,8 @@ RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
 SAVE_VIDEO = False
-OPENED_CABINET = False
-NO_LOCK = False
+OPENED_CABINET = True
+NO_LOCK = True
 IS_COP = False
 
 REWARD_CNT = {
@@ -87,10 +87,10 @@ BLOCKS_NAME_MAPPING = {
     "yellow_block": "yellow_block",
     "red_block": "red_block",
     "blue_block": "blue_block",
-    "right_cube": "red_block",
+    "right_cube": "yellow_block",
     "rightside_cube": "yellow_block",
-    "left_cube": "yellow_block",
-    "leftside_cube": "yellow_block",
+    "left_cube": "red_block",
+    "leftside_cube": "red_block",
     "crate": "red_bin",
     "plate": "red_bin",
     "square_plate": "red_bin"
