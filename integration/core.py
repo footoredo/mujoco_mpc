@@ -374,6 +374,8 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
 
 def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     global REWARD_CNT, TASK_PARAMS, COST_WEIGHTS, PRIMARY_REWARD, COST_NAMES_REQUIRED
+    if ENV == "blocks":  # no joint for blocks
+        return
     if REWARD_CNT["joint"] >= 1:
         return
     if not is_joint(obj):
