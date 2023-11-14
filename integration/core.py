@@ -742,8 +742,14 @@ class Runner:
             door_hinge = self.data.joint("rightdoorhinge").qpos[0]
             return door_hinge > 1.4
         elif self.task == "blocks":
-            distance = get_object_distance("crate", "red_block")
-            return distance < 0.05
+            distance1 = get_object_distance("crate", "red_block")
+            distance2 = get_object_distance("crate", "yellow_block")
+            if distance2 < 0.05:
+                return 1
+            elif distance1 < 0.05:
+                return -1
+            else:
+                return 0
     
     def execute(self, custom=False, reset_after_done=True):
         if custom:
