@@ -5,6 +5,6 @@ set_env('blocks')
 runner_init(load_init=False)
 
 reset_reward()
-minimize_l2_distance_reward("palm", "red_block")
-maximize_l2_distance_reward("yellow_block", "red_block", primary_reward=True)
+minimize_l2_distance_reward("palm", "crate")
+maximize_l2_distance_reward("red_block", "crate", primary_reward=True)
 execute_plan()

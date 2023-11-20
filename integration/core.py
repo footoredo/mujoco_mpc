@@ -15,7 +15,6 @@ import joblib
 
 import pathlib
 
-
 def vidwrite(fn, images, framerate=60, vcodec='libx264'):
     if not isinstance(images, np.ndarray):
         images = np.asarray(images)
@@ -50,6 +49,9 @@ def environment_step(model, data, action):
     data.qpos[15] = 1.57
   if ENV == "locklock" and get_joint_value("red_switch_handle_joint") < 1.5:
     data.joint("rightdoorhinge").qpos[0] = 0.
+  if ENV == "kitchen" and get_joint_value("red_switch_handle_joint") < 1.5:
+    data.joint("rightdoorhinge").qpos[0] = 0.
+    data.joint("leftdoorhinge").qpos[0] = 0.
   if ENV == "cabinet" and NO_LOCK:
     data.qpos[0] = 100
   return get_observation(model, data)
@@ -65,7 +67,7 @@ REPEATS = 5
 RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = False
+SAVE_VIDEO = True
 OPENED_CABINET = True
 NO_LOCK = True
 IS_COP = False
@@ -82,12 +84,17 @@ REWARD_CNT = {
 TASK_PARAMS = {}
 COST_WEIGHTS = {}
 
+
+   # "right_cube": "yellow_block",
+   # "rightside_cube": "yellow_block",
 BLOCKS_NAME_MAPPING = {
     "palm": "hand",
     "yellow_block": "yellow_block",
     "red_block": "red_block",
-    "blue_block": "blue_block",
+    #"right_block": "blue_block",
     "right_cube": "yellow_block",
+    "red_cube": "red_block",
+    "yellow_cube": "yellow_block",
     "rightside_cube": "yellow_block",
     "left_cube": "red_block",
     "leftside_cube": "red_block",
@@ -164,7 +171,10 @@ KITCHEN_NAME_MAPPING = {
     "blue_kettle_handle": "kettle_handle",
     "green_apple": "box",
     "green_cube": "box",
-    "target_position": "target_position"
+    "target_position": "target_position",
+    "red_lever_handle": "red_switch_handle",
+    "red_lever": "red_switch_handle_joint",
+    "red_lever_joint": "red_switch_handle_joint"
 }
 
 KITCHEN_SITE_MAPPING = {
@@ -743,6 +753,7 @@ class Runner:
             return door_hinge > 1.4
         elif self.task == "blocks":
             distance = get_object_distance("crate", "red_block")
+            #distance = get_object_distance("crate", "yellow_block")
             return distance < 0.05
     
     def execute(self, custom=False, reset_after_done=True):

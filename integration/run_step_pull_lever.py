@@ -5,8 +5,10 @@ from core import reset_reward, minimize_l2_distance_reward, maximize_l2_distance
 set_retries(1)
 
 set_repeats(5)
-set_env('locklock')
+set_env('kitchen')
+#set_env('locklock')
 runner_init()
+print("HERE")
 
 # reset_reward()
 # print("joint", get_joint_value("red_lever_joint"))
@@ -23,8 +25,11 @@ runner_init()
 
 
 reset_reward()
+print("HERE")
 minimize_l2_distance_reward("palm", "red_switch_handle")
-set_joint_fraction_reward("red_switch_handle_joint", 1, primary_reward=True)
+print("HERE")
+set_joint_fraction_reward("red_switch_handle_joint", -1, primary_reward=True)
+print("HERE")
 # execute_plan(finish=False, reset_after_done=False)
 
 
