@@ -15,29 +15,27 @@
 
   	<numeric name="residual_PinchForce" data="20 0 100"/>
 
-
 	<numeric name="residual_select_FingerTouchObject" data="0"/>
-	<text name="residual_list_FingerTouchObject" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4|red_switch|red_switch_handle"/>
+	<text name="residual_list_FingerTouchObject" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 
 	<numeric name="residual_select_ReachObjectA" data="0"/>
-	<text name="residual_list_ReachObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4|red_switch|red_switch_handle"/>
+	<text name="residual_list_ReachObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 	<numeric name="residual_select_ReachObjectB" data="0"/>
-	<text name="residual_list_ReachObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4|red_switch|red_switch_handle"/>
+	<text name="residual_list_ReachObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 
 	<numeric name="residual_select_Reach2ObjectA" data="0"/>
-	<text name="residual_list_Reach2ObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4|red_switch|red_switch_handle"/>
+	<text name="residual_list_Reach2ObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 	<numeric name="residual_select_Reach2ObjectB" data="0"/>
-	<text name="residual_list_Reach2ObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4|red_switch|red_switch_handle"/>
-
+	<text name="residual_list_Reach2ObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 
 	<numeric name="residual_select_JointTarget" data="0"/>
-	<text name="residual_list_JointTarget" data="leftdoorhinge|rightdoorhinge|knob1_joint|knob2_joint|knob3_joint|knob4_joint|lightswitch_joint|micro0joint|red_switch_handle_joint"/>
+	<text name="residual_list_JointTarget" data="leftdoorhinge|rightdoorhinge|knob1_joint|knob2_joint|knob3_joint|knob4_joint|lightswitch_joint|micro0joint"/>
 	<numeric name="residual_JointTargetAngle" data="1 0 1"/>
 
 	<numeric name="residual_select_MoveAwayObjectA" data="0"/>
-	<text name="residual_list_MoveAwayObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4|red_switch|red_switch_handle"/>
+	<text name="residual_list_MoveAwayObjectA" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 	<numeric name="residual_select_MoveAwayObjectB" data="4"/>
-	<text name="residual_list_MoveAwayObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4|red_switch|red_switch_handle"/>
+	<text name="residual_list_MoveAwayObjectB" data="hand|box|target_position|cabinet_doorhandle_r|cabinet_doorhandle_l|kettle_handle|kettle_center|microwave_handle|microwave_center|slide_handle|knob1|knob2|knob3|knob4"/>
 	<numeric name="residual_MoveAwayDistance" data="1.0 1 2"/>
   </custom>
 
@@ -93,33 +91,6 @@
 	  </body>
       <body name="hingecabinet" pos="-0.604 0.3 2.6" >
 	  	<include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
-			<body name="red_switch" pos="-0.5 -0.45 -0.65" axisangle="0 0 1 -1.57079">
-
-				<site name="red_switch" type="box" pos="0 0 0" size="0.0030 0.0030 0.0030"/>
-
-				<geom class="hinge_collision" type="box" pos="0 0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
-				<geom material="kettle_red" pos="0 0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
-
-				<geom class="hinge_collision" type="box" pos="0 -0.033 -0.12" size="0.080 0.010 0.040" mass=".3"/>
-				<geom material="kettle_red" pos="0 -0.033 -0.12" size="0.081 0.011 0.041" type="box"/>
-
-				<geom class="hinge_collision" type="box" pos="-0.07 0.0 -0.14" size="0.010 0.040 0.020" mass=".3"/>
-				<geom material="kettle_red" pos="-0.07 0.00 -0.14" size="0.011 0.041 0.021" type="box"/>
-
-				<geom class="hinge_collision" type="box" pos="0.07 0.0 -0.14" size="0.010 0.040 0.020" mass=".3"/>
-				<geom material="kettle_red" pos="0.07 0.00 -0.14" size="0.011 0.041 0.021" type="box"/>
-
-				<body name="red_switch_handle" pos="0 0 0.02">
-					<joint type="hinge" name="red_switch_handle_joint" axis="0 1 0" pos="0 0 -0.13" frictionloss="1" range="-1.57 1.57"/>
-					<geom class="hinge_collision" type="cylinder" size="0.010 0.130" mass=".3" condim="6" friction="1 .01 .003"/>
-					<geom material="M_hinge_metal" pos="0 0 0" size="0.011 0.131" type="cylinder"/>
-
-					<geom class="hinge_collision" type="cylinder" pos="0 0 0.1" size="0.020 0.040" mass=".3" condim="6" friction="1 .01 .003"/>
-					<geom material="kettle_red" pos="0 0 0.1" size="0.021 0.041" type="cylinder"/>
-
-					<site name="red_switch_handle" type="box" pos="0 0 0.075" size="0.0030 0.0030 0.0030"/>
-				</body>
-			</body>
 	  </body>
 	  <!-- <body name="microwave" pos="-0.750 -0.025 1.6" euler="0 0 0.0"> -->
 	  <body name="microwave" pos="-0.800 0.25 1.6" euler="0 0 0.3">
@@ -178,10 +149,6 @@
     <framepos name="target_position" objtype="site" objname="target_position"/>
 	<framepos name="cabinet_doorhandle_r" objtype="site" objname="rightdoor_site"/>
 	<framepos name="cabinet_doorhandle_l" objtype="site" objname="leftdoor_site"/>
-	
-	<framepos name="red_switch" objtype="site" objname="red_switch"/>
-    <framepos name="red_switch_handle" objtype="site" objname="red_switch_handle"/>
-
 	<framepos name="kettle_handle" objtype="site" objname="kettle_site0"/>
 	<framepos name="kettle_center" objtype="site" objname="kettle_center"/>
 	<framepos name="microwave_handle" objtype="site" objname="microhandle_site"/>
@@ -209,9 +176,6 @@
     <jointpos name="slidedoor_joint" joint="slidedoor_joint"/>
 	<jointpos name='leftdoorhinge' joint= 'leftdoorhinge'/>
 	<jointpos name='rightdoorhinge' joint= 'rightdoorhinge'/>
-
-	<jointpos name='red_switch_handle_joint' joint= 'red_switch_handle_joint'/>
-
     <jointpos name="micro0joint" joint="micro0joint"/>
 	<framepos name="leftfinger" objtype="site" objname="touch_left"/>
 	<framepos name="rightfinger" objtype="site" objname="touch_right"/>

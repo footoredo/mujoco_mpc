@@ -27,16 +27,17 @@ std::string Kitchen::XmlPath() const {
   return GetModelPath("panda/kitchen/task.xml");
 }
 std::string Kitchen::Name() const { return "Panda Kitchen"; }
-const std::array<std::string, 14> object_names = {
+const std::array<std::string, 16> object_names = {
 	"hand", "box", "target_position", "cabinet_doorhandle_r", 
   "cabinet_doorhandle_l", "kettle_handle", "kettle_center", 
   "microwave_handle", "microwave_center", "slide_handle", 
-  "knob1", "knob2", "knob3", "knob4"
+  "knob1", "knob2", "knob3", "knob4", "red_switch", "red_switch_handle",
 };
 
-const std::array<std::string, 8> joint_names = {
-	"leftdoorhinge", "rightdoorhinge", "knob1_joint", "knob2_joint", "knob3_joint", "knob4_joint", "lightswitch_joint", "micro0joint"
+const std::array<std::string, 9> joint_names = {
+	"red_switch_handle_joint", "leftdoorhinge", "rightdoorhinge", "knob1_joint", "knob2_joint", "knob3_joint", "knob4_joint", "lightswitch_joint", "micro0joint"
 };
+
 
 
 // ---------- Residuals for in-panda manipulation task ---------
@@ -180,11 +181,35 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
         "and actual length of residual %d",
         counter);
   }
+
+
+
+}
+
+double* KitchenJointByName(const mjModel* m, const mjData* d,
+                    const std::string& name) {
+  int id = mj_name2id(m, mjOBJ_JOINT, name.c_str());
+  if (id == -1) {
+    std::cerr << "joint \"" << name << "\" not found.\n";
+    return nullptr;
+  } else {
+    return d->qpos + m->jnt_qposadr[id];
+  }
 }
 
 void Kitchen::TransitionLocked(mjModel* model, mjData* data) {
   double residuals[100];
   residual_.Residual(model, data, residuals);
+
+
+  double* lever_joint = KitchenJointByName(model, data, "red_switch_handle_joint");
+  double* left_door_hinge = KitchenJointByName(model, data, "leftdoorhinge");
+  double* right_door_hinge = KitchenJointByName(model, data, "rightdoorhinge");
+
+  if (lever_joint[0] < 1.5) {
+    left_door_hinge[0] = 0.0;
+    right_door_hinge[0] = 0.0;
+  }
 }
 
 }  // namespace panda
