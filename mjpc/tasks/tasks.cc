@@ -26,6 +26,7 @@
 #include "mjpc/tasks/panda/cabinet/cabinet.h"
 #include "mjpc/tasks/panda/kitchen/kitchen.h"
 #include "mjpc/tasks/panda/blocks/blocks.h"
+#include "mjpc/tasks/panda/blocks_hard/blocks_hard.h"
 #include "mjpc/tasks/panda/locklock/locklock.h"
 #include "mjpc/tasks/manipulation/manipulation.h"
 // DEEPMIND INTERNAL IMPORT
