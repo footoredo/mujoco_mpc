@@ -52,6 +52,11 @@ def environment_step(model, data, action):
     data.joint("rightdoorhinge").qpos[0] = 0.
   if ENV == "cabinet" and NO_LOCK:
     data.qpos[0] = 100
+  if ENV == "long":
+    # data.joint("leftdoorhinge").qpos[0] = -1.57
+    distance = get_object_distance("weight", "weightsensor")
+    if distance > 0.05:
+        data.joint("slidedoor_joint").qpos[0] = 0.
   return get_observation(model, data)
 
 
@@ -65,9 +70,9 @@ REPEATS = 5
 RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = False
-OPENED_CABINET = True
-NO_LOCK = True
+SAVE_VIDEO = True
+OPENED_CABINET = False
+NO_LOCK = False
 IS_COP = False
 
 REWARD_CNT = {
@@ -119,10 +124,48 @@ LOCKLOCK_NAME_MAPPING = {
 
 LOCKLOCK_SITE_MAPPING = {
     "hand": "eeff",
-    "rightdoorhandle": "rightdoorhinge",
-    "leftdoorhandle": "leftdoorhinge",
+    "rightdoorhinge": "rightdoorhinge",
+    "leftdoorhinge": "leftdoorhinge",
     "rightdoorhandle": "rightdoor_site",
     "leftdoorhandle": "leftdoor_site"
+}
+
+LONG_NAME_MAPPING = {
+    "palm": "hand",
+    "weight_sensor_lock": "weightsensor",
+    "weight": "weight",
+    "green_weight_sensor": "weightsensor",
+    "green_weight_sensor_lock": "weightsensor",
+    "green_weight": "weight",
+    "red_weight": "weight",
+    "red_cube": "weight",
+    "hinge_cabinet_door_handle": "leftdoorhandle",
+    "hinge_cabinet": "leftdoorhinge",
+    "top_cabinet_door_handle": "leftdoorhandle",
+    "top_cabinet": "leftdoorhinge",
+    "wooden_cabinet_door_handle": "leftdoorhandle",
+    "wooden_cabinet": "leftdoorhinge",
+    "red_block_right_side": "barright",
+    "blue_block_right_side": "barright",
+    # "hinge_cabinet_door_handle": "rightdoorhandle",
+    # "hinge_cabinet": "rightdoorhinge",
+    "slide_cabinet_door_handle": "slidedoorhandle",
+    "slide_cabinet": "slidedoorjoint",
+    "bottom_cabinet_door_handle": "slidedoorhandle",
+    "bottom_cabinet": "slidedoorjoint",
+    "stone_cabinet_door_handle": "slidedoorhandle",
+    "stone_cabinet": "slidedoorjoint",
+    "hinge_cabinet_inside": "leftcabinetinside",
+    "microwave": "micro0joint",
+}
+
+LONG_SITE_MAPPING = {
+    "hand": "eeff",
+    "rightdoorhandle": "rightdoor_site",
+    "leftdoorhandle": "leftdoor_site",
+    "slidedoorhandle": "slide_site",
+    "slidedoorjoint": "slidedoor_joint",
+    "microwave_handle": "microhandle_site",
 }
 
 CABINET_NAME_MAPPING = {
@@ -179,14 +222,16 @@ NAME_MAPPING = {
     "locklock": LOCKLOCK_NAME_MAPPING,
     "blocks": BLOCKS_NAME_MAPPING,
     "cabinet": CABINET_NAME_MAPPING,
-    "kitchen": KITCHEN_NAME_MAPPING
+    "kitchen": KITCHEN_NAME_MAPPING,
+    "long": LONG_NAME_MAPPING,
 }
 
 SITE_MAPPING = {
     "locklock": LOCKLOCK_SITE_MAPPING,
     "cabinet": CABINET_SITE_MAPPING,
     "kitchen": KITCHEN_SITE_MAPPING,
-    "blocks": BLOCKS_SITE_MAPPING
+    "blocks": BLOCKS_SITE_MAPPING,
+    "long": LONG_SITE_MAPPING
 }
 
 PRIMARY_REWARD = None
@@ -236,12 +281,18 @@ def get_object_position(obj_name):
     mapped_name = map_name(obj_name)
     site_name = map_site(mapped_name)
 
-    return RUNNER.data.site(site_name).xpos.copy()
+    try:
+        return RUNNER.data.site(site_name).xpos.copy()
+    except:
+        return None
 
 
 def get_object_distance(obj1, obj2):
     pos1 = get_object_position(obj1)
     pos2 = get_object_position(obj2)
+    
+    if pos1 is None or pos2 is None:
+        return None
     
     return np.linalg.norm(pos1 - pos2)
 
@@ -346,6 +397,8 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     if is_joint(obj1) or is_joint(obj2):
         return
     original_distance = get_object_distance(obj1, obj2)
+    if original_distance is None:
+        return
     print("original_distance:", original_distance)
     REWARD_CNT["max_l2"] += 1
     cnt = REWARD_CNT["max_l2"]
@@ -385,7 +438,11 @@ def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     if cnt == 1:
         cnt = ""
     TASK_PARAMS[f"JointTarget{cnt}"] = map_name(obj)
-    TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction * 1.5
+    if map_name(obj) == "slidedoorjoint":
+        fraction = fraction * 0.4
+    else:
+        fraction = fraction * 1.5
+    TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction
     COST_WEIGHTS[f"Joint Target{cnt}"] = 1.0
 
     if primary_reward:
@@ -750,6 +807,11 @@ class Runner:
                 return -1
             else:
                 return 0
+        elif self.task == "long":
+            slide_joint = self.data.joint("slidedoor_joint").qpos[0]
+            return slide_joint > 0.35
+        else:
+            return 0
     
     def execute(self, custom=False, reset_after_done=True):
         if custom:

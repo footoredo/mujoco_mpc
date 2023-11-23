@@ -26,3 +26,4 @@ for i in range(T):
 
 print(outcomes)
 print(sum(outcomes))
+print("\t".join(list(map(str, outcomes))))

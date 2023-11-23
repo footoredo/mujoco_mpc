@@ -60,6 +60,8 @@ add_library(
   tasks/panda/blocks/blocks.h
   tasks/panda/locklock/locklock.cc
   tasks/panda/locklock/locklock.h
+  tasks/panda/long/long.cc
+  tasks/panda/long/long.h
   tasks/particle/particle.cc
   tasks/particle/particle.h
   tasks/quadrotor/quadrotor.cc

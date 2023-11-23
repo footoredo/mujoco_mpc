@@ -1,0 +1,217 @@
+<mujoco model="Panda">
+  <include file="../../common.xml"/>
+
+  <size memory="1M"/>
+
+  <custom>
+    <numeric name="agent_planner" data="0" />
+    <numeric name="agent_horizon" data="0.5" />
+    <numeric name="agent_timestep" data="0.009" />
+    <numeric name="agent_policy_width" data="0.0035" />
+    <numeric name="sampling_trajectories" data="60"/>
+    <numeric name="sampling_spline_points" data="7" />
+    <numeric name="sampling_exploration" data="0.1" />
+    <numeric name="gradient_spline_points" data="6" />
+
+    <numeric name="residual_select_ReachObjectA" data="0"/>
+    <text name="residual_list_ReachObjectA" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+    <numeric name="residual_select_ReachObjectB" data="0"/>
+    <text name="residual_list_ReachObjectB" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+
+    <numeric name="residual_select_Reach2ObjectA" data="0"/>
+    <text name="residual_list_Reach2ObjectA" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+    <numeric name="residual_select_Reach2ObjectB" data="0"/>
+    <text name="residual_list_Reach2ObjectB" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+
+    <numeric name="residual_select_Reach3ObjectA" data="0"/>
+    <text name="residual_list_Reach3ObjectA" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+    <numeric name="residual_select_Reach3ObjectB" data="0"/>
+    <text name="residual_list_Reach3ObjectB" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+
+    <numeric name="residual_select_JointTarget" data="0"/>
+    <text name="residual_list_JointTarget" data="slidedoorjoint|leftdoorhinge|rightdoorhinge|micro0joint"/>
+    <numeric name="residual_JointTargetAngle" data="1 0 1"/>
+
+    <numeric name="residual_select_MoveAwayObjectA" data="0"/>
+    <text name="residual_list_MoveAwayObjectA" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+    <numeric name="residual_select_MoveAwayObjectB" data="0"/>
+    <text name="residual_list_MoveAwayObjectB" data="hand|slidedoorhandle|leftdoorhandle|rightdoorhandle|leftcabinetinside|barleft|barright|weight|weightsensor|microwave_handle"/>
+    <numeric name="residual_MoveAwayDistance" data="0.5 0.1 2"/>
+
+    <numeric name="residual_EndEffectorTo1" data="0.0 -10 10"/>
+    <numeric name="residual_EndEffectorTo2" data="0.0 -10 10"/>
+    <numeric name="residual_EndEffectorTo3" data="0.0 0 10"/>
+  </custom>
+
+  <statistic extent="1.5" center="0.1 0.2 0.3"/>
+
+  <visual>
+    <quality shadowsize="8192"/>
+    <global azimuth="180" elevation="-30"/>
+    <scale framelength=".3" framewidth=".03"/>
+  </visual>
+
+  <default>
+    <geom solref=".001 1"/>
+  </default>
+
+  <compiler angle="radian"/>
+  <include file="../furniture_sim/slidecabinet/slidecabinet_asset.xml"/>
+  <include file="../furniture_sim/microwave/microwave_asset.xml"/>
+  <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/>
+  <asset>
+    <texture name="T_Green" type="cube" height="1" width="1" file="../furniture_sim/common/textures/green.png" />
+    <texture name="T_Blue" type="cube" height="1" width="1" file="../furniture_sim/common/textures/blue.png" />
+    <texture name="T_Red" type="cube" height="1" width="1" file="../furniture_sim/common/textures/red.png" />
+    <texture name="T_Yellow" type="cube" height="1" width="1" file="../furniture_sim/common/textures/yellow.png" />
+
+    <material name="kettle_green" rgba="1 1 1 1" texture="T_Green" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+    <material name="kettle_red" rgba="1 1 1 1" texture="T_Red" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+    <material name="kettle_yellow" rgba="1 1 1 1" texture="T_Yellow" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+    <material name="kettle_blue" rgba="1 1 1 1" texture="T_Blue" texrepeat="3 3" reflectance="1" shininess="1" texuniform="false" />
+  </asset>
+
+  <worldbody>
+    <site name="world"/>
+    <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
+        directional="true" castshadow="true"/>
+
+    <!-- <camera pos="0.151 -0.631 0.883" xyaxes="1.000 -0.031 -0.000 0.015 0.507 0.862"/> -->
+    <!-- <camera pos="0.477 -1.143 1.296" xyaxes="0.932 0.362 -0.000 -0.205 0.528 0.824"/> -->
+    <!-- <camera pos="-0.222 -1.523 1.620" xyaxes="0.988 -0.152 -0.000 0.087 0.567 0.819"/> -->
+    <!-- <camera pos="-0.522 -0.710 0.767" xyaxes="0.915 -0.403 -0.000 0.154 0.350 0.924"/> -->
+    <!-- <camera pos="-0.347 -0.650 0.668" xyaxes="0.937 -0.350 -0.000 0.138 0.370 0.919"/> -->
+    <!-- <camera pos="-0.539 -0.757 0.589" xyaxes="0.864 -0.504 0.000 0.118 0.202 0.972"/> -->
+    <!-- <camera pos="-1.135 -1.548 0.884" xyaxes="0.817 -0.577 -0.000 0.152 0.215 0.965"/> -->
+    <!-- <camera pos="-0.537 -1.346 0.900" xyaxes="0.955 -0.297 0.000 0.087 0.279 0.956"/> -->
+<!-- <camera pos="0.390 -1.883 1.143" xyaxes="0.974 0.225 0.000 -0.082 0.357 0.930"/> -->
+<!-- <camera pos="1.018 -1.331 1.137" xyaxes="0.868 0.496 -0.000 -0.180 0.315 0.932"/> -->
+<camera pos="1.208 -0.820 1.261" xyaxes="0.653 0.758 -0.000 -0.387 0.334 0.859"/>
+
+
+
+    <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" rgba=".3 .3 .3 1"/>
+
+
+    <body name="slidecabinet" pos="0 1 .21" >
+      <include file="../furniture_sim/slidecabinet/slidecabinet_body.xml"/>
+      <site name="leftcabinetinside" type="box" pos="-0.15 0.5 0.3" size="0.01 0.01 0.01"/>
+    </body>
+
+    <body name="microwave" pos="-1 0 0.0" axisangle="0 0 1 1.57">
+	  	<site name="microwave_center" type="box" pos="-0.2 0.0 0.02" size="0.01 0.01 0.01"/>
+	  	<include file="../furniture_sim/microwave/microwave_body0.xml"/>
+	  </body>
+
+    <body name="hingecabinet" pos="0 1 .72" >
+      <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
+    </body>
+
+    <body name="bar" pos="10000.0 0.63 0.66">
+      <joint type="free"/>
+      <geom class="hinge_collision" type="box" size="0.20 0.022 0.022" mass=".1"/>
+      <!-- <geom material="M_hinge_blue" pos="0 0 0" size="0.20 0.02 0.02" type="box"/> -->
+      <geom material="kettle_blue" pos="0 0 0" size="0.201 0.0221 0.0221" type="box"/>
+      <site name="bar" type="box" pos="0 0 0" size="0.20 0.022 0.022"/>
+      <site name="barleft" type="box" pos="-0.195 0 0" size="0.005 0.02 0.02" rgba="1 .1 .1 .3"/>
+      <site name="barright" type="box" pos="0.195 0 0" size="0.005 0.02 0.02" rgba=".1 .1 1 .3"/>
+    </body>
+
+    <body name="weight" pos="-0.30 0.8 0.8">
+      <joint type="free"/>
+      <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".5"/>
+      <geom material="kettle_red" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
+      <site name="weight" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
+    </body>
+
+    <body name="weightsensor" pos="0.2 0.3 .001" >
+      <geom class="hinge_collision" type="box" size="0.06 0.06 0.001" />
+      <geom class="hinge_collision" pos="0.06 0 0.01" type="box" size="0.007 0.05 0.007"/>
+      <geom class="hinge_collision" pos="-0.06 0 0.01" type="box" size="0.007 0.05 0.007"/>
+      <geom class="hinge_collision" pos="0 -0.06 0.01" type="box" size="0.07 0.007 0.007"/>
+      <geom class="hinge_collision" pos="0 0.06 0.01" type="box" size="0.07 0.007 0.007"/>
+
+      <geom name="bottom" type="box" size="0.06 0.06 0.001" material="kettle_green" />
+      <geom name="leftWall" pos="0.06 0 0.01" type="box" size="0.0071 0.0501 0.0071" material="kettle_green"/>
+      <geom name="rightWall" pos="-0.06 0 0.01" type="box" size="0.0071 0.05 0.0071" material="kettle_green"/>
+      <geom name="backWall" pos="0 -0.06 0.01" type="box" size="0.0701 0.0071 0.0071" material="kettle_green"/>
+      <geom name="frontWall" pos="0 0.06 0.01" type="box" size="0.0701 0.0071 0.0071" material="kettle_green"/>
+
+      <site name="weightsensor" type="box" pos="0 0 0.04" size="0.001 0.001 0.001"/>
+    </body>
+
+  </worldbody>
+
+  <contact>
+    <exclude body1="world" body2="left_finger"/>
+    <exclude body1="world" body2="right_finger"/>
+    <exclude body1="left_finger" body2="right_finger"/>
+  </contact>
+
+
+  <sensor>
+    <!-- <user name="Reach Door" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Open Door" dim="1" user="2 .1 0 1 0.003"/>
+    <user name="Reach Box" dim="3" user="2 .1 0 1 0.01"/>
+    <user name="Move Box" dim="1" user="2 1 0 5 0.003"/> -->
+    <user name="Reach" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Reach2" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Reach3" dim="3" user="2 1 0 5 0.01"/>
+    <user name="Joint Target" dim="1" user="2 0 0 1 0.003"/>
+    <!-- <user name="Move Away Temp" dim="2" user="2 0 0 5 0.01"/> -->
+    <user name="Move Away" dim="1" user="2 1 0 5 0.01"/>
+    <user name="End-Effector To" dim="3" user="2 1 0 5 0.001"/>
+    <user name="End-Effector Open" dim="1" user="2 1 0 5 0.01"/>
+    <user name="End-Effector Close" dim="1" user="2 1 0 5 0.01"/>
+	  <user name="Control" dim="9" user="2 0 0 5 0.01"/>
+    <user name="Default Pose" dim="6" user="2 0 0 5 0.01"/>
+	  <user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
+    <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
+    <framepos name="hand" objtype="site" objname="eeff"/>
+    <framepos name="slidedoorhandle" objtype="site" objname="slide_site"/>
+    <jointpos name="slidedoorjoint" joint="slidedoor_joint"/>
+
+    <framepos name="leftdoorhandle" objtype="site" objname="leftdoor_site"/>
+    <framepos name="rightdoorhandle" objtype="site" objname="rightdoor_site"/>
+    <jointpos name="leftdoorhinge" joint="leftdoorhinge"/>
+    <jointpos name="rightdoorhinge" joint="rightdoorhinge"/>
+
+    <framepos name="leftcabinetinside" objtype="site" objname="leftcabinetinside"/>
+
+	  <framepos name="microwave_handle" objtype="site" objname="microhandle_site"/>
+    <jointpos name="micro0joint" joint="micro0joint"/>
+
+    <framepos name="barleft" objtype="site" objname="barleft"/>
+    <framepos name="barright" objtype="site" objname="barright"/>
+
+    <framepos name="weight" objtype="site" objname="weight"/>
+    <framepos name="weightsensor" objtype="site" objname="weightsensor"/>
+
+    <jointpos name='panda_joint0' joint= 'joint0'/>
+    <jointpos name='panda_joint1' joint= 'joint1'/>
+    <jointpos name='panda_joint2' joint= 'joint2'/>
+    <jointpos name='panda_joint3' joint= 'joint3'/>
+    <jointpos name='panda_joint4' joint= 'joint4'/>
+    <jointpos name='panda_joint5' joint= 'joint5'/>
+    <jointpos name='panda_joint6' joint= 'joint6'/>
+    <jointpos name='panda_joint7' joint= 'joint7'/>
+
+    <jointpos name='finger_joint1' joint='finger_joint1'/>
+    <jointpos name='finger_joint2' joint='finger_joint2'/>
+
+	<!--
+    <framepos name="box" objtype="geom" objname="box"/>
+    <framepos name="box1" objtype="site" objname="box1"/>
+    <framepos name="box2" objtype="site" objname="box2"/>
+    <framepos name="target" objtype="geom" objname="target"/>
+    <framepos name="target1" objtype="site" objname="target1"/>
+    <framepos name="target2" objtype="site" objname="target2"/>
+	-->
+    <framepos name="trace0" objtype="site" objname="touch_left"/>
+    <framepos name="trace1" objtype="site" objname="touch_right"/>
+  </sensor>
+
+  <!-- <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/> -->
+
+  <include file="panda.xml"/>
+</mujoco>
