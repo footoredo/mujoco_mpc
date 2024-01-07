@@ -172,15 +172,18 @@
     <user name="End-Effector Open" dim="1" user="2 1 0 5 0.01"/>
     <user name="End-Effector Close" dim="1" user="2 1 0 5 0.01"/>
 	  <user name="Control" dim="9" user="2 0 0 5 0.01"/>
+	  <user name="Saftey" dim="2" user="2 0 0 5 0.01"/>
     <user name="Default Pose" dim="6" user="2 0 0 5 0.01"/>
 	  <user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
     <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
     <framepos name="hand" objtype="site" objname="eeff"/>
+    <velocimeter name="hand_vel"  site="eeff"/>
     <framepos name="left_target_position" objtype="site" objname="left_target_position"/>
     <framepos name="right_target_position" objtype="site" objname="right_target_position"/>
     <framepos name="rightdoorhandle" objtype="site" objname="rightdoor_site"/>
     <framepos name="leftdoorhandle" objtype="site" objname="leftdoor_site"/>
     <framepos name="box" objtype="site" objname="box"/>
+    <velocimeter name="box_vel" site="box"/>
     <framepos name="box_left" objtype="site" objname="box_left"/>
     <framepos name="box_right" objtype="site" objname="box_right"/>
     <framepos name="target" objtype="site" objname="target"/>
