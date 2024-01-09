@@ -66,6 +66,7 @@ findorfetch(
   https://github.com/google-deepmind/mujoco.git
   GIT_TAG
   de5c3b1a0942e5306a227ce16fc0e57a844879c4
+  GIT_SHALLOW TRUE
   TARGETS
   mujoco::mujoco
   mujoco::platform_ui_adapter
@@ -104,6 +105,7 @@ findorfetch(
   https://github.com/google/googletest.git
   GIT_TAG
   ${MUJOCO_DEP_VERSION_gtest}
+  GIT_SHALLOW TRUE
   TARGETS
   gtest
   gmock
@@ -124,6 +126,7 @@ findorfetch(
   https://github.com/abseil/abseil-cpp.git
   GIT_TAG
   ${MUJOCO_DEP_VERSION_abseil}
+  GIT_SHALLOW TRUE
   TARGETS
   absl::core_headers
   EXCLUDE_FROM_ALL
@@ -145,6 +148,7 @@ findorfetch(
   https://github.com/glfw/glfw.git
   GIT_TAG
   ${MUJOCO_DEP_VERSION_glfw3}
+  GIT_SHALLOW TRUE
   TARGETS
   glfw
   EXCLUDE_FROM_ALL
