@@ -18,6 +18,7 @@
 
 #include <absl/random/random.h>
 #include <mujoco/mujoco.h>
+#include <cmath>
 #include "mjpc/task.h"
 #include "mjpc/utilities.h"
 
@@ -187,13 +188,46 @@ namespace mjpc
       {
         hand_vel_d = 0;
       }
-      printf("handvel: %.2f\n", hand_vel_d);
-      residual[counter++] = (hand_vel_d);
+      // if (hand_vel_d > 0.001)
+      // {
+      //   printf("handvel-2: %.2f\n", hand_vel_d);
+      // }
+      residual[counter++] = sqrt(hand_vel_d);
 
       double *box_vel = SensorByName(model, data, "box_vel");
       double box_vel_d = box_vel[0] * box_vel[0] + box_vel[1] * box_vel[1] + box_vel[2] * box_vel[2];
-      printf("box_vel: %.2f\n", box_vel_d);
-      residual[counter++] = 0.05 * (box_vel_d);
+      // if (box_vel_d > 0.01)
+      // {
+      //    printf("box_vel_2: %.2f\n", box_vel_d);
+      // }
+      residual[counter++] = 0.05 * sqrt(box_vel_d);
+
+      double *target_vel = SensorByName(model, data, "target_vel");
+      double target_vel_d = target_vel[0] * target_vel[0] + target_vel[1] * target_vel[1] + target_vel[2] * target_vel[2];
+      // if (target_vel_d > 0.01)
+      // {
+      //   printf("target_vel: %.2f\n", target_vel_d);
+      // }
+      residual[counter++] = 0.05 * sqrt(target_vel_d);
+
+      // get joint velocities
+      double joint_norm = 0;
+      for (int i = 0; i < 8; i++)
+      {
+        double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i) + "_jvel");
+        joint_norm += joint_i * joint_i;
+      }
+
+      if (joint_norm < 0.7)
+      {
+        joint_norm = 0;
+      }
+      residual[counter++] = sqrt(joint_norm);
+
+      residual[counter++] = std::max(0.02 - ee_position[2], 0.0);
+
+      // joint velocity limiter
+      // table height limiter?
 
       // default position
       // double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
