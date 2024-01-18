@@ -93,8 +93,7 @@
     <!-- <body name="target" pos="0.2 0.0 0.2"> -->
 			<!-- <body name="yellow_block" pos="0 0.5 0.032"> -->
     <!-- <body name="yellow_block" pos="0.5 0.0 .04"> -->
-		    <!-- <body name="yellow_block" pos="0.04 0.55 .04"> -->
-    <body name="yellow_block" pos="0.0 0.5 0.04">
+    <body name="yellow_block" pos="-0.2 0.4 .04">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
       <geom material="kettle_yellow" pos="0 0 0" size="0.0301 0.0301 0.0301" type="box"/>
@@ -108,26 +107,26 @@
       <site name="red_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
 
-	    <!-- <body name="blue_block" pos="-0.02 0.48 0.01">-->
-    <body name="blue_block" pos="-100000.2 0.4 0.04">
+    <body name="blue_block" pos="0.4 -0.2 0.032">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
-      <geom material="kettle_green" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
+      <geom material="kettle_blue" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
       <site name="blue_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
 
-    <body name="bin" pos="0.8 0.5 .001" >
-      <geom class="hinge_collision" type="box" size="0.06 0.06 0.001" material="kettle_peach" />
-      <geom class="hinge_collision" pos="0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_peach"/>
-      <geom class="hinge_collision" pos="-0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_peach"/>
-      <geom class="hinge_collision" pos="0 -0.06 0.01" type="box" size="0.07 0.007 0.007" material="kettle_peach"/>
-      <geom class="hinge_collision" pos="0 0.06 0.01" type="box" size="0.07 0.007 0.007" material="kettle_peach"/>
+    <body name="bin" pos="0.0 0.5 .001" >
+      <!-- <geom class="viz_stl_Metal_bin" type="mesh" mesh="bin" euler="-1.57 0 3.14" group="1" contype="0" conaffinity="0" /> -->
+      <geom class="hinge_collision" type="box" size="0.06 0.06 0.001" material="kettle_red" />
+      <geom class="hinge_collision" pos="0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_red"/>
+      <geom class="hinge_collision" pos="-0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_red"/>
+      <geom class="hinge_collision" pos="0 -0.06 0.01" type="box" size="0.07 0.007 0.007" material="kettle_red"/>
+      <geom class="hinge_collision" pos="0 0.06 0.01" type="box" size="0.07 0.007 0.007" material="kettle_red"/>
 
-      <geom name="bottom" type="box" size="0.06 0.06 0.001" material="kettle_peach" />
-      <geom name="leftWall" pos="0.05 0 0.01" type="box" size="0.0071 0.0501 0.0171" material="kettle_peach"/>
-      <geom name="rightWall" pos="-0.05 0 0.01" type="box" size="0.0071 0.05 0.0171" material="kettle_peach"/>
-      <geom name="backWall" pos="0 -0.05 0.01" type="box" size="0.0701 0.0071 0.0171" material="kettle_peach"/>
-      <geom name="frontWall" pos="0 0.05 0.01" type="box" size="0.0701 0.0071 0.0171" material="kettle_peach"/>
+      <geom name="bottom" type="box" size="0.06 0.06 0.001" material="kettle_red" />
+      <geom name="leftWall" pos="0.06 0 0.01" type="box" size="0.0071 0.0501 0.0071" material="kettle_red"/>
+      <geom name="rightWall" pos="-0.06 0 0.01" type="box" size="0.0071 0.05 0.0071" material="kettle_red"/>
+      <geom name="backWall" pos="0 -0.06 0.01" type="box" size="0.0701 0.0071 0.0071" material="kettle_red"/>
+      <geom name="frontWall" pos="0 0.06 0.01" type="box" size="0.0701 0.0071 0.0071" material="kettle_red"/>
 
       <site name="red_bin" type="box" pos="0 0 0.04" size="0.001 0.001 0.001"/>
     </body>

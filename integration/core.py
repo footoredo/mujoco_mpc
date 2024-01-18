@@ -50,8 +50,9 @@ def environment_step(model, data, action):
   if ENV == "locklock" and get_joint_value("red_switch_handle_joint") < 1.5:
     data.joint("rightdoorhinge").qpos[0] = 0.
   if ENV == "kitchen" and get_joint_value("red_switch_handle_joint") < 1.5:
-    data.joint("rightdoorhinge").qpos[0] = 0.
-    data.joint("leftdoorhinge").qpos[0] = 0.
+    data.joint("micro0joint").qpos[0] = 0.
+    #data.joint("rightdoorhinge").qpos[0] = 0.
+    #data.joint("leftdoorhinge").qpos[0] = 0.
   if ENV == "cabinet" and NO_LOCK:
     data.qpos[0] = 100
   return get_observation(model, data)
@@ -170,11 +171,24 @@ KITCHEN_NAME_MAPPING = {
     "microwave": "micro0joint",
     "blue_kettle_handle": "kettle_handle",
     "green_apple": "box",
-    "green_cube": "box",
     "target_position": "target_position",
     "red_lever_handle": "red_switch_handle",
+    "red_switch_handle": "red_switch_handle",
     "red_lever": "red_switch_handle_joint",
-    "red_lever_joint": "red_switch_handle_joint"
+    "red_switch": "red_switch_handle_joint",
+    "red_lever_joint": "red_switch_handle_joint",
+    "peach": "box",
+    "lemon": "box", 
+    "blue_plate": "blue_plate",
+    "blue_tray": "blue_plate",
+    "orange_plate": "peach_plate",
+    "green_plate": "peach_plate",
+    "purple_tray": "peach_plate",
+    "purple_plate": "peach_plate",
+    "yellow_sponge": "box_green",
+    "green_box": "box",
+    "green_cube": "box",
+    "green_bottle": "box",
 }
 
 KITCHEN_SITE_MAPPING = {
@@ -395,6 +409,8 @@ def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     if cnt == 1:
         cnt = ""
     TASK_PARAMS[f"JointTarget{cnt}"] = map_name(obj)
+    if map_name(obj)=="leftdoorhinge":
+        fraction *= -1
     TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction * 1.5
     COST_WEIGHTS[f"Joint Target{cnt}"] = 1.0
 
@@ -402,6 +418,7 @@ def set_joint_fraction_reward(obj, fraction, primary_reward=False):
         PRIMARY_REWARD = f"Joint Target{cnt}"
 
     COST_NAMES_REQUIRED.append(f"Joint Target{cnt}")
+    print("TASK PARAMS!!!!!", TASK_PARAMS)
 
 
 def set_primary_reward(reward_index):
@@ -741,9 +758,10 @@ class Runner:
     
     def check_goal_completed(self):
         if self.task == "kitchen":
-            microwave_joint = self.data.joint("micro0joint").qpos[0]
-            # print(microwave_joint)
-            return microwave_joint < -1.4
+            #microwave_joint = self.data.joint("micro0joint").qpos[0]
+            #return microwave_joint < -1.4
+            distance = get_object_distance("blue_plate", "box")
+            return distance < 0.05
         elif self.task == "cabinet":
             distance = get_object_distance("right_target_position", "yellow_cube")
             return distance < 0.05
@@ -753,7 +771,6 @@ class Runner:
             return door_hinge > 1.4
         elif self.task == "blocks":
             distance = get_object_distance("crate", "red_block")
-            #distance = get_object_distance("crate", "yellow_block")
             return distance < 0.05
     
     def execute(self, custom=False, reset_after_done=True):

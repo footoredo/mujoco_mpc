@@ -28,7 +28,7 @@ reset_reward()
 print("HERE")
 minimize_l2_distance_reward("palm", "red_switch_handle")
 print("HERE")
-set_joint_fraction_reward("red_switch_handle_joint", -1, primary_reward=True)
+set_joint_fraction_reward("red_switch_handle_joint", 1, primary_reward=True)
 print("HERE")
 # execute_plan(finish=False, reset_after_done=False)
 
