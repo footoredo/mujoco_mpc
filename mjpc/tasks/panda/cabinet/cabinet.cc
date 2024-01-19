@@ -224,7 +224,48 @@ namespace mjpc
       }
       residual[counter++] = sqrt(joint_norm);
 
-      residual[counter++] = std::max(0.02 - ee_position[2], 0.0);
+      // double *tip_left_position = SensorByName(model, data, "tip_left");
+      // double *tip_right_position = SensorByName(model, data, "tip_right");
+      double *cabinet_position = SensorByName(model, data, "rightdoorhandle"); // Replace obj_id with the appropriate object identifier
+
+      // Define a threshold distance for triggering an action (you can adjust this value)
+      double threshold_distance = 0.05; // Adjust as needed
+
+      // // Calculate the L2 distance between "tip_left" and the object
+      // double left_distance = 0.0;
+      // for (int i = 0; i < 3; i++)
+      // {
+      //   double diff = tip_left_position[i] - cabinet_position[i];
+      //   left_distance += diff * diff;
+      // }
+      // left_distance = sqrt(left_distance);
+
+      // // Calculate the L2 distance between "tip_right" and the object
+      // double right_distance = 0.0;
+      // for (int i = 0; i < 3; i++)
+      // {
+      //   double diff = tip_right_position[i] - cabinet_position[i];
+      //   right_distance += diff * diff;
+      // }
+      // right_distance = sqrt(right_distance);
+
+      double distance = 0.0;
+      for (int i = 0; i < 3; i++)
+      {
+        double diff = ee_position[i] - cabinet_position[i];
+        distance += diff * diff;
+      }
+      distance = sqrt(distance);
+
+      residual[counter++] = (0.0407 * 2 - finger_1 - finger_2) + 2;
+      // Check if both left and right distances are below the threshold
+      if (distance < threshold_distance)
+      {
+        counter--;
+        residual[counter++] = (finger_1 + finger_2);
+      }
+
+      // std::max(0.001 - ee_position[2], 0.0);
 
       // joint velocity limiter
       // table height limiter?

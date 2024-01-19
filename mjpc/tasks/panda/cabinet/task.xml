@@ -178,6 +178,8 @@
     <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
     <framepos name="hand" objtype="site" objname="eeff"/>
     <velocimeter name="hand_vel"  site="eeff"/>
+    <framepos name="tip_left" objtype="site" objname="tip_left"/>
+    <framepos name="tip_right" objtype="site" objname="tip_right"/>
     <framepos name="left_target_position" objtype="site" objname="left_target_position"/>
     <framepos name="right_target_position" objtype="site" objname="right_target_position"/>
     <framepos name="rightdoorhandle" objtype="site" objname="rightdoor_site"/>
