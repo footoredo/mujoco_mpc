@@ -206,7 +206,7 @@ namespace mjpc
       // safety
       double *hand_vel = SensorByName(model, data, "hand_vel");
       double hand_vel_d = (hand_vel[0] * hand_vel[0] + hand_vel[1] * hand_vel[1] + hand_vel[2] * hand_vel[2]);
-      if (hand_vel_d < 0.3)
+      if (hand_vel_d < 0.5)
       {
         hand_vel_d = 0;
       }
@@ -220,7 +220,7 @@ namespace mjpc
       double y_box_vel_d = y_box_vel[0] * y_box_vel[0] + y_box_vel[1] * y_box_vel[1] + y_box_vel[2] * y_box_vel[2];
       if (y_box_vel_d > 0.01)
       {
-        printf("y_box_vel: %.2f\n", y_box_vel_d);
+		//printf("y_box_vel: %.2f\n", y_box_vel_d);
       }
       residual[counter++] = 0.05 * sqrt(y_box_vel_d);
 
@@ -228,7 +228,7 @@ namespace mjpc
       double r_box_vel_d = r_box_vel[0] * r_box_vel[0] + r_box_vel[1] * r_box_vel[1] + r_box_vel[2] * r_box_vel[2];
       if (r_box_vel_d > 0.01)
       {
-        printf("r_box_vel: %.2f\n", r_box_vel_d);
+        //printf("r_box_vel: %.2f\n", r_box_vel_d);
       }
       residual[counter++] = 0.05 * sqrt(r_box_vel_d);
 
@@ -236,25 +236,26 @@ namespace mjpc
       double b_box_vel_d = b_box_vel[0] * b_box_vel[0] + b_box_vel[1] * b_box_vel[1] + b_box_vel[2] * b_box_vel[2];
       if (b_box_vel_d > 0.01)
       {
-        printf("b_box_vel: %.2f\n", b_box_vel_d);
+        //printf("b_box_vel: %.2f\n", b_box_vel_d);
       }
       residual[counter++] = 0.05 * sqrt(b_box_vel_d);
 
       // get joint velocities
-      double joint_norm = 0;
+      double joint_max = 0;
       for (int i = 0; i < 8; i++)
       {
         double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i) + "_jvel");
-        joint_norm += joint_i * joint_i;
+        joint_max = std::max(joint_max, joint_i);;
       }
 
-      if (joint_norm < 0.7)
+      if (joint_max < 1.0)
       {
-        joint_norm = 0;
-      }
-      residual[counter++] = sqrt(joint_norm);
+        joint_max = 0;
+      } 
 
-      residual[counter++] = std::max(0.02 - ee_position[2], 0.0);
+      residual[counter++] = sqrt(joint_max);
+
+      residual[counter++] = 0;
 
       // default position
       // double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
