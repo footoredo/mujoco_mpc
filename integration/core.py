@@ -70,7 +70,7 @@ REPEATS = 5
 RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = True
+SAVE_VIDEO = False
 OPENED_CABINET = False
 NO_LOCK = False
 IS_COP = False
@@ -102,7 +102,7 @@ BLOCKS_NAME_MAPPING = {
 }
 
 BLOCKS_SITE_MAPPING = {
-    "hand": "eeff",
+    "hand": "pinch",
     "yellow_block": "yellow_block",
     "red_block": "red_block",
     "blue_block": "blue_block",
@@ -477,8 +477,10 @@ class Runner:
             self.data = mujoco.MjData(self.model)
         else:
             self.data = init_data
+            
+        mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
 
-        print(self.data.site("eeff").xpos)
+        # print(self.data.site("eeff").xpos)
 
         self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
 
@@ -605,7 +607,7 @@ class Runner:
         
         while True:
             print(f"Task [{task_name}] retry #{retries} ...", flush=True)
-            self.run_reset()
+            # self.run_reset()
             costs = self.agent.get_cost_term_values()
             # if PRIMARY_REWARD is not None:
             #     primary_cost_before = costs[PRIMARY_REWARD]
@@ -839,6 +841,10 @@ class Runner:
         return self.outcome
 
     def finish(self):
+        self.agent.reset()
+        if self.viewer is not None:
+            self.viewer.close()
+        
         if self.save_video:
             images = np.stack(self.images, 0)
             vidwrite("output.mp4", images, 240 * 5)
@@ -886,6 +892,8 @@ def execute_plan(duration=None, finish=True, reset_after_done=True):
     print(int(RUNNER.execute(custom=True, reset_after_done=reset_after_done)))
     if finish:
         RUNNER.finish()
+        
+    print("Done")
 
 
 def end_effector_to(position):

@@ -4,14 +4,20 @@
   <size memory="1M"/>
 
   <custom>
-    <numeric name="agent_planner" data="0" />
+    <!-- <numeric name="agent_planner" data="0" />
     <numeric name="agent_horizon" data="0.5" />
     <numeric name="agent_timestep" data="0.009" />
     <numeric name="agent_policy_width" data="0.0035" />
     <numeric name="sampling_trajectories" data="60"/>
     <numeric name="sampling_spline_points" data="7" />
     <numeric name="sampling_exploration" data="0.1" />
-    <numeric name="gradient_spline_points" data="6" />
+    <numeric name="gradient_spline_points" data="6" /> -->
+
+    <!-- ILQG planner -->
+    <numeric name="agent_planner" data="2" />
+    <numeric name="agent_horizon" data="0.35" />
+    <numeric name="agent_timestep" data="0.01" />
+    <numeric name="agent_integrator" data="3" />
 
     <numeric name="residual_select_ReachObjectA" data="0"/>
     <text name="residual_list_ReachObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|left_target_position|right_target_position"/>

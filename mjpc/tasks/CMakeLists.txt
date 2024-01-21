@@ -30,6 +30,9 @@ add_custom_target(
           ${menagerie_SOURCE_DIR}/franka_emika_panda/assets
           ${CMAKE_CURRENT_BINARY_DIR}/panda/blocks/assets
   COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${menagerie_SOURCE_DIR}/robotiq_2f85
+          ${CMAKE_CURRENT_BINARY_DIR}/panda/blocks
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/franka_emika_panda/assets
           ${CMAKE_CURRENT_BINARY_DIR}/panda/locklock/assets
   COMMAND ${CMAKE_COMMAND} -E copy_directory
