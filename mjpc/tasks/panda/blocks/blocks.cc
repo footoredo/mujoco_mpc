@@ -196,6 +196,31 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // residual[counter ++] = (finger_1 + finger_2) * 20;
   counter += 2;
 
+  // safety
+
+  double *hand_vel = SensorByName(model, data, "hand_vel");
+  double hand_vel_d = (hand_vel[0] * hand_vel[0] + hand_vel[1] * hand_vel[1] + hand_vel[2] * hand_vel[2]);
+  if (hand_vel_d < 0.3)
+  {
+	hand_vel_d = 0;
+  }
+  residual[counter++] = sqrt(hand_vel_d);
+
+  double joint_max = 0;
+  for (int i = 0; i < 7; i++)
+  {
+	double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i+1) + "_jvel");
+	joint_max = std::max(joint_max, joint_i*joint_i);;
+  }
+
+  if (joint_max < 0.7)
+  {
+	joint_max = 0;
+  } 
+
+  residual[counter++] = sqrt(joint_max);
+  
+
   // std::cout << finger_1 << " " << finger_2 << std::endl;
 
   // counter += 2;

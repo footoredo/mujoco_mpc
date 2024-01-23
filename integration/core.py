@@ -267,6 +267,10 @@ def reset_reward():
     COST_WEIGHTS = {}
     PRIMARY_REWARD = None
     COST_NAMES_REQUIRED = []
+    COST_WEIGHTS["Safety"] = 0.1
+    COST_NAMES_REQUIRED.append("Safety")
+    REWARD_CNT["Safety"] = 1
+
 
 
 def map_name(name):

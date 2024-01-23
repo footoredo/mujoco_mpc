@@ -205,26 +205,34 @@
     <user name="End-Effector Open" dim="1" user="2 1 0 5 0.01"/>
     <user name="End-Effector Close" dim="1" user="2 1 0 5 0.01"/>
 	  <!-- <user name="Control" dim="9" user="2 0 0 5 0.01"/> -->
+	<user name="Safety" dim="2" user="2 0 0 5 0.01"/>
     <user name="Default Pose" dim="6" user="2 0 0 5 0.01"/>
 	  <user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
     <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
     <framepos name="hand" objtype="site" objname="pinch"/>
+	<velocimeter name="hand_vel"  site="pinch"/>
     <framepos name="yellow_block" objtype="site" objname="yellow_block"/>
     <framepos name="red_block" objtype="site" objname="red_block"/>
     <framepos name="blue_block" objtype="site" objname="blue_block"/>
     <framepos name="red_bin" objtype="site" objname="red_bin"/>
 
-    <!-- <jointpos name='panda_joint0' joint= 'joint0'/>
     <jointpos name='panda_joint1' joint= 'joint1'/>
+    <jointvel name='panda_joint1_jvel' joint= 'joint1'/>
     <jointpos name='panda_joint2' joint= 'joint2'/>
+    <jointvel name='panda_joint2_jvel' joint= 'joint2'/>
     <jointpos name='panda_joint3' joint= 'joint3'/>
+    <jointvel name='panda_joint3_jvel' joint= 'joint3'/>
     <jointpos name='panda_joint4' joint= 'joint4'/>
+    <jointvel name='panda_joint4_jvel' joint= 'joint4'/>
     <jointpos name='panda_joint5' joint= 'joint5'/>
+    <jointvel name='panda_joint5_jvel' joint= 'joint5'/>
     <jointpos name='panda_joint6' joint= 'joint6'/>
-    <jointpos name='panda_joint7' joint= 'joint7'/> -->
+    <jointvel name='panda_joint6_jvel' joint= 'joint6'/>
+    <jointpos name='panda_joint7' joint= 'joint7'/>
+	<jointvel name='panda_joint7_jvel' joint= 'joint7'/>-->
 
-    <!-- <jointpos name='finger_joint1' joint='finger_joint1'/>
-    <jointpos name='finger_joint2' joint='finger_joint2'/> -->
+	<!-- <jointpos name='finger_joint1' joint='finger_joint1'/>
+	<jointpos name='finger_joint2' joint='finger_joint2'/> -->
 
 	<!--
     <framepos name="box" objtype="geom" objname="box"/>
