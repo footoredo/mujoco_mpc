@@ -95,16 +95,16 @@
     <!-- <body name="yellow_block" pos="0.5 0.0 .04"> -->
     <body name="yellow_block" pos="0.4 -0.2 .04">
       <joint type="free"/>
-      <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
-      <geom material="kettle_yellow" pos="0 0 0" size="0.0301 0.0301 0.0301" type="box"/>
-      <site name="yellow_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
+      <geom class="hinge_collision" type="box" size="0.020 0.020 0.020" mass=".2" condim="6" friction="1 .01 .003"/>
+      <geom material="kettle_yellow" pos="0 0 0" size="0.0201 0.0201 0.0201" type="box"/>
+      <site name="yellow_block" type="box" pos="0 0 0" size="0.020 0.020 0.020"/>
     </body>
 
     <body name="red_block" pos="0.4 0.2 0.04">
       <joint type="free"/>
-      <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
-      <geom material="kettle_red" pos="0 0 0" size="0.0301 0.0301 0.0301" type="box"/>
-      <site name="red_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
+      <geom class="hinge_collision" type="box" size="0.020 0.020 0.020" mass=".2" condim="6" friction="1 .01 .003"/>
+      <geom material="kettle_red" pos="0 0 0" size="0.0201 0.0201 0.0201" type="box"/>
+      <site name="red_block" type="box" pos="0 0 0" size="0.020 0.020 0.020"/>
     </body>
 
     <body name="blue_block" pos="10000.4 -0.2 0.032">
@@ -131,17 +131,17 @@
     </body> -->
 
     <body name="bin" pos="0.5 0.0 .001" >
-      <geom class="hinge_collision" type="box" size="0.06 0.06 0.001" material="kettle_yellow" />
-      <geom class="hinge_collision" pos="0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_yellow"/>
-      <geom class="hinge_collision" pos="-0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_yellow"/>
-      <geom class="hinge_collision" pos="0 -0.06 0.01" type="box" size="0.07 0.007 0.007" material="kettle_yellow"/>
-      <geom class="hinge_collision" pos="0 0.06 0.01" type="box" size="0.07 0.007 0.007" material="kettle_yellow"/>
+      <geom class="hinge_collision" type="box" size="0.05 0.05 0.001" material="kettle_yellow" />
+      <geom class="hinge_collision" pos="0.05 0 0.1" type="box" size="0.007 0.05 0.017" material="kettle_yellow"/>
+      <geom class="hinge_collision" pos="-0.05 0 0.1" type="box" size="0.007 0.05 0.017" material="kettle_yellow"/>
+      <geom class="hinge_collision" pos="0 -0.05 0.1" type="box" size="0.05 0.007 0.017" material="kettle_yellow"/>
+      <geom class="hinge_collision" pos="0 0.05 0.1" type="box" size="0.05 0.007 0.017" material="kettle_yellow"/>
 
-      <geom name="bottom" type="box" size="0.06 0.06 0.001" material="kettle_yellow" />
-      <geom name="leftWall" pos="0.06 0 0.01" type="box" size="0.0071 0.0501 0.0071" material="kettle_yellow"/>
-      <geom name="rightWall" pos="-0.06 0 0.01" type="box" size="0.0071 0.05 0.0071" material="kettle_yellow"/>
-      <geom name="backWall" pos="0 -0.06 0.01" type="box" size="0.0701 0.0071 0.0071" material="kettle_yellow"/>
-      <geom name="frontWall" pos="0 0.06 0.01" type="box" size="0.0701 0.0071 0.0071" material="kettle_yellow"/>
+      <geom name="bottom" type="box" size="0.05 0.05 0.001" material="kettle_yellow" />
+      <geom name="leftWall" pos="0.05 0 0.02" type="box" size="0.0071 0.0501 0.0171" material="kettle_yellow"/>
+      <geom name="rightWall" pos="-0.05 0 0.02" type="box" size="0.0071 0.05 0.0171" material="kettle_yellow"/>
+      <geom name="backWall" pos="0 -0.05 0.02" type="box" size="0.0701 0.0071 0.0171" material="kettle_yellow"/>
+      <geom name="frontWall" pos="0 0.05 0.02" type="box" size="0.0701 0.0071 0.0171" material="kettle_yellow"/>
 
       <site name="red_bin" type="box" pos="0 0 0.04" size="0.001 0.001 0.001"/>
     </body>
@@ -181,7 +181,7 @@
   </contact> -->
 
   <keyframe>
-    <key name="home" qpos='0.4 -0.2 0.0309981 1 2.65706e-17 5.49329e-19 -1.39678e-17 0.4 0.2 0.0309981 1 2.65706e-17 5.49329e-19 -1.39678e-17 10000.4 -0.2 0.0309996 1 2.35473e-17 4.385e-19 -6.41441e-19 2.88201 0.55156 -2.87356 -2.76687 0.175641 2.22391 0.648175 0.00647986 0.0025101 0.0104537 -0.0156212 0.00647986 0.00251018 0.0104655 -0.0156448'/>
+    <key name="home" qpos='0.5 -0.15 0.0309981 1 2.65706e-17 5.49329e-19 -1.39678e-17 0.5 0.15 0.0309981 1 2.65706e-17 5.49329e-19 -1.39678e-17 10000.4 -0.2 0.0309996 1 2.35473e-17 4.385e-19 -6.41441e-19 2.88201 0.55156 -2.87356 -2.76687 0.175641 2.22391 0.648175 0.00647986 0.0025101 0.0104537 -0.0156212 0.00647986 0.00251018 0.0104655 -0.0156448'/>
   </keyframe>
 
   <!-- <keyframe>

@@ -197,14 +197,17 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   counter += 2;
 
   // safety
+  double *hand_pos = SensorByName(model, data, "hand");
+
+  residual[counter++] = -(hand_pos[2] - 0.02);
+  // printf("%.2f\n", hand_pos[2]);
 
   double *hand_vel = SensorByName(model, data, "hand_vel");
   double hand_vel_d = (hand_vel[0] * hand_vel[0] + hand_vel[1] * hand_vel[1] + hand_vel[2] * hand_vel[2]);
-  if (hand_vel_d < 0.3)
+  if (hand_vel_d < 10)
   {
 	hand_vel_d = 0;
   }
-  residual[counter++] = sqrt(hand_vel_d);
 
   double joint_max = 0;
   for (int i = 0; i < 7; i++)
@@ -213,12 +216,12 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
 	joint_max = std::max(joint_max, joint_i*joint_i);;
   }
 
-  if (joint_max < 0.7)
+  if (joint_max < 10)
   {
 	joint_max = 0;
   } 
 
-  residual[counter++] = sqrt(joint_max);
+  residual[counter++] = sqrt(hand_vel_d) + sqrt(joint_max);
   
 
   // std::cout << finger_1 << " " << finger_2 << std::endl;
