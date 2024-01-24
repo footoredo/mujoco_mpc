@@ -5,6 +5,6 @@ set_env('cabinet')
 runner_init()
 
 reset_reward()
-minimize_l2_distance_reward("palm", "box_right")
-maximize_l2_distance_reward("box_right", "rightdoorhandle", primary_reward=True)
+minimize_l2_distance_reward("palm", "yellow_cube")
+minimize_l2_distance_reward("yellow_cube", "target_position_in_wooden_cabinet", primary_reward=True)
 execute_plan()

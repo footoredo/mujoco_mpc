@@ -7,5 +7,5 @@ if __name__ == "__main__":
     runner = Runner(env, use_viewer=True, save_video=False, save_last_img=True, init_data=None)
     set_runner(runner)
     set_env(env)
-    runner.execute(custom=False, reset_after_done=False)
+    runner.execute(custom=True, reset_after_done=False)
     runner.finish()

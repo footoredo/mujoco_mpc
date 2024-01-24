@@ -184,5 +184,5 @@
 	<touch name="rightfingerforce" site="tip_right"/>
   </sensor>
 
-  <include file="panda.xml"/>
+  <include file="../panda.xml"/>
 </mujoco>

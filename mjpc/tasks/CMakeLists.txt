@@ -20,24 +20,42 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/shadow_hand/assets
           ${CMAKE_CURRENT_BINARY_DIR}/hand/assets
+
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/franka_emika_panda/assets
           ${CMAKE_CURRENT_BINARY_DIR}/panda/cabinet/assets
   COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${menagerie_SOURCE_DIR}/robotiq_2f85
+          ${CMAKE_CURRENT_BINARY_DIR}/panda/cabinet
+
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/franka_emika_panda/assets
           ${CMAKE_CURRENT_BINARY_DIR}/panda/kitchen/assets
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${menagerie_SOURCE_DIR}/robotiq_2f85
+          ${CMAKE_CURRENT_BINARY_DIR}/panda/kitchen
+
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/franka_emika_panda/assets
           ${CMAKE_CURRENT_BINARY_DIR}/panda/blocks/assets
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/robotiq_2f85
           ${CMAKE_CURRENT_BINARY_DIR}/panda/blocks
+
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/franka_emika_panda/assets
           ${CMAKE_CURRENT_BINARY_DIR}/panda/locklock/assets
   COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${menagerie_SOURCE_DIR}/robotiq_2f85
+          ${CMAKE_CURRENT_BINARY_DIR}/panda/locklock
+
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/franka_emika_panda/assets
           ${CMAKE_CURRENT_BINARY_DIR}/panda/long/assets
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${menagerie_SOURCE_DIR}/robotiq_2f85
+          ${CMAKE_CURRENT_BINARY_DIR}/panda/long
+          
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${menagerie_SOURCE_DIR}/unitree_a1/assets
           ${CMAKE_CURRENT_BINARY_DIR}/quadruped/assets

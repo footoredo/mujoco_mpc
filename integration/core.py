@@ -68,6 +68,8 @@ def environment_reset(model, data):
 ENV = "blocks"
 REPEATS = 5
 RETRIES = 2
+STEP_LIMIT = 200
+PERSIST_STEPS = 20
 # ENV = "cabinet"
 # ENV = "kitchen"
 SAVE_VIDEO = False
@@ -92,17 +94,17 @@ BLOCKS_NAME_MAPPING = {
     "yellow_block": "yellow_block",
     "red_block": "red_block",
     "blue_block": "blue_block",
-    "right_cube": "yellow_block",
-    "rightside_cube": "yellow_block",
-    "left_cube": "red_block",
-    "leftside_cube": "red_block",
+    "right_cube": "red_block",
+    "rightside_cube": "red_block",
+    "left_cube": "yellow_block",
+    "leftside_cube": "yellow_block",
     "crate": "red_bin",
     "plate": "red_bin",
     "square_plate": "red_bin"
 }
 
 BLOCKS_SITE_MAPPING = {
-    "hand": "pinch",
+    "hand": "eeff",
     "yellow_block": "yellow_block",
     "red_block": "red_block",
     "blue_block": "blue_block",
@@ -291,6 +293,8 @@ def get_object_distance(obj1, obj2):
     pos1 = get_object_position(obj1)
     pos2 = get_object_position(obj2)
     
+    # print(pos1, pos2, obj1, obj2)
+    
     if pos1 is None or pos2 is None:
         return None
     
@@ -397,6 +401,7 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     if is_joint(obj1) or is_joint(obj2):
         return
     original_distance = get_object_distance(obj1, obj2)
+    # print(obj1, obj2, original_distance)
     if original_distance is None:
         return
     print("original_distance:", original_distance)
@@ -475,10 +480,9 @@ class Runner:
         self.model = mujoco.MjModel.from_xml_path(str(model_path))
         if init_data is None:
             self.data = mujoco.MjData(self.model)
+            mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
         else:
             self.data = init_data
-            
-        mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
 
         # print(self.data.site("eeff").xpos)
 
@@ -512,6 +516,7 @@ class Runner:
         num_steps = 0
         best_cost = 1e9
         last_updated = 0
+        satisfied = 0
         while True:
             self.agent.set_state(
                 time=self.data.time,
@@ -527,7 +532,7 @@ class Runner:
             # actions.append(agent.get_action(averaging_duration=control_timestep))
             self.actions.append(self.agent.get_action())
             # print(i)
-            satisfied = False
+            # satisfied = False
             for _ in range(self.repeats):
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
@@ -544,7 +549,7 @@ class Runner:
                 # agent.planner_step()
                 if num_steps > 20:
                     if cost_limit is not None and cost <= cost_limit:
-                        satisfied = True
+                        satisfied += 1
 
             if self.save_video:
                 img = self.mj_viewer.read_pixels(camid=0)
@@ -555,7 +560,7 @@ class Runner:
                 # print(i, cost)
                 print(num_steps, f"{self.agent.get_total_cost():.2f} {cost:.2f}", self.agent.get_cost_term_values())
 
-            if satisfied:
+            if satisfied >= PERSIST_STEPS * self.repeats:
                 return True
 
             # observations.append(environment_step(model, data, actions[-1]))
@@ -577,6 +582,12 @@ class Runner:
         self.agent.set_cost_weights(zeroed_cost_weights)
         return self.plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit)
         
+    def run_reset_cartisian(self):
+        for _ in range(500):
+            environment_step(self.model, self.data, np.zeros(self.model.nu))
+            if self.viewer is not None:
+                self.viewer.sync()
+        
     def run_reset(self):
         # print(last_primary)
         succ = self.run_once(task_parameters=None, cost_weights={
@@ -590,7 +601,7 @@ class Runner:
         }, cost_limit=0.02, cost_name="Default Pose No-Obstruction", step_limit=200)
         return succ
 
-    def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=5, step_limit=1000):
+    def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=5, step_limit=STEP_LIMIT):
         retries = 0
         best_primary_cost = 1e9
         
@@ -608,6 +619,7 @@ class Runner:
         while True:
             print(f"Task [{task_name}] retry #{retries} ...", flush=True)
             # self.run_reset()
+            self.run_reset_cartisian()
             costs = self.agent.get_cost_term_values()
             # if PRIMARY_REWARD is not None:
             #     primary_cost_before = costs[PRIMARY_REWARD]
@@ -784,7 +796,7 @@ class Runner:
             else:
                 cost_limit = 0.02
         succ = self.run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=RETRIES, step_limit=500)
+        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=RETRIES, step_limit=STEP_LIMIT)
 
         return succ
     
@@ -884,7 +896,7 @@ def cop_runner_init():
     runner_init(load_init=False)
 
 
-def execute_plan(duration=None, finish=True, reset_after_done=True):
+def execute_plan(duration=None, finish=True, reset_after_done=False):
     print(TASK_PARAMS)
     print(COST_WEIGHTS)
     print(PRIMARY_REWARD)
