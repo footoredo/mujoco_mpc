@@ -162,8 +162,11 @@ class CopyTaskAssetsCommand(setuptools.Command):
     
     try:
       os.remove(destination_dir_path)
-    except FileNotFoundError:
-      pass
+    except:
+      try:
+        os.rmdir(destination_dir_path)
+      except:
+        pass
     os.symlink(mjpc_tasks_path, destination_dir_path)
 
     # for source_path, relative_source_path in zip(source_paths, relative_source_paths):

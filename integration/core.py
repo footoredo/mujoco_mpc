@@ -554,18 +554,25 @@ class Runner:
         last_updated = 0
         satisfied = 0
         site_action = None
+        freeze_qpos = None
         while True:
-            
-            if num_steps >= 10:
-                if site_action is None:
-                    site_transition = self.data.site('eeff').xpos.copy()
-                    site_transition = site_transition - np.array([0.45, 0.0, 0.3])
-                    site_rotation = R.from_matrix(self.data.site('eeff').xmat.copy().reshape(3, 3))
-                    site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
-                    # gripper_pose = 
-                    site_action = np.concatenate((site_transition, site_rotation, [0.]))
-                    print(site_rotation)
-                self.actions.append(site_action)
+            # print(self.data.act)
+            if (num_steps + 1) % 10 == 0:
+                # if freeze_qpos is None:
+                site_transition = self.data.site('eeff').xpos.copy()
+                site_transition = site_transition - np.array([0.45, 0.0, 0.3])
+                site_rotation = R.from_matrix(self.data.site('eeff').xmat.copy().reshape(3, 3))
+                site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
+                # gripper_pose = 
+                site_action = np.concatenate((site_transition, site_rotation, [0.]))
+                print(site_rotation)
+                print(self.data.joint("right_driver_joint").qpos)
+                freeze_qpos = self.data.qpos.copy()
+                freeze_qpos[0] += 1.
+                input()
+                self.data.qpos[:] = freeze_qpos
+                self.data.qvel[:] = 0.
+                # self.actions.append(site_action)
             else:
                 self.agent.set_state(
                     time=self.data.time,
