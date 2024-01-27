@@ -11,6 +11,8 @@ import mujoco_mpc
 from mujoco_mpc import agent as agent_lib
 import numpy as np
 import joblib
+# from scipy.spatial.transform import Rotation as R
+import requests
 
 
 import pathlib
@@ -517,22 +519,58 @@ class Runner:
         num_steps = 0
         best_cost = 1e9
         last_updated = 0
+        satisfied = 0
         while True:
-            self.agent.set_state(
-                time=self.data.time,
-                qpos=self.data.qpos,
-                qvel=self.data.qvel,
-                act=self.data.act,
-                mocap_pos=self.data.mocap_pos,
-                mocap_quat=self.data.mocap_quat,
-                userdata=self.data.userdata,
-            )
-            self.agent.planner_step()
+            if (num_steps + 1) % 10 == 0:
+                # if freeze_qpos is None:
+                site_transition = self.data.site('pinch').xpos.copy()
+                site_transition = site_transition - np.array([0.45, 0.0, 0.3])
+                # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
+                # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
+                site_rotation = [1,2,3]
+
+                data_to_send = {
+                    "site_transition": site_transition.tolist(),
+                    "site_rotation": site_rotation
+                }
+
+                # Make the POST request
+                response = requests.post("http://localhost:5000/act_ret_obs", json=data_to_send)
+                if response.status_code == 200:
+                    received_data = response.json()
+                    # Process the received data if necessary
+                    print("Received data:", received_data)
+                else:
+                    print("Error in POST request:", response.status_code)
+
+                # gripper_pose = 
+                site_action = np.concatenate((site_transition, site_rotation, [0.]))
+                print(site_rotation)
+                print(self.data.joint("right_driver_joint").qpos)
+                freeze_qpos = self.data.qpos.copy()
+                freeze_qpos[0] += 1.
+
+                input()
+
+                self.data.qpos[:] = freeze_qpos
+                self.data.qvel[:] = 0.
+                # self.actions.append(site_action)
+            else:
+                self.agent.set_state(
+                    time=self.data.time,
+                    qpos=self.data.qpos,
+                    qvel=self.data.qvel,
+                    act=self.data.act,
+                    mocap_pos=self.data.mocap_pos,
+                    mocap_quat=self.data.mocap_quat,
+                    userdata=self.data.userdata,
+                )
+                self.agent.planner_step()
+                # print(i)
+                # actions.append(agent.get_action(averaging_duration=control_timestep))
+                self.actions.append(self.agent.get_action())
             # print(i)
-            # actions.append(agent.get_action(averaging_duration=control_timestep))
-            self.actions.append(self.agent.get_action())
-            # print(i)
-            satisfied = False
+            # satisfied = False
             for _ in range(self.repeats):
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
@@ -549,7 +587,7 @@ class Runner:
                 # agent.planner_step()
                 if num_steps > 20:
                     if cost_limit is not None and cost <= cost_limit:
-                        satisfied = True
+                        satisfied += 1
 
             if self.save_video:
                 img = self.mj_viewer.read_pixels(camid=0)
