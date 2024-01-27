@@ -11,6 +11,7 @@ import mujoco_mpc
 from mujoco_mpc import agent as agent_lib
 import numpy as np
 import joblib
+from scipy.spatial.transform import Rotation as R
 
 
 import pathlib
@@ -47,7 +48,7 @@ def environment_step(model, data, action):
   joint1adr = model.jnt_dofadr[model.joint("joint1").id]
   mujoco.mj_step1(model, data)
 #   print(model.nv, model.nu)
-  print(data.qfrc_actuator[joint1adr: joint1adr + 8])
+#   print(data.qfrc_actuator[joint1adr: joint1adr + 8])  # joint torque
   mujoco.mj_step2(model, data)
 #   print(model.nv, model.nu)
 #   print(data.qfrc_applied)
@@ -552,20 +553,35 @@ class Runner:
         best_cost = 1e9
         last_updated = 0
         satisfied = 0
+        site_action = None
         while True:
-            self.agent.set_state(
-                time=self.data.time,
-                qpos=self.data.qpos,
-                qvel=self.data.qvel,
-                act=self.data.act,
-                mocap_pos=self.data.mocap_pos,
-                mocap_quat=self.data.mocap_quat,
-                userdata=self.data.userdata,
-            )
-            self.agent.planner_step()
-            # print(i)
-            # actions.append(agent.get_action(averaging_duration=control_timestep))
-            self.actions.append(self.agent.get_action())
+            
+            if num_steps >= 10:
+                if site_action is None:
+                    site_transition = self.data.site('eeff').xpos.copy()
+                    site_transition = site_transition - np.array([0.45, 0.0, 0.3])
+                    site_rotation = R.from_matrix(self.data.site('eeff').xmat.copy().reshape(3, 3))
+                    site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
+                    # gripper_pose = 
+                    site_action = np.concatenate((site_transition, site_rotation, [0.]))
+                    print(site_rotation)
+                self.actions.append(site_action)
+            else:
+                self.agent.set_state(
+                    time=self.data.time,
+                    qpos=self.data.qpos,
+                    qvel=self.data.qvel,
+                    act=self.data.act,
+                    mocap_pos=self.data.mocap_pos,
+                    mocap_quat=self.data.mocap_quat,
+                    userdata=self.data.userdata,
+                )
+                self.agent.planner_step()
+                # print(i)
+                # actions.append(agent.get_action(averaging_duration=control_timestep))
+                self.actions.append(self.agent.get_action())
+                # print(self.data.site('eeff').xpos, self.data.site('eeff').xmat, self.actions[-1])
+                
 
             # print(i)
             # satisfied = False
@@ -609,6 +625,7 @@ class Runner:
             last_updated += 1
             # print(last_updated, best_cost)
             if last_updated > 200 and num_steps > step_limit:
+                input()
                 break
         return False
         
