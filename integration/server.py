@@ -2,19 +2,29 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-def dummy_function(data):
-    print("Received data:", data)
-    return data
+# Dictionaries to store observations and actions
+actions = None
+observations = None
 
-@app.route('/process', methods=['GET', 'POST'])
-def process():
+@app.route('/obs_ret_act', methods=['GET', 'POST'])
+def obs_ret_act():
     if request.method == 'POST':
         data = request.json
-    else: # for GET request
-        data = request.args.to_dict()
+        observation = data.get('observation')
+        return jsonify({"action": action})
+    else:
+        observation = request.args.get('observation')
+        return jsonify({"action": action})
 
-    result = dummy_function(data)
-    return jsonify(result)
+@app.route('/act_ret_obs', methods=['GET', 'POST'])
+def act_ret_obs():
+    if request.method == 'POST':
+        data = request.json
+        action = data.get('action')
+        return jsonify({"observation": observation})
+    else:
+        action = request.args.get('action')
+        return jsonify({"observation": observation})
 
 if __name__ == '__main__':
     app.run(debug=True)
