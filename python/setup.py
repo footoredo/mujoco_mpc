@@ -147,21 +147,29 @@ class CopyTaskAssetsCommand(setuptools.Command):
     self.set_undefined_options("build_ext", ("build_lib", "build_lib"))
 
   def run(self):
-    mjpc_tasks_path = Path(__file__).parent.parent / "mjpc" / "tasks"
+    mjpc_tasks_path = Path(__file__).parent.parent / "build" / "mjpc" / "tasks"
     source_paths = tuple(mjpc_tasks_path.rglob("*.xml"))
     relative_source_paths = tuple(p.relative_to(mjpc_tasks_path) for p in source_paths)
     assert self.build_lib is not None
+    # print(os.path.isdir(self.build_lib))
     build_lib_path = Path(self.build_lib).resolve()
     destination_dir_path = Path(build_lib_path, "mujoco_mpc", "mjpc", "tasks")
+    destination_dir_path.parent.mkdir(exist_ok=True, parents=True)
     self.announce(
         f"Copying assets {relative_source_paths} from"
         f" {mjpc_tasks_path} over to {destination_dir_path}."
     )
+    
+    try:
+      os.remove(destination_dir_path)
+    except FileNotFoundError:
+      pass
+    os.symlink(mjpc_tasks_path, destination_dir_path)
 
-    for source_path, relative_source_path in zip(source_paths, relative_source_paths):
-      destination_path = destination_dir_path / relative_source_path
-      destination_path.parent.mkdir(exist_ok=True, parents=True)
-      shutil.copy(source_path, destination_path)
+    # for source_path, relative_source_path in zip(source_paths, relative_source_paths):
+    #   destination_path = destination_dir_path / relative_source_path
+    #   destination_path.parent.mkdir(exist_ok=True, parents=True)
+    #   shutil.copy(source_path, destination_path)
 
 
 class BuildPyCommand(build_py.build_py):

@@ -44,7 +44,13 @@ def get_observation(model, data):
 
 def environment_step(model, data, action):
   data.ctrl[:] = action
-  mujoco.mj_step(model, data)
+  joint1adr = model.jnt_dofadr[model.joint("joint1").id]
+  mujoco.mj_step1(model, data)
+#   print(model.nv, model.nu)
+  print(data.qfrc_actuator[joint1adr: joint1adr + 8])
+  mujoco.mj_step2(model, data)
+#   print(model.nv, model.nu)
+#   print(data.qfrc_applied)
 #   print(data.joint("rightdoorhandle").qpos)
   if ENV == "cabinet" and OPENED_CABINET:
     data.qpos[15] = 1.57
@@ -220,12 +226,36 @@ KITCHEN_SITE_MAPPING = {
     "hand": "eeff"
 }
 
+KITCHEN_LONG_NAME_MAPPING = {
+    "palm": "hand",
+    "cabinet_handle": "cabinet_doorhandle_l",
+    "right_cabinet_handle": "cabinet_doorhandle_r",
+    "cabinet": "leftdoorhinge",
+    "right_cabinet": "rightdoorhinge",
+    "microwave_handle": "microwave_handle",
+    "microwave": "micro0joint",
+    "blue_kettle_handle": "kettle_handle",
+    "green_apple": "box",
+    "green_cube": "box",
+    "target_position": "target_position"
+}
+
+KITCHEN_LONG_SITE_MAPPING = {
+    "cabinet_doorhandle_r": "rightdoor_site",
+    "cabinet_doorhandle_l": "leftdoor_site",
+    "kettle_handle": "kettle_site0",
+    "microwave_handle": "microhandle_site",
+    "hand": "eeff"
+}
+
+
 NAME_MAPPING = {
     "locklock": LOCKLOCK_NAME_MAPPING,
     "blocks": BLOCKS_NAME_MAPPING,
     "cabinet": CABINET_NAME_MAPPING,
     "kitchen": KITCHEN_NAME_MAPPING,
     "long": LONG_NAME_MAPPING,
+    "kitchen_long": KITCHEN_LONG_NAME_MAPPING
 }
 
 SITE_MAPPING = {
@@ -233,7 +263,8 @@ SITE_MAPPING = {
     "cabinet": CABINET_SITE_MAPPING,
     "kitchen": KITCHEN_SITE_MAPPING,
     "blocks": BLOCKS_SITE_MAPPING,
-    "long": LONG_SITE_MAPPING
+    "long": LONG_SITE_MAPPING,
+    "kitchen_long": KITCHEN_LONG_SITE_MAPPING
 }
 
 PRIMARY_REWARD = None
@@ -443,10 +474,10 @@ def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     if cnt == 1:
         cnt = ""
     TASK_PARAMS[f"JointTarget{cnt}"] = map_name(obj)
-    if map_name(obj) == "slidedoorjoint":
-        fraction = fraction * 0.4
-    else:
-        fraction = fraction * 1.5
+    # if map_name(obj) == "slidedoorjoint":
+    #     fraction = fraction * 0.4
+    # else:
+    #     fraction = fraction * 1.5
     TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction
     COST_WEIGHTS[f"Joint Target{cnt}"] = 1.0
 
@@ -462,6 +493,10 @@ def set_primary_reward(reward_index):
 
 
 last_primary = None
+
+
+def capitalize(task):
+    return " ".join([s.capitalize() for s in task.split("_")])
 
 
 class Runner:
@@ -500,7 +535,7 @@ class Runner:
 
         self.images = []
 
-        self.agent = agent_lib.Agent(task_id=f"Panda {self.task.capitalize()}", model=self.model)
+        self.agent = agent_lib.Agent(task_id=f"Panda {capitalize(self.task)}", model=self.model)
 
     # def get_joints(self):
     #     joints = []
@@ -531,10 +566,15 @@ class Runner:
             # print(i)
             # actions.append(agent.get_action(averaging_duration=control_timestep))
             self.actions.append(self.agent.get_action())
+
             # print(i)
             # satisfied = False
             for _ in range(self.repeats):
-                self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
+                # if num_steps > 20:
+                #     action = np.zeros_like(self.actions[-1])
+                # else:
+                action = self.actions[-1]
+                self.observations.append(environment_step(self.model, self.data, action))
                 # print("hand xpos:", data.site("eeff").xpos)
                 if self.viewer is not None:
                     self.viewer.sync()
