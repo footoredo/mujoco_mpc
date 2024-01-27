@@ -1,30 +1,43 @@
 from flask import Flask, request, jsonify
+from time import sleep
 
 app = Flask(__name__)
 
 # Dictionaries to store observations and actions
-actions = None
-observations = None
+actions = "init" 
+observations = "init" 
+obs_turn = True
+sleep_time = 0.5
 
-@app.route('/obs_ret_act', methods=['GET', 'POST'])
+@app.route('/obs_ret_act', methods=['POST'])
 def obs_ret_act():
-    if request.method == 'POST':
-        data = request.json
-        observation = data.get('observation')
-        return jsonify({"action": action})
-    else:
-        observation = request.args.get('observation')
-        return jsonify({"action": action})
+    global actions, observations, obs_turn, sleep_time
+    data = request.json
 
-@app.route('/act_ret_obs', methods=['GET', 'POST'])
+    while not obs_turn:
+        sleep(sleep_time)
+    obs_turn = False
+
+    observations = data.get('observations')
+    print("====================")
+    print(observations)
+    print(actions)
+    return jsonify({"actions": actions})
+
+@app.route('/act_ret_obs', methods=['POST'])
 def act_ret_obs():
-    if request.method == 'POST':
-        data = request.json
-        action = data.get('action')
-        return jsonify({"observation": observation})
-    else:
-        action = request.args.get('action')
-        return jsonify({"observation": observation})
+    global actions, observations, obs_turn, sleep_time
+    data = request.json
+
+    while obs_turn:
+        sleep(sleep_time)
+    obs_turn = True
+
+    actions = data.get('actions')
+    print("====================")
+    print(observations)
+    print(actions)
+    return jsonify({"observations": observations})
 
 if __name__ == '__main__':
     app.run(debug=True)
