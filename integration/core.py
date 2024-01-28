@@ -521,18 +521,31 @@ class Runner:
         last_updated = 0
         satisfied = 0
         while True:
-            if (num_steps + 1) % 10 == 0:
-                # if freeze_qpos is None:
-                site_transition = self.data.site('pinch').xpos.copy()
-                site_transition = site_transition - np.array([0.45, 0.0, 0.3])
+            if num_steps % 10 == 0:
+                site_translation = self.data.site('pinch').xpos.copy()
+                # print(site_translation)
+                # site_translation = site_translation - np.array([0.45, 0.0, 0.3])
+                site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
                 # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
-                site_rotation = [1,2,3]
+                site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
+                gripper_pose = self.data.joint("right_driver_joint").qpos  # 0.0 is fully open, 0.8 is fully closed
+                gripper_pose = max(min(int(gripper_pose / 0.8 * 255), 255), 0)  # to robotiq pose
 
-                data_to_send = {
-                    "site_transition": site_transition.tolist(),
-                    "site_rotation": site_rotation
-                }
+                if num_steps > 0:
+                    data_to_send = {
+                        "translation": site_translation.tolist(),
+                        "rotation": site_rotation.tolist(),
+                        "gripper_pose": gripper_pose,
+                        "type": "update"
+                    }
+                    
+                else:
+                    data_to_send = {
+                        "type": "init"
+                    }
+                    
+                print("Waiting for obs...")
 
                 # Make the POST request
                 response = requests.post("http://localhost:5000/act_ret_obs", json=data_to_send)
@@ -543,32 +556,54 @@ class Runner:
                 else:
                     print("Error in POST request:", response.status_code)
 
-                # gripper_pose = 
-                site_action = np.concatenate((site_transition, site_rotation, [0.]))
-                print(site_rotation)
-                print(self.data.joint("right_driver_joint").qpos)
-                freeze_qpos = self.data.qpos.copy()
-                freeze_qpos[0] += 1.
+                
+                joint_pos = received_data["joints"]
+                obj_pos = self.data.qpos[:-15]
+                gripper_pos = self.data.qpos[-8:]
+                objects_data = received_data["objects"]
+                objects_poses = {}
+                for _, obj in objects_data["objects"].items():
+                    obj_name = obj["object_type"]
+                    obj_pose_hmat = np.array(obj["pose"])
+                    obj_translation = obj_pose_hmat[:3, 3].copy()
+                    obj_orientation = obj_pose_hmat[:3, :3].copy()
+                    objects_poses[obj_name] = {
+                        "translation": obj_translation,
+                        "orientation": obj_orientation
+                    }
+                print(objects_data)
+                obj_pos[:3] = objects_poses["lemon"]["translation"]
+                # gripper_pos = received_data["gripper"]
+                # gripper_pos = gripper_pos / 255 * 0.8  # robotiq to mujoco
+                # gripper_pos = 0.0
+                
+                qpos = np.concatenate((obj_pos, joint_pos, gripper_pos))
 
-                input()
-
-                self.data.qpos[:] = freeze_qpos
+                self.data.qpos[:] = qpos
                 self.data.qvel[:] = 0.
+                
+                # print(self.data.qpos)
+                
+                if self.viewer is not None:
+                    self.viewer.sync()
+                input("Continue? ")
+                
                 # self.actions.append(site_action)
-            else:
-                self.agent.set_state(
-                    time=self.data.time,
-                    qpos=self.data.qpos,
-                    qvel=self.data.qvel,
-                    act=self.data.act,
-                    mocap_pos=self.data.mocap_pos,
-                    mocap_quat=self.data.mocap_quat,
-                    userdata=self.data.userdata,
-                )
-                self.agent.planner_step()
-                # print(i)
-                # actions.append(agent.get_action(averaging_duration=control_timestep))
-                self.actions.append(self.agent.get_action())
+            # else:
+            self.agent.set_state(
+                time=self.data.time,
+                qpos=self.data.qpos,
+                qvel=self.data.qvel,
+                act=self.data.act,
+                mocap_pos=self.data.mocap_pos,
+                mocap_quat=self.data.mocap_quat,
+                userdata=self.data.userdata,
+            )
+            print(self.data.qpos)
+            self.agent.planner_step()
+            # print(i)
+            # actions.append(agent.get_action(averaging_duration=control_timestep))
+            self.actions.append(self.agent.get_action())
             # print(i)
             # satisfied = False
             for _ in range(self.repeats):
