@@ -53,7 +53,8 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   int lift_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
   double *lift_obj = SensorByName(model, data, object_names[lift_obj_id]);
   double lift_height = parameters_[param_counter ++];
-  residual[counter ++] = lift_obj[2] - lift_height;
+  double obj_height = std::max(0., lift_obj[2] - 0.02);
+  residual[counter ++] = std::max(-obj_height + lift_height, 0.);
 
 
   int stack_obj_a_id = ReinterpretAsInt(parameters_[param_counter ++]);
@@ -197,9 +198,10 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   counter += 2;
 
   // safety
-  double *hand_pos = SensorByName(model, data, "hand");
+  // double *hand_pos = SensorByName(model, data, "hand");
 
-  residual[counter++] = -(hand_pos[2] - 0.02);
+  // residual[counter++] = -(hand_pos[2] - 0.003);
+  counter++;
   // printf("%.2f\n", hand_pos[2]);
 
   double *hand_vel = SensorByName(model, data, "hand_vel");

@@ -11,7 +11,7 @@ import mujoco_mpc
 from mujoco_mpc import agent as agent_lib
 import numpy as np
 import joblib
-# from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation as R
 import requests
 
 
@@ -270,8 +270,8 @@ def reset_reward():
     PRIMARY_REWARD = None
     COST_NAMES_REQUIRED = []
     print(0)
-    COST_WEIGHTS["Safety"] = 0.1
-    COST_NAMES_REQUIRED.append("Safety")
+    COST_WEIGHTS["Safety"] = 0.0
+    # COST_NAMES_REQUIRED.append("Safety")
     REWARD_CNT["Safety"] = 1
 
 
@@ -521,11 +521,13 @@ class Runner:
         last_updated = 0
         satisfied = 0
         while True:
-            if num_steps % 10 == 0:
-                site_translation = self.data.site('pinch').xpos.copy()
+            pinch_position = self.data.site('pinch').xpos.copy()
+            franka_ee_position = self.data.site('franka_ee').xpos.copy()
+            # print(franka_ee_position)
+            if num_steps % 20 == 0:
                 # print(site_translation)
-                # site_translation = site_translation - np.array([0.45, 0.0, 0.3])
-                site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
+                # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
+                site_translation = franka_ee_position
                 # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
                 site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
@@ -548,31 +550,41 @@ class Runner:
                 print("Waiting for obs...")
 
                 # Make the POST request
-                response = requests.post("http://localhost:5000/act_ret_obs", json=data_to_send)
-                if response.status_code == 200:
-                    received_data = response.json()
-                    # Process the received data if necessary
-                    print("Received data:", received_data)
-                else:
-                    print("Error in POST request:", response.status_code)
-
                 
-                joint_pos = received_data["joints"]
+                if False:
+                    response = requests.post("http://localhost:5000/act_ret_obs", json=data_to_send)
+                    if response.status_code == 200:
+                        received_data = response.json()
+                        # Process the received data if necessary
+                        print("Received data:", received_data)
+                    else:
+                        print("Error in POST request:", response.status_code)
+        
+                    joint_pos = received_data["joints"]
+                    ee_pos = received_data["ee"]
+                    print(ee_pos - franka_ee_position)
+                else:
+                    print("Not receiving data!")
+                    received_data = {}
+                    joint_pos = self.data.qpos[-15:-8]
                 obj_pos = self.data.qpos[:-15]
                 gripper_pos = self.data.qpos[-8:]
-                objects_data = received_data["objects"]
-                objects_poses = {}
-                for _, obj in objects_data["objects"].items():
-                    obj_name = obj["object_type"]
-                    obj_pose_hmat = np.array(obj["pose"])
-                    obj_translation = obj_pose_hmat[:3, 3].copy()
-                    obj_orientation = obj_pose_hmat[:3, :3].copy()
-                    objects_poses[obj_name] = {
-                        "translation": obj_translation,
-                        "orientation": obj_orientation
-                    }
-                print(objects_data)
-                obj_pos[:3] = objects_poses["lemon"]["translation"]
+                
+                if "objects" in received_data:
+                    objects_data = received_data["objects"]
+                    objects_poses = {}
+                    for _, obj in objects_data["objects"].items():
+                        obj_name = obj["object_type"]
+                        obj_pose_hmat = np.array(obj["pose"])
+                        obj_translation = obj_pose_hmat[:3, 3].copy()
+                        obj_orientation = obj_pose_hmat[:3, :3].copy()
+                        objects_poses[obj_name] = {
+                            "translation": obj_translation,
+                            "orientation": obj_orientation
+                        }
+                    print(objects_data)
+                    obj_pos[:3] = objects_poses["lemon"]["translation"]
+                    obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
                 # gripper_pos = received_data["gripper"]
                 # gripper_pos = gripper_pos / 255 * 0.8  # robotiq to mujoco
                 # gripper_pos = 0.0
@@ -586,7 +598,7 @@ class Runner:
                 
                 if self.viewer is not None:
                     self.viewer.sync()
-                input("Continue? ")
+                # input("Continue? ")
                 
                 # self.actions.append(site_action)
             # else:
@@ -599,7 +611,7 @@ class Runner:
                 mocap_quat=self.data.mocap_quat,
                 userdata=self.data.userdata,
             )
-            print(self.data.qpos)
+            # print(self.data.qpos)
             self.agent.planner_step()
             # print(i)
             # actions.append(agent.get_action(averaging_duration=control_timestep))
@@ -607,6 +619,9 @@ class Runner:
             # print(i)
             # satisfied = False
             for _ in range(self.repeats):
+                # reach1_cost = self.agent.get_cost_term_values()["Reach"]
+                # if reach1_cost > 0.02:
+                #     self.actions[-1][-1] = 0.
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
                 if self.viewer is not None:
