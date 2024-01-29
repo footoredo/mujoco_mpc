@@ -26,7 +26,7 @@
         <geom type="mesh" contype="0" conaffinity="0" group="2"/>
       </default>
       <default class="collision">
-        <geom type="mesh" group="3" contype="2" conaffinity="1"/>
+        <geom type="mesh" group="3" contype="1" conaffinity="1"/>
         <default class="pad_box1">
           <geom mass="0" type="box" pos="0 -0.0026 0.028125" size="0.011 0.004 0.009375" friction="0.7"
             solimp="0.95 0.99 0.001" solref="0.004 1" priority="1" contype="6" conaffinity="5" rgba="0.55 0.55 0.55 1"/>
@@ -50,7 +50,7 @@
         <geom type="mesh" contype="0" conaffinity="0" group="2"/>
       </default>
       <default class="panda/collision">
-        <geom type="mesh" group="3" contype="2" conaffinity="1"/>
+        <geom type="mesh" group="3" contype="1" conaffinity="1"/>
       </default>
       <site size="0.001" rgba="0.5 0.5 0.5 0.3" group="4"/>
     </default>
