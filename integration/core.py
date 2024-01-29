@@ -66,6 +66,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
+REAL_ROBOT = False
 
 ENV = "blocks"
 REPEATS = 2
@@ -271,8 +272,10 @@ def reset_reward():
     COST_NAMES_REQUIRED = []
     print(0)
     COST_WEIGHTS["Safety"] = 0.1
-    COST_NAMES_REQUIRED.append("Safety")
-    REWARD_CNT["Safety"] = 1
+    # COST_NAMES_REQUIRED.append("Safety")
+    # REWARD_CNT["Safety"] = 1
+    COST_WEIGHTS["LockBin"] = 1
+    COST_WEIGHTS["BlockOrient"] = 1
 
 
 
@@ -551,7 +554,7 @@ class Runner:
 
                 # Make the POST request
                 
-                if True:
+                if REAL_ROBOT:
                     response = requests.post("http://localhost:5000/act_ret_obs", json=data_to_send)
                     if response.status_code == 200:
                         received_data = response.json()
@@ -587,6 +590,8 @@ class Runner:
                     obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
                     obj_pos[7:10] = objects_poses["apple"]["translation"]
                     obj_pos[10:14] = R.from_matrix(objects_poses["apple"]["orientation"]).as_quat()
+                    obj_pos[21:24] = objects_poses["cup"]["translation"]
+                    obj_pos[24:28] = R.from_matrix(objects_poses["cup"]["orientation"]).as_quat()
                 # gripper_pos = received_data["gripper"]
                 # gripper_pos = gripper_pos / 255 * 0.8  # robotiq to mujoco
                 # gripper_pos = 0.0
@@ -600,7 +605,9 @@ class Runner:
                 
                 if self.viewer is not None:
                     self.viewer.sync()
-                input("Continue? ")
+                
+                if REAL_ROBOT:
+                    input("Continue? ")
                 
                 # self.actions.append(site_action)
             # else:
@@ -640,6 +647,8 @@ class Runner:
                 if num_steps > 20:
                     if cost_limit is not None and cost <= cost_limit:
                         satisfied += 1
+
+            # print("Cost:", self.agent.get_cost_term_values())
 
             if self.save_video:
                 img = self.mj_viewer.read_pixels(camid=0)

@@ -78,7 +78,7 @@
       </default>
 
       <default class="cup_visual">
-        <geom type="box" size="0.0026 0.007822 0.03050" material="kettle_green"/>
+        <geom type="box" size="0.0026 0.007822 0.03050" material="kettle_green" contype="0" conaffinity="0"/>
       </default>
   </default>
 
@@ -313,6 +313,8 @@
     <user name="Open Door" dim="1" user="2 .1 0 1 0.003"/>
     <user name="Reach Box" dim="3" user="2 .1 0 1 0.01"/>
     <user name="Move Box" dim="1" user="2 1 0 5 0.003"/> -->
+    <user name="LockBin" dim="3" user="2 1 0 5 0.01"/>
+    <user name="BlockOrient" dim="1" user="2 1 0 5 0.01"/>
     <user name="Lift" dim="1" user="2 1 0 5 0.01"/>
     <user name="Stack" dim="3" user="2 1 0 5 0.01"/>
     <user name="Reach" dim="3" user="2 1 0 5 0.01"/>
@@ -335,6 +337,8 @@
     <framepos name="red_block" objtype="site" objname="red_block"/>
     <framepos name="blue_block" objtype="site" objname="blue_block"/>
     <framepos name="red_bin" objtype="site" objname="red_bin"/>
+    <framequat name="red_block_quat" objtype="site" objname="red_block"/>
+	<velocimeter name="bin_vel"  site="red_bin"/>
 
     <jointpos name='panda_joint1' joint= 'joint1'/>
     <jointvel name='panda_joint1_jvel' joint= 'joint1'/>

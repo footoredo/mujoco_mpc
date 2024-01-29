@@ -49,11 +49,22 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   int counter = 0;
   int param_counter = 0;
 
+  double *bin_vel = SensorByName(model, data, "bin_vel");
+  mju_copy3(residual + counter, bin_vel);
+  counter += 3;
+
+  double *red_block_quat = SensorByName(model, data, "red_block_quat");
+  double red_block_mat[9] = {0.};
+  mju_quat2Mat(red_block_mat, red_block_quat);
+  // mju_copy(residual + counter, red_block_quat, 2);
+  // std::cout << red_block_quat[0] << " " << red_block_quat[1] << " " << red_block_quat[2] << " " << red_block_quat[3] << std::endl;
+  // counter += 2;
+  residual[counter ++] = red_block_mat[8] - 1;
 
   int lift_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
   double *lift_obj = SensorByName(model, data, object_names[lift_obj_id]);
   double lift_height = parameters_[param_counter ++];
-  double obj_height = std::max(0., lift_obj[2] - 0.02);
+  double obj_height = std::max(0., lift_obj[2] - 0.05);
   residual[counter ++] = std::max(-obj_height + lift_height, 0.);
 
 
@@ -224,7 +235,7 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   } 
 
   residual[counter++] = sqrt(hand_vel_d) + sqrt(joint_max);
-  
+
 
   // std::cout << finger_1 << " " << finger_2 << std::endl;
 
