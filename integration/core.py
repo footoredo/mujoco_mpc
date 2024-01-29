@@ -270,8 +270,8 @@ def reset_reward():
     PRIMARY_REWARD = None
     COST_NAMES_REQUIRED = []
     print(0)
-    COST_WEIGHTS["Safety"] = 0.0
-    # COST_NAMES_REQUIRED.append("Safety")
+    COST_WEIGHTS["Safety"] = 0.1
+    COST_NAMES_REQUIRED.append("Safety")
     REWARD_CNT["Safety"] = 1
 
 
@@ -551,7 +551,7 @@ class Runner:
 
                 # Make the POST request
                 
-                if False:
+                if True:
                     response = requests.post("http://localhost:5000/act_ret_obs", json=data_to_send)
                     if response.status_code == 200:
                         received_data = response.json()
@@ -570,7 +570,7 @@ class Runner:
                 obj_pos = self.data.qpos[:-15]
                 gripper_pos = self.data.qpos[-8:]
                 
-                if "objects" in received_data:
+                if "objects" in received_data and received_data["objects"] is not None:
                     objects_data = received_data["objects"]
                     objects_poses = {}
                     for _, obj in objects_data["objects"].items():
@@ -585,6 +585,8 @@ class Runner:
                     print(objects_data)
                     obj_pos[:3] = objects_poses["lemon"]["translation"]
                     obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
+                    obj_pos[7:10] = objects_poses["apple"]["translation"]
+                    obj_pos[10:14] = R.from_matrix(objects_poses["apple"]["orientation"]).as_quat()
                 # gripper_pos = received_data["gripper"]
                 # gripper_pos = gripper_pos / 255 * 0.8  # robotiq to mujoco
                 # gripper_pos = 0.0
@@ -598,7 +600,7 @@ class Runner:
                 
                 if self.viewer is not None:
                     self.viewer.sync()
-                # input("Continue? ")
+                input("Continue? ")
                 
                 # self.actions.append(site_action)
             # else:

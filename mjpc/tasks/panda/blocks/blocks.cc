@@ -198,10 +198,10 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   counter += 2;
 
   // safety
-  // double *hand_pos = SensorByName(model, data, "hand");
+  double *hand_pos = SensorByName(model, data, "hand");
 
-  // residual[counter++] = -(hand_pos[2] - 0.003);
-  counter++;
+  residual[counter++] = -100 * std::min((hand_pos[2] - 0.03), 0.);
+  // counter++;
   // printf("%.2f\n", hand_pos[2]);
 
   double *hand_vel = SensorByName(model, data, "hand_vel");
