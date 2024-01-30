@@ -380,9 +380,9 @@
     <general name="arm_direct_actuator_6" joint="joint6" ctrlrange="-1 1" gainprm="10"/> 
     <general name="arm_direct_actuator_7" joint="joint7" ctrlrange="-1 1" gainprm="10"/> 
     <position name="fingers" ctrllimited="true" forcelimited="true" ctrlrange="0 1" forcerange="-5 5" kp="40" tendon="split"/> -->
-    <general  name="x" site="pinch" refsite="ee_origin" ctrlrange="-.75 1.5" ctrllimited="true" gainprm="600" biasprm="0 -1000 -200" biastype="affine" gear="1 0 0 0 0 0"/>
-    <general  name="y" site="pinch" refsite="ee_origin" ctrlrange="-.75 .75" ctrllimited="true" gainprm="600" biasprm="0 -1000 -200" biastype="affine" gear="0 1 0 0 0 0"/>
-    <general  name="z" site="pinch" refsite="ee_origin" ctrlrange="-1.65 .0" ctrllimited="true" gainprm="600" biasprm="0 -1000 -200" biastype="affine" gear="0 0 1 0 0 0"/>
+    <general  name="x" site="pinch" refsite="ee_origin" ctrlrange="-.75 1.5" ctrllimited="true" gainprm="1000" biasprm="0 -1000 -200" biastype="affine" gear="1 0 0 0 0 0"/>
+    <general  name="y" site="pinch" refsite="ee_origin" ctrlrange="-.75 .75" ctrllimited="true" gainprm="1000" biasprm="0 -1000 -200" biastype="affine" gear="0 1 0 0 0 0"/>
+    <general  name="z" site="pinch" refsite="ee_origin" ctrlrange="-1.65 .0" ctrllimited="true" gainprm="1000" biasprm="0 -1000 -200" biastype="affine" gear="0 0 1 0 0 0"/>
     <general name="rx" site="pinch" refsite="world"    ctrlrange="-.001 .001" ctrllimited="true" gainprm="10" biasprm="0 -100 -20" biastype="affine"  gear="0 0 0 1 0 0"/>
     <general name="ry" site="pinch" refsite="world"    ctrlrange="-.001 .001" ctrllimited="true" gainprm="10" biasprm="-157.08 -100 -20" biastype="affine"  gear="0 0 0 0 1 0"/>
     <general name="rz" site="pinch" refsite="world"    ctrlrange="-.001 .001" ctrllimited="true" gainprm="5" biasprm="0 -10 -2" biastype="affine"  gear="0 0 0 0 0 1"/>

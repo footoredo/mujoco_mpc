@@ -13,6 +13,7 @@ import numpy as np
 import joblib
 from scipy.spatial.transform import Rotation as R
 import requests
+import copy
 
 
 import pathlib
@@ -271,7 +272,7 @@ def reset_reward():
     PRIMARY_REWARD = None
     COST_NAMES_REQUIRED = []
     print(0)
-    COST_WEIGHTS["Safety"] = 0.0
+    COST_WEIGHTS["Safety"] = 0.1
     # COST_NAMES_REQUIRED.append("Safety")
     # REWARD_CNT["Safety"] = 1
     COST_WEIGHTS["LockBin"] = 1
@@ -492,7 +493,8 @@ class Runner:
 
         # print(self.data.site("eeff").xpos)
 
-        self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
+        # self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
+        self.mj_viewer = None
 
         if self.use_viewer:
             self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
@@ -523,34 +525,66 @@ class Runner:
         best_cost = 1e9
         last_updated = 0
         satisfied = 0
+        waypoints = []
+        
+        franka_ee_pos = self.data.site("franka_ee").xpos.copy()
+        pinch_pos = self.data.site("pinch").xpos.copy()
+        
+        print(pinch_pos - franka_ee_pos)
+        franka_diff = pinch_pos - franka_ee_pos
+        
         while True:
+            reach_cost = self.agent.get_cost_term_values()["Reach"]
             pinch_position = self.data.site('pinch').xpos.copy()
             franka_ee_position = self.data.site('franka_ee').xpos.copy()
             # print(franka_ee_position)
-            if num_steps % 20 == 0:
+            # if reach_cost > 0.2:
+            #     step_size = 50
+            # elif reach_cost > 0.03:
+            #     step_size = 20
+            # else:
+            #     step_size = 10
+            update_step_size = 50
+            # waypoint_step_size = 10
+            # step_size = 50
+            waypoint_step_size = 10 if reach_cost < 0.2 else 50
+            if num_steps % waypoint_step_size == 0:
                 # print(site_translation)
                 # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
                 site_translation = franka_ee_position
+                # site_translation = pinch_position - franka_diff
+                # print(site_translation - franka_ee_position)
                 # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
+                site_rotation = R.from_matrix(self.data.site('franka_ee').xmat.copy().reshape(3, 3))
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
-                site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
+                rotation_offset = R.from_quat([0, 1, 0, 0])
+                site_rotation = rotation_offset.inv() * site_rotation
+                print("rotation", site_rotation.as_rotvec(), site_rotation.as_quat())
+                site_rotation = site_rotation.as_matrix()
+                # site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
                 gripper_pose = self.data.joint("right_driver_joint").qpos  # 0.0 is fully open, 0.8 is fully closed
                 gripper_pose = max(min(int(gripper_pose / 0.8 * 255), 255), 0)  # to robotiq pose
 
                 if num_steps > 0:
                     data_to_send = {
                         "translation": site_translation.tolist(),
-                        "rotation": site_rotation.tolist(),
+                        "rotation": site_rotation.flatten().tolist(),  # [3x3] -> [9]
                         "gripper_pose": gripper_pose,
+                        "qpos": self.data.qpos.tolist(),
                         "type": "update"
                     }
+                    waypoints.append(copy.deepcopy(data_to_send))
                     
                 else:
                     data_to_send = {
                         "type": "init"
                     }
+            
+            if num_steps % update_step_size == 0:
                     
                 print("Waiting for obs...")
+                
+                data_to_send = waypoints
 
                 # Make the POST request
                 
@@ -563,9 +597,10 @@ class Runner:
                     else:
                         print("Error in POST request:", response.status_code)
         
-                    joint_pos = received_data["joints"]
-                    ee_pos = received_data["ee"]
-                    print(ee_pos - franka_ee_position)
+                    # joint_pos = received_data["joints"]
+                    # ee_pos = received_data["ee"]
+                    # print(ee_pos - franka_ee_position)
+                    joint_pos = self.data.qpos[-15:-8]
                 else:
                     print("Not receiving data!")
                     received_data = {}
@@ -589,9 +624,9 @@ class Runner:
                     obj_pos[:3] = objects_poses["lemon"]["translation"]
                     obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
                     obj_pos[7:10] = objects_poses["apple"]["translation"]
-                    obj_pos[10:14] = R.from_matrix(objects_poses["apple"]["orientation"]).as_quat()
-                    obj_pos[21:24] = objects_poses["cup"]["translation"]
-                    obj_pos[24:28] = R.from_matrix(objects_poses["cup"]["orientation"]).as_quat()
+                    # obj_pos[10:14] = R.from_matrix(objects_poses["apple"]["orientation"]).as_quat()
+                    obj_pos[21:24] = objects_poses["bowl"]["translation"]
+                    # obj_pos[24:28] = R.from_matrix(objects_poses["bowl"]["orientation"]).as_quat()
                 # gripper_pos = received_data["gripper"]
                 # gripper_pos = gripper_pos / 255 * 0.8  # robotiq to mujoco
                 # gripper_pos = 0.0
@@ -606,8 +641,10 @@ class Runner:
                 if self.viewer is not None:
                     self.viewer.sync()
                 
-                if REAL_ROBOT:
+                if False:
                     input("Continue? ")
+                    
+                waypoints = []
                 
                 # self.actions.append(site_action)
             # else:
@@ -628,9 +665,17 @@ class Runner:
             # print(i)
             # satisfied = False
             for _ in range(self.repeats):
-                # reach1_cost = self.agent.get_cost_term_values()["Reach"]
+                reach2_cost = self.agent.get_cost_term_values()["Reach2"]
                 # if reach1_cost > 0.02:
                 #     self.actions[-1][-1] = 0.
+                lift_cost = self.agent.get_cost_term_values()["Lift"]
+                self.agent.set_cost_weights({
+                    "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+                    "Lift": reach2_cost > 0.1,
+                    # "BlockOrient": reach2_cost > 0.09
+                    "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
+                    "Reach": reach2_cost > 0.03
+                })
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
                 if self.viewer is not None:
@@ -648,7 +693,8 @@ class Runner:
                     if cost_limit is not None and cost <= cost_limit:
                         satisfied += 1
 
-            # print("Cost:", self.agent.get_cost_term_values())
+            print("Cost:", self.agent.get_cost_term_values())
+            print("Cost weights:", self.agent.get_cost_weights())
 
             if self.save_video:
                 img = self.mj_viewer.read_pixels(camid=0)
@@ -681,6 +727,12 @@ class Runner:
         self.agent.set_cost_weights(zeroed_cost_weights)
         return self.plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit)
         
+    def run_reset_cartisian(self):
+        for _ in range(500):
+            environment_step(self.model, self.data, np.zeros(self.model.nu))
+            if self.viewer is not None:
+                self.viewer.sync()
+        
     def run_reset(self):
         # print(last_primary)
         succ = self.run_once(task_parameters=None, cost_weights={
@@ -712,6 +764,7 @@ class Runner:
         while True:
             print(f"Task [{task_name}] retry #{retries} ...", flush=True)
             # self.run_reset()
+            self.run_reset_cartisian()
             costs = self.agent.get_cost_term_values()
             # if PRIMARY_REWARD is not None:
             #     primary_cost_before = costs[PRIMARY_REWARD]
@@ -952,8 +1005,10 @@ class Runner:
         if self.save_video:
             images = np.stack(self.images, 0)
             vidwrite("output.mp4", images, 240 * 5)
+            
+        # print(111)
 
-        if self.save_last_img:
+        if self.save_last_img and self.mj_viewer is not None:
             im = self.mj_viewer.read_pixels(camid=0)
             cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
 

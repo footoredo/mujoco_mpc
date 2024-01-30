@@ -59,12 +59,13 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // mju_copy(residual + counter, red_block_quat, 2);
   // std::cout << red_block_quat[0] << " " << red_block_quat[1] << " " << red_block_quat[2] << " " << red_block_quat[3] << std::endl;
   // counter += 2;
-  residual[counter ++] = red_block_mat[8] - 1;
+  residual[counter ++] = std::max(0., 1 - red_block_mat[8] - 0.00);
 
   int lift_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
   double *lift_obj = SensorByName(model, data, object_names[lift_obj_id]);
   double lift_height = parameters_[param_counter ++];
   double obj_height = std::max(0., lift_obj[2] - 0.05);
+  // double *lift_residual = residual + counter;
   residual[counter ++] = std::max(-obj_height + lift_height, 0.);
 
 
@@ -120,6 +121,10 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // residual[counter + 1] = residual[counter];
   // residual[counter + 2] = residual[counter];
   mju_sub3(residual + counter, obj_2_a, obj_2_b);
+  // double applied = *lift_residual < 0.05;
+  // residual[counter] *= applied;
+  // residual[counter + 1] *= applied;
+  // residual[counter + 2] *= applied;
   // mju_copy(residual + counter, hand, 3);
   counter += 3;
 
@@ -224,7 +229,7 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   double *hand_pos = SensorByName(model, data, "hand");
   double finger_vel = *SensorByName(model, data, "finger_joint_jvel");
 
-  residual[counter++] = -100 * std::min((hand_pos[2] - 0.03), 0.);
+  residual[counter++] = std::min((hand_pos[2] - 0.03), 0.);
   // counter++;
   // printf("%.2f\n", hand_pos[2]);
 
@@ -248,7 +253,11 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // } 
 
   // residual[counter++] = sqrt(hand_vel_d) + sqrt(joint_max);
-  residual[counter++] =  finger_vel * finger_vel * 100;
+  if (finger_vel < 0)
+  {
+	finger_vel = -finger_vel;
+  }
+  residual[counter++] =  finger_vel;
 
 
   // std::cout << finger_1 << " " << finger_2 << std::endl;
