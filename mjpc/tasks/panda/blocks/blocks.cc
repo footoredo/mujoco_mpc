@@ -229,7 +229,7 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   double *hand_pos = SensorByName(model, data, "hand");
   double finger_vel = *SensorByName(model, data, "finger_joint_jvel");
 
-  residual[counter++] = -100 * std::min((hand_pos[2] - 0.03), 0.);
+  residual[counter++] = std::min((hand_pos[2] - 0.03), 0.);
   // counter++;
   // printf("%.2f\n", hand_pos[2]);
 
@@ -253,7 +253,11 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // } 
 
   // residual[counter++] = sqrt(hand_vel_d) + sqrt(joint_max);
-  residual[counter++] =  finger_vel * finger_vel * 100;
+  if (finger_vel < 0)
+  {
+	finger_vel = -finger_vel;
+  }
+  residual[counter++] =  finger_vel;
 
 
   // std::cout << finger_1 << " " << finger_2 << std::endl;
