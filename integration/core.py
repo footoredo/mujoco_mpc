@@ -67,7 +67,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = False
+REAL_ROBOT = True
 
 ENV = "blocks"
 REPEATS = 2
@@ -275,8 +275,10 @@ def reset_reward():
     # COST_WEIGHTS["Safety"] = 0.1
     # COST_NAMES_REQUIRED.append("Safety")
     # REWARD_CNT["Safety"] = 1
+    COST_WEIGHTS["HitGround"] = 0
     COST_WEIGHTS["LockBin"] = 1
     COST_WEIGHTS["BlockOrient"] = 1
+    COST_WEIGHTS["OpenGripper"] = 1
 
 
 
@@ -557,9 +559,10 @@ class Runner:
                 # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
                 site_rotation = R.from_matrix(self.data.site('franka_ee').xmat.copy().reshape(3, 3))
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
-                rotation_offset = R.from_quat([0, 1, 0, 0])
-                site_rotation = rotation_offset.inv() * site_rotation
+                rotation_offset = R.from_quat([1, 0, 0, 0])
+                site_rotation = rotation_offset.inv() * site_rotation 
                 print("rotation", site_rotation.as_rotvec(), site_rotation.as_quat())
+                print(site_rotation.as_matrix())
                 site_rotation = site_rotation.as_matrix()
                 # site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
                 gripper_pose = self.data.joint("right_driver_joint").qpos  # 0.0 is fully open, 0.8 is fully closed
@@ -658,6 +661,19 @@ class Runner:
                 userdata=self.data.userdata,
             )
             # print(self.data.qpos)
+            reach2_cost = self.agent.get_cost_term_values()["Reach2"]
+            reach_cost = self.agent.get_cost_term_values()["Reach"]
+            # if reach1_cost > 0.02:
+            #     self.actions[-1][-1] = 0.
+            lift_cost = self.agent.get_cost_term_values()["Lift"]
+            self.agent.set_cost_weights({
+                "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+                "Lift": reach2_cost > 0.1,
+                # "BlockOrient": reach2_cost > 0.09
+                "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
+                "Reach": reach2_cost > 0.03,
+                # "OpenGripper": reach_cost > 0.05
+            })
             self.agent.planner_step()
             # print(i)
             # actions.append(agent.get_action(averaging_duration=control_timestep))
@@ -665,17 +681,7 @@ class Runner:
             # print(i)
             # satisfied = False
             for _ in range(self.repeats):
-                reach2_cost = self.agent.get_cost_term_values()["Reach2"]
-                # if reach1_cost > 0.02:
-                #     self.actions[-1][-1] = 0.
-                lift_cost = self.agent.get_cost_term_values()["Lift"]
-                self.agent.set_cost_weights({
-                    "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
-                    "Lift": reach2_cost > 0.1,
-                    # "BlockOrient": reach2_cost > 0.09
-                    "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
-                    "Reach": reach2_cost > 0.03
-                })
+                
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
                 if self.viewer is not None:

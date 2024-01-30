@@ -49,6 +49,17 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   int counter = 0;
   int param_counter = 0;
 
+  double *pinch_pos = SensorByName(model, data, "hand");
+  double *apple_pos = SensorByName(model, data, "red_block");
+  double pinch_dis = mju_dist3(pinch_pos, apple_pos);
+
+  double *finger_tip = SensorByName(model, data, "finger_tip");
+  double *base_bottom = SensorByName(model, data, "base_bottom");
+  residual[counter ++] = 100 * std::max(0.01 - std::min(finger_tip[2], base_bottom[2]), 0.);
+
+  double *gripper_joint = SensorByName(model, data, "finger_joint");
+  residual[counter ++] = pinch_dis < 0.06 ? 0. : *gripper_joint;
+
   double *bin_vel = SensorByName(model, data, "bin_vel");
   mju_copy3(residual + counter, bin_vel);
   counter += 3;
