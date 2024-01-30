@@ -271,7 +271,7 @@ def reset_reward():
     PRIMARY_REWARD = None
     COST_NAMES_REQUIRED = []
     print(0)
-    COST_WEIGHTS["Safety"] = 0.1
+    COST_WEIGHTS["Safety"] = 0.0
     # COST_NAMES_REQUIRED.append("Safety")
     # REWARD_CNT["Safety"] = 1
     COST_WEIGHTS["LockBin"] = 1
