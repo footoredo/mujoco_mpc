@@ -134,8 +134,8 @@
 
     <body name="red_block" pos="0.4 0.2 0.04">  
       <joint type="free"/>
-      <geom class="hinge_collision" type="cylinder" size="0.030 0.030" mass=".1" condim="6"/>
-      <geom material="kettle_red" pos="0 0 0" type="cylinder" size="0.0301 0.0301" />
+      <geom class="hinge_collision" type="cylinder" size="0.033 0.032" mass=".1" condim="6"/>
+      <geom material="kettle_red" pos="0 0 0" type="cylinder" size="0.0331 0.0321" />
       <site name="red_block" type="box" pos="0 0 0" size="0.001 0.001 0.001" group="3"/>
     </body>
 
@@ -250,7 +250,7 @@
         <geom class="mug_collision" size="0.007 0.0025 0.0055" pos="-0.007 -0.0195 0"/>
         <geom class="mug_collision" size="0.007 0.0025 0.0055" pos="-0.007 0.0195 0"/>
       </body> -->
-      <site name="red_bin" type="box" pos="0 0 0.01" size="0.001 0.001 0.001" group="3"/>
+      <site name="red_bin" type="box" pos="0 0 0.03" size="0.001 0.001 0.001" group="3"/>
     </body>
 
     <!-- <site name="ee_origin" pos="4.55737943e-01 1.20335101e-04 5.61278488e-01" group="3"/> -->

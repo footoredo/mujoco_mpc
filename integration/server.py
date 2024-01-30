@@ -40,7 +40,8 @@ def act_ret_obs():
     global actions, observations, obs_ready, action_ready, sleep_time
     data = request.json
 
-    if data["type"] != "init":
+    # if data["type"] != "init":
+    if len(data) > 0:  # waypoints
         actions = copy.deepcopy(data)
         action_ready = True
     
