@@ -276,7 +276,7 @@ def reset_reward():
     # COST_NAMES_REQUIRED.append("Safety")
     # REWARD_CNT["Safety"] = 1
     COST_WEIGHTS["LockBin"] = 1
-    COST_WEIGHTS["BlockOrient"] = 1
+    # COST_WEIGHTS["BlockOrient"] = 1
 
 
 
@@ -622,8 +622,10 @@ class Runner:
                         }
                     print(objects_data)
                     obj_pos[:3] = objects_poses["lemon"]["translation"]
-                    obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
+                    obj_pos[2] += 0.2
+                    # obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
                     obj_pos[7:10] = objects_poses["apple"]["translation"]
+                    obj_pos[9] -= 0.2  # prevent collision
                     # obj_pos[10:14] = R.from_matrix(objects_poses["apple"]["orientation"]).as_quat()
                     obj_pos[21:24] = objects_poses["bowl"]["translation"]
                     # obj_pos[24:28] = R.from_matrix(objects_poses["bowl"]["orientation"]).as_quat()
@@ -665,16 +667,16 @@ class Runner:
             # print(i)
             # satisfied = False
             for _ in range(self.repeats):
-                reach2_cost = self.agent.get_cost_term_values()["Reach2"]
+                remove_cost = self.agent.get_cost_term_values()["Move Away"]
                 # if reach1_cost > 0.02:
                 #     self.actions[-1][-1] = 0.
                 lift_cost = self.agent.get_cost_term_values()["Lift"]
                 self.agent.set_cost_weights({
-                    "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
-                    "Lift": reach2_cost > 0.1,
+                    # "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+                    "Lift": remove_cost > 0.1,
                     # "BlockOrient": reach2_cost > 0.09
-                    "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
-                    "Reach": reach2_cost > 0.03
+                    # "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
+                    # "Reach": reach2_cost > 0.03
                 })
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)

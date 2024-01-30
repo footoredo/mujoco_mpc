@@ -170,7 +170,10 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // std::cout << residual[counter] << " " << residual[counter + 1] << std::endl;
   // counter += 2; // only xy
 
-  residual[counter++] = std::max(move_distance_target - mju_dist3(move_obj_a, move_obj_b), 0.0);
+  double xy_distance = (move_obj_a[0] - move_obj_b[0]) * (move_obj_a[0] - move_obj_b[0]) + 
+    (move_obj_a[1] - move_obj_b[1]) * (move_obj_a[1] - move_obj_b[1]);
+
+  residual[counter++] = std::max(move_distance_target - xy_distance, 0.0);
   // residual[counter] = std::max(move_distance_target - mju_norm(residual + counter - 2, 2), 0.0);
   // counter += 1;
 
