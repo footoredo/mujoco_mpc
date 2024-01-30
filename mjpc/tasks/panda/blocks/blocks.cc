@@ -93,6 +93,11 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // printf("%d %d\n", object_a_, object_b_);
   // printf("%d %d\n", obj_a_id, obj_b_id);
   mju_sub3(residual + counter, obj_a, obj_b);
+
+  // residual[counter] =  std::tanh((obj_a[0] - obj_b[0])*(obj_a[0] - obj_b[0]) + (obj_a[1] - obj_b[1])*(obj_a[1] - obj_b[1]) + (obj_a[2] - obj_b[2])*(obj_a[2] - obj_b[2]));
+  // printf("%.2f\n", residual[counter]);
+  // residual[counter + 1] = residual[counter];
+  // residual[counter + 2] = residual[counter];
   // printf("%.2f %.2f %.2f\n", obj_a[counter], obj_a[counter + 1], obj_a[2]);
   // printf("%.2f %.2f %.2f\n", obj_b[counter], obj_b[counter + 1], obj_b[2]);
   // mju_copy(residual + counter, hand, 3);
@@ -111,6 +116,10 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // double* handle = SensorByName(model, data, "doorhandle");
   double* obj_2_b = SensorByName(model, data, object_names[obj_2_b_id]);
   // printf("%d %d\n", object_a_, object_b_);
+  
+  // residual[counter] = std::tanh((obj_2_a[0] - obj_2_b[0])*(obj_2_a[0] - obj_2_b[0]) + (obj_2_a[1] - obj_2_b[1])*(obj_2_a[1] - obj_2_b[1]) + (obj_2_a[2] - obj_2_b[2])*(obj_2_a[2] - obj_2_b[2]));
+  // residual[counter + 1] = residual[counter];
+  // residual[counter + 2] = residual[counter];
   mju_sub3(residual + counter, obj_2_a, obj_2_b);
   // double applied = *lift_residual < 0.05;
   // residual[counter] *= applied;
@@ -131,6 +140,9 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // double* handle = SensorByName(model, data, "doorhandle");
   double* obj_3_b = SensorByName(model, data, object_names[obj_3_b_id]);
   // printf("%d %d\n", object_a_, object_b_);
+  // residual[counter] = std::tanh((obj_3_a[0] - obj_3_b[0])*(obj_3_a[0] - obj_3_b[0]) + (obj_3_a[1] - obj_3_b[1])*(obj_3_a[1] - obj_3_b[1]) + (obj_3_a[2] - obj_3_b[2])*(obj_3_a[2] - obj_3_b[2]));
+  // residual[counter + 1] = residual[counter];
+  //     residual[counter + 2] = residual[counter];
   mju_sub3(residual + counter, obj_3_a, obj_3_b);
   // mju_copy(residual + counter, hand, 3);
   counter += 3;
@@ -215,31 +227,33 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
 
   // safety
   double *hand_pos = SensorByName(model, data, "hand");
+  double finger_vel = *SensorByName(model, data, "finger_joint_jvel");
 
   residual[counter++] = -100 * std::min((hand_pos[2] - 0.03), 0.);
   // counter++;
   // printf("%.2f\n", hand_pos[2]);
 
-  double *hand_vel = SensorByName(model, data, "hand_vel");
-  double hand_vel_d = (hand_vel[0] * hand_vel[0] + hand_vel[1] * hand_vel[1] + hand_vel[2] * hand_vel[2]);
-  if (hand_vel_d < 10)
-  {
-	hand_vel_d = 0;
-  }
+  // double *hand_vel = SensorByName(model, data, "hand_vel");
+  // double hand_vel_d = (hand_vel[0] * hand_vel[0] + hand_vel[1] * hand_vel[1] + hand_vel[2] * hand_vel[2]);
+  // if (hand_vel_d < 10)
+  // {
+  //   hand_vel_d = 0;
+  // }
 
-  double joint_max = 0;
-  for (int i = 0; i < 7; i++)
-  {
-	double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i+1) + "_jvel");
-	joint_max = std::max(joint_max, joint_i*joint_i);;
-  }
+  // double joint_max = 0;
+  // for (int i = 0; i < 7; i++)
+  // {
+  //   double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i+1) + "_jvel");
+  //   joint_max = std::max(joint_max, joint_i*joint_i);;
+  // }
 
-  if (joint_max < 10)
-  {
-	joint_max = 0;
-  } 
+  // if (joint_max < 10)
+  // {
+  //   joint_max = 0;
+  // } 
 
-  residual[counter++] = sqrt(hand_vel_d) + sqrt(joint_max);
+  // residual[counter++] = sqrt(hand_vel_d) + sqrt(joint_max);
+  residual[counter++] =  finger_vel * finger_vel * 100;
 
 
   // std::cout << finger_1 << " " << finger_2 << std::endl;
