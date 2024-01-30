@@ -235,7 +235,7 @@
                     <geom mesh="link7_c" class="panda/collision"/>
                     <body gravcomp="1" name="attachment" pos="0 0 0.107" quat="0.3826834 0 0 0.9238795">
       
-    <site name="franka_ee" size="0.001 0.001 0.001" group="3" pos="0 0 0.103"/>
+    <site name="franka_ee" size="0.001 0.001 0.001" group="3" pos="0 0 0.103" quat="0.000 0.000 0 1"/>
                       
     <!-- <body gravcomp="1" name="base_mount" pos="0 0 0.027" quat="0.5 -0.5 -0.5 0.5" childclass="2f85"> -->
     <body gravcomp="1" name="base_mount" pos="-0.0297 0 0.050" quat="0.5 -0.5 -0.5 0.5" childclass="2f85">
@@ -247,7 +247,9 @@
           diaginertia="0.000260285 0.000225381 0.000152708"/>
         <geom class="visual" mesh="base" material="black"/>
         <geom class="collision" mesh="base"/>
-        <site name="pinch" pos="0 0 0.145" type="sphere" group="5" rgba="0.9 0.9 0.9 1" size="0.005"/>
+        <site name="pinch" pos="0 0 0.143" type="sphere" group="5" rgba="0.9 0.9 0.9 1" size="0.005"/>
+        <site name="finger_tip" pos="0.02 0 0.155" type="sphere" group="5" rgba="0.9 0.9 0.9 1" size="0.005"/>
+        <site name="base_bottom" pos="0.045 0 -0.0" type="sphere" group="5" rgba="0.9 0.9 0.9 1" size="0.005"/>
         <!-- Right-hand side 4-bar linkage -->
         <body gravcomp="1" name="right_driver" pos="0 0.0306011 0.054904">
           <inertial mass="0.00899563" pos="2.96931e-12 0.0177547 0.00107314" quat="0.681301 0.732003 0 0"
@@ -382,11 +384,11 @@
     <position name="fingers" ctrllimited="true" forcelimited="true" ctrlrange="0 1" forcerange="-5 5" kp="40" tendon="split"/> -->
     <general  name="x" site="pinch" refsite="ee_origin" ctrlrange="-.75 1.5" ctrllimited="true" gainprm="1000" biasprm="0 -1000 -200" biastype="affine" gear="1 0 0 0 0 0"/>
     <general  name="y" site="pinch" refsite="ee_origin" ctrlrange="-.75 .75" ctrllimited="true" gainprm="1000" biasprm="0 -1000 -200" biastype="affine" gear="0 1 0 0 0 0"/>
-    <general  name="z" site="pinch" refsite="ee_origin" ctrlrange="-1.65 .0" ctrllimited="true" gainprm="1000" biasprm="0 -1000 -200" biastype="affine" gear="0 0 1 0 0 0"/>
-    <general name="rx" site="pinch" refsite="world"    ctrlrange="-.001 .001" ctrllimited="true" gainprm="10" biasprm="0 -100 -20" biastype="affine"  gear="0 0 0 1 0 0"/>
-    <general name="ry" site="pinch" refsite="world"    ctrlrange="-.001 .001" ctrllimited="true" gainprm="10" biasprm="-157.08 -100 -20" biastype="affine"  gear="0 0 0 0 1 0"/>
-    <general name="rz" site="pinch" refsite="world"    ctrlrange="-.001 .001" ctrllimited="true" gainprm="5" biasprm="0 -10 -2" biastype="affine"  gear="0 0 0 0 0 1"/>
-     <!-- <general name="rx" site="pinch" refsite="world"    ctrlrange="-.5 .5" ctrllimited="true" gainprm="100" biasprm="0 -100 -20" biastype="affine"  gear="0 0 0 1 0 0"/>
+    <general  name="z" site="pinch" refsite="ee_origin" ctrlrange="-.55 .0" ctrllimited="true" gainprm="1000" biasprm="0 -1000 -200" biastype="affine" gear="0 0 1 0 0 0"/>
+    <general name="rx" site="pinch" refsite="world"    ctrlrange="-.00001 .00001" ctrllimited="true" gainprm="10" biasprm="0 -100 -20" biastype="affine"  gear="0 0 0 1 0 0"/>
+    <general name="ry" site="pinch" refsite="world"    ctrlrange="-.00001 .00001" ctrllimited="true" gainprm="10" biasprm="-157.08 -100 -20" biastype="affine"  gear="0 0 0 0 1 0"/>
+    <general name="rz" site="pinch" refsite="world"    ctrlrange="-.00001 .00001" ctrllimited="true" gainprm="5" biasprm="0 -10 -2" biastype="affine"  gear="0 0 0 0 0 1"/>
+    <!-- <general name="rx" site="pinch" refsite="world"    ctrlrange="-.5 .5" ctrllimited="true" gainprm="100" biasprm="0 -100 -20" biastype="affine"  gear="0 0 0 1 0 0"/>
     <general name="ry" site="pinch" refsite="world"    ctrlrange="-.5 .5" ctrllimited="true" gainprm="100" biasprm="-157.08 -100 -20" biastype="affine"  gear="0 0 0 0 1 0"/>
     <general name="rz" site="pinch" refsite="world"    ctrlrange="-1.5 1.5" ctrllimited="true" gainprm="10" biasprm="0 -10 -2" biastype="affine"  gear="0 0 0 0 0 1"/> -->
     <position name="fingers" ctrllimited="true" forcelimited="true" ctrlrange="0 1" forcerange="-5 5" kp="10" tendon="split"/>

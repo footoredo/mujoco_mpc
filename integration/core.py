@@ -67,7 +67,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = False
+REAL_ROBOT = True
 
 ENV = "blocks"
 REPEATS = 2
@@ -275,8 +275,10 @@ def reset_reward():
     # COST_WEIGHTS["Safety"] = 0.1
     # COST_NAMES_REQUIRED.append("Safety")
     # REWARD_CNT["Safety"] = 1
+    # COST_WEIGHTS["HitGround"] = 0
     COST_WEIGHTS["LockBin"] = 1
     # COST_WEIGHTS["BlockOrient"] = 1
+    COST_WEIGHTS["OpenGripper"] = 1
 
 
 
@@ -418,7 +420,10 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
     # TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 0.8
-    move_away_distance = original_distance + 0.6 if ENV == "kitchen" else original_distance + 0.3
+    if REAL_ROBOT:
+        move_away_distance = 0.2
+    else:
+        move_away_distance = original_distance + 0.6 if ENV == "kitchen" else original_distance + 0.3
     if ENV == "kitchen":
         max_distance = 2.0
     elif ENV == "cabinet":
@@ -525,6 +530,7 @@ class Runner:
         best_cost = 1e9
         last_updated = 0
         satisfied = 0
+        step_limit_exceeded = False
         waypoints = []
         
         franka_ee_pos = self.data.site("franka_ee").xpos.copy()
@@ -534,6 +540,7 @@ class Runner:
         franka_diff = pinch_pos - franka_ee_pos
         
         while True:
+            finished = satisfied or step_limit_exceeded
             reach_cost = self.agent.get_cost_term_values()["Reach"]
             pinch_position = self.data.site('pinch').xpos.copy()
             franka_ee_position = self.data.site('franka_ee').xpos.copy()
@@ -548,7 +555,7 @@ class Runner:
             # waypoint_step_size = 10
             # step_size = 50
             waypoint_step_size = 10 if reach_cost < 0.2 else 50
-            if num_steps % waypoint_step_size == 0:
+            if num_steps % waypoint_step_size == 0 or finished:
                 # print(site_translation)
                 # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
                 site_translation = franka_ee_position
@@ -557,9 +564,10 @@ class Runner:
                 # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
                 site_rotation = R.from_matrix(self.data.site('franka_ee').xmat.copy().reshape(3, 3))
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
-                rotation_offset = R.from_quat([0, 1, 0, 0])
-                site_rotation = rotation_offset.inv() * site_rotation
+                rotation_offset = R.from_quat([1, 0, 0, 0])
+                site_rotation = rotation_offset.inv() * site_rotation 
                 print("rotation", site_rotation.as_rotvec(), site_rotation.as_quat())
+                print(site_rotation.as_matrix())
                 site_rotation = site_rotation.as_matrix()
                 # site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
                 gripper_pose = self.data.joint("right_driver_joint").qpos  # 0.0 is fully open, 0.8 is fully closed
@@ -580,7 +588,7 @@ class Runner:
                         "type": "init"
                     }
             
-            if num_steps % update_step_size == 0:
+            if num_steps % update_step_size == 0 or finished:
                     
                 print("Waiting for obs...")
                 
@@ -648,6 +656,9 @@ class Runner:
                     
                 waypoints = []
                 
+            if finished:
+                break
+                
                 # self.actions.append(site_action)
             # else:
             self.agent.set_state(
@@ -660,6 +671,20 @@ class Runner:
                 userdata=self.data.userdata,
             )
             # print(self.data.qpos)
+            reach2_cost = self.agent.get_cost_term_values()["Reach2"]
+            reach_cost = self.agent.get_cost_term_values()["Reach"]
+            remove_cost = self.agent.get_cost_term_values()["Move Away"]
+            # if reach1_cost > 0.02:
+            #     self.actions[-1][-1] = 0.
+            lift_cost = self.agent.get_cost_term_values()["Lift"]
+            self.agent.set_cost_weights({
+                # "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+                "Lift": remove_cost > 0.1,
+                # "BlockOrient": reach2_cost > 0.09
+                # "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
+                # "Reach": reach2_cost > 0.03,
+                # "OpenGripper": reach_cost > 0.05
+            })
             self.agent.planner_step()
             # print(i)
             # actions.append(agent.get_action(averaging_duration=control_timestep))
@@ -667,17 +692,7 @@ class Runner:
             # print(i)
             # satisfied = False
             for _ in range(self.repeats):
-                remove_cost = self.agent.get_cost_term_values()["Move Away"]
-                # if reach1_cost > 0.02:
-                #     self.actions[-1][-1] = 0.
-                lift_cost = self.agent.get_cost_term_values()["Lift"]
-                self.agent.set_cost_weights({
-                    # "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
-                    "Lift": remove_cost > 0.1,
-                    # "BlockOrient": reach2_cost > 0.09
-                    # "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
-                    # "Reach": reach2_cost > 0.03
-                })
+                
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
                 if self.viewer is not None:
@@ -707,8 +722,8 @@ class Runner:
                 # print(i, cost)
                 print(num_steps, f"{self.agent.get_total_cost():.2f} {cost:.2f}", self.agent.get_cost_term_values())
 
-            if satisfied:
-                return True
+            # if satisfied:
+            #     return True
 
             # observations.append(environment_step(model, data, actions[-1]))
             # viewer.render()
@@ -716,8 +731,9 @@ class Runner:
             last_updated += 1
             # print(last_updated, best_cost)
             if last_updated > 200 and num_steps > step_limit:
-                break
-        return False
+                step_limit_exceeded = True
+                # break
+        return satisfied
         
     def run_once(self, task_parameters, cost_weights, cost_limit, cost_name=None, step_limit=1000):
         if task_parameters is not None:
