@@ -59,7 +59,7 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // mju_copy(residual + counter, red_block_quat, 2);
   // std::cout << red_block_quat[0] << " " << red_block_quat[1] << " " << red_block_quat[2] << " " << red_block_quat[3] << std::endl;
   // counter += 2;
-  residual[counter ++] = std::max(0., 1 - red_block_mat[8] - 0.05);
+  residual[counter ++] = std::max(0., 1 - red_block_mat[8] - 0.00);
 
   int lift_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
   double *lift_obj = SensorByName(model, data, object_names[lift_obj_id]);

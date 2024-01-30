@@ -67,7 +67,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = True
+REAL_ROBOT = False
 
 ENV = "blocks"
 REPEATS = 2
@@ -551,20 +551,26 @@ class Runner:
             if num_steps % waypoint_step_size == 0:
                 # print(site_translation)
                 # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
-                # site_translation = franka_ee_position
-                site_translation = pinch_position - franka_diff
-                print(site_translation - franka_ee_position)
+                site_translation = franka_ee_position
+                # site_translation = pinch_position - franka_diff
+                # print(site_translation - franka_ee_position)
                 # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
+                site_rotation = R.from_matrix(self.data.site('franka_ee').xmat.copy().reshape(3, 3))
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
-                site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
+                rotation_offset = R.from_quat([0, 1, 0, 0])
+                site_rotation = rotation_offset.inv() * site_rotation
+                print("rotation", site_rotation.as_rotvec(), site_rotation.as_quat())
+                site_rotation = site_rotation.as_matrix()
+                # site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
                 gripper_pose = self.data.joint("right_driver_joint").qpos  # 0.0 is fully open, 0.8 is fully closed
                 gripper_pose = max(min(int(gripper_pose / 0.8 * 255), 255), 0)  # to robotiq pose
 
                 if num_steps > 0:
                     data_to_send = {
                         "translation": site_translation.tolist(),
-                        "rotation": site_rotation.tolist(),
+                        "rotation": site_rotation.flatten().tolist(),  # [3x3] -> [9]
                         "gripper_pose": gripper_pose,
+                        "qpos": self.data.qpos.tolist(),
                         "type": "update"
                     }
                     waypoints.append(copy.deepcopy(data_to_send))
@@ -664,9 +670,11 @@ class Runner:
                 #     self.actions[-1][-1] = 0.
                 lift_cost = self.agent.get_cost_term_values()["Lift"]
                 self.agent.set_cost_weights({
-                    "Reach2": lift_cost < 0.05,
-                    "Lift": reach2_cost > 0.09,
-                    "BlockOrient": reach2_cost > 0.09
+                    "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+                    "Lift": reach2_cost > 0.1,
+                    # "BlockOrient": reach2_cost > 0.09
+                    "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
+                    "Reach": reach2_cost > 0.03
                 })
                 self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
                 # print("hand xpos:", data.site("eeff").xpos)
@@ -1000,7 +1008,7 @@ class Runner:
             
         # print(111)
 
-        if self.save_last_img:
+        if self.save_last_img and self.mj_viewer is not None:
             im = self.mj_viewer.read_pixels(camid=0)
             cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
 
