@@ -67,7 +67,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = True
+REAL_ROBOT = False
 
 ENV = "blocks"
 REPEATS = 2
@@ -275,7 +275,7 @@ def reset_reward():
     # COST_WEIGHTS["Safety"] = 0.1
     # COST_NAMES_REQUIRED.append("Safety")
     # REWARD_CNT["Safety"] = 1
-    COST_WEIGHTS["HitGround"] = 0
+    # COST_WEIGHTS["HitGround"] = 0
     COST_WEIGHTS["LockBin"] = 1
     COST_WEIGHTS["BlockOrient"] = 1
     COST_WEIGHTS["OpenGripper"] = 1
@@ -666,14 +666,14 @@ class Runner:
             # if reach1_cost > 0.02:
             #     self.actions[-1][-1] = 0.
             lift_cost = self.agent.get_cost_term_values()["Lift"]
-            self.agent.set_cost_weights({
-                "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
-                "Lift": reach2_cost > 0.1,
-                # "BlockOrient": reach2_cost > 0.09
-                "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
-                "Reach": reach2_cost > 0.03,
-                # "OpenGripper": reach_cost > 0.05
-            })
+            # self.agent.set_cost_weights({
+            #     "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+            #     "Lift": reach2_cost > 0.1,
+            #     # "BlockOrient": reach2_cost > 0.09
+            #     "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
+            #     "Reach": reach2_cost > 0.03,
+            #     # "OpenGripper": reach_cost > 0.05
+            # })
             self.agent.planner_step()
             # print(i)
             # actions.append(agent.get_action(averaging_duration=control_timestep))
