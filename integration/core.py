@@ -67,7 +67,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = False
+REAL_ROBOT = True
 
 ENV = "blocks"
 REPEATS = 2
@@ -558,17 +558,40 @@ class Runner:
             if num_steps % waypoint_step_size == 0 or finished:
                 # print(site_translation)
                 # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
-                site_translation = franka_ee_position
+                site_translation = franka_ee_position.copy()
                 # site_translation = pinch_position - franka_diff
                 # print(site_translation - franka_ee_position)
                 # site_rotation = R.from_matrix(self.data.site('pinch').xmat.copy().reshape(3, 3))
-                site_rotation = R.from_matrix(self.data.site('franka_ee').xmat.copy().reshape(3, 3))
+                franka_ee_rotation = self.data.site('franka_ee').xmat.copy().reshape(3, 3)
+                pinch_rotation = self.data.site('pinch').xmat.copy().reshape(3, 3)
+                # print(pinch_rotation)
+                # exit(0)
+                T1 = np.eye(4)
+                T1[:3, :3] = pinch_rotation
+                T1[:3, 3] = pinch_position
+                T2 = np.array([[0, 0, 1, 0], [0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1]])
+                T3 = np.array([[ 1.00000000e+00,  1.03212410e-16,  0.00000000e+00,
+                    -1.72698481e-01],
+                [ 2.47464700e-17,  1.00000000e+00,  0.00000000e+00,
+                    -1.46301970e-05],
+                [ 0.00000000e+00,  0.00000000e+00,  1.00000000e+00,
+                    5.30000000e-02],
+                [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                    1.00000000e+00]])
+                T = T1 @ T2 @ T3
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
                 rotation_offset = R.from_quat([1, 0, 0, 0])
                 # site_rotation = rotation_offset.inv() * site_rotation 
-                print("rotation", site_rotation.as_rotvec(), site_rotation.as_quat())
-                print(site_rotation.as_matrix())
-                site_rotation = site_rotation.as_matrix()
+                # print("rotation", site_rotation.as_rotvec(), site_rotation.as_quat())
+                # print(site_rotation.as_matrix())
+                # site_rotation = site_rotation.as_matrix()
+                site_rotation = T[:3, :3]
+                site_translation = T[:3, 3]
+                print(site_translation, franka_ee_position, pinch_position, self.data.site('red_block').xpos)
+                print(np.linalg.norm(site_translation - franka_ee_position), np.linalg.norm(site_rotation - franka_ee_rotation))
+                # print(site_translation, site_rotation)
+                # if num_steps > 0:
+                # exit(0)
                 # site_rotation = np.array([0.0, 0.0, 0.0])  # ignore rotation for now
                 gripper_pose = self.data.joint("right_driver_joint").qpos  # 0.0 is fully open, 0.8 is fully closed
                 gripper_pose = max(min(int(gripper_pose / 0.8 * 255), 255), 0)  # to robotiq pose
@@ -677,10 +700,10 @@ class Runner:
             #     self.actions[-1][-1] = 0.
             lift_cost = self.agent.get_cost_term_values()["Lift"]
             self.agent.set_cost_weights({
-                "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+                "Reach2": lift_cost < 0.09 or reach2_cost <= 0.1,
                 "Lift": reach2_cost > 0.1,
                 # "BlockOrient": reach2_cost > 0.09
-                "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
+                "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1 and reach_cost > 0.03,
                 "Reach": reach2_cost > 0.03,
                 # "OpenGripper": reach_cost > 0.05
             })
@@ -709,8 +732,8 @@ class Runner:
                     if cost_limit is not None and cost <= cost_limit:
                         satisfied += 1
 
-            print("Cost:", self.agent.get_cost_term_values())
-            print("Cost weights:", self.agent.get_cost_weights())
+            # print("Cost:", self.agent.get_cost_term_values())
+            # print("Cost weights:", self.agent.get_cost_weights())
 
             if self.save_video:
                 img = self.mj_viewer.read_pixels(camid=0)
