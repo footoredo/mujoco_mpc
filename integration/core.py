@@ -164,6 +164,8 @@ LONG_NAME_MAPPING = {
     "bottom_cabinet": "slidedoorjoint",
     "stone_cabinet_door_handle": "slidedoorhandle",
     "stone_cabinet": "slidedoorjoint",
+    "marble_cabinet_door_handle": "slidedoorhandle",
+    "marble_cabinet": "slidedoorjoint",
     "hinge_cabinet_inside": "leftcabinetinside",
     "microwave": "micro0joint",
 }
@@ -557,37 +559,37 @@ class Runner:
         freeze_qpos = None
         while True:
             # print(self.data.act)
-            if (num_steps + 1) % 10 == 0:
-                # if freeze_qpos is None:
-                site_transition = self.data.site('eeff').xpos.copy()
-                site_transition = site_transition - np.array([0.45, 0.0, 0.3])
-                site_rotation = R.from_matrix(self.data.site('eeff').xmat.copy().reshape(3, 3))
-                site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
-                # gripper_pose = 
-                site_action = np.concatenate((site_transition, site_rotation, [0.]))
-                print(site_rotation)
-                print(self.data.joint("right_driver_joint").qpos)
-                freeze_qpos = self.data.qpos.copy()
-                freeze_qpos[0] += 1.
-                input()
-                self.data.qpos[:] = freeze_qpos
-                self.data.qvel[:] = 0.
-                # self.actions.append(site_action)
-            else:
-                self.agent.set_state(
-                    time=self.data.time,
-                    qpos=self.data.qpos,
-                    qvel=self.data.qvel,
-                    act=self.data.act,
-                    mocap_pos=self.data.mocap_pos,
-                    mocap_quat=self.data.mocap_quat,
-                    userdata=self.data.userdata,
-                )
-                self.agent.planner_step()
-                # print(i)
-                # actions.append(agent.get_action(averaging_duration=control_timestep))
-                self.actions.append(self.agent.get_action())
-                # print(self.data.site('eeff').xpos, self.data.site('eeff').xmat, self.actions[-1])
+            # if (num_steps + 1) % 10 == 0:
+            #     # if freeze_qpos is None:
+            #     site_transition = self.data.site('eeff').xpos.copy()
+            #     site_transition = site_transition - np.array([0.45, 0.0, 0.3])
+            #     site_rotation = R.from_matrix(self.data.site('eeff').xmat.copy().reshape(3, 3))
+            #     site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
+            #     # gripper_pose = 
+            #     site_action = np.concatenate((site_transition, site_rotation, [0.]))
+            #     print(site_rotation)
+            #     # print(self.data.joint("right_driver_joint").qpos)
+            #     freeze_qpos = self.data.qpos.copy()
+            #     freeze_qpos[0] += 1.
+            #     input()
+            #     self.data.qpos[:] = freeze_qpos
+            #     self.data.qvel[:] = 0.
+            #     # self.actions.append(site_action)
+            # else:
+            self.agent.set_state(
+                time=self.data.time,
+                qpos=self.data.qpos,
+                qvel=self.data.qvel,
+                act=self.data.act,
+                mocap_pos=self.data.mocap_pos,
+                mocap_quat=self.data.mocap_quat,
+                userdata=self.data.userdata,
+            )
+            self.agent.planner_step()
+            # print(i)
+            # actions.append(agent.get_action(averaging_duration=control_timestep))
+            self.actions.append(self.agent.get_action())
+            # print(self.data.site('eeff').xpos, self.data.site('eeff').xmat, self.actions[-1])
                 
 
             # print(i)
@@ -632,7 +634,7 @@ class Runner:
             last_updated += 1
             # print(last_updated, best_cost)
             if last_updated > 200 and num_steps > step_limit:
-                input()
+                # input()
                 break
         return False
         
