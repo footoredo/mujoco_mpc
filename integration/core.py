@@ -542,6 +542,8 @@ class Runner:
             pinch_position = self.data.site('pinch').xpos.copy()
             franka_ee_position = self.data.site('franka_ee').xpos.copy()
             finished = step_limit_exceeded or satisfied
+            if finished:
+                print("finished! satisfied?", satisfied)
             # print(franka_ee_position)
             # if reach_cost > 0.2:
             #     step_size = 50
@@ -549,10 +551,10 @@ class Runner:
             #     step_size = 20
             # else:
             #     step_size = 10
-            update_step_size = 50
+            update_step_size = 540
             # waypoint_step_size = 10
             # step_size = 50
-            waypoint_step_size = 10 if reach_cost < 0.2 else 50
+            waypoint_step_size = 20 if reach_cost < 0.2 else 60
             if num_steps % waypoint_step_size == 0 or finished:
                 # print(site_translation)
                 # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
@@ -628,10 +630,12 @@ class Runner:
                         }
                     print(objects_data)
                     obj_pos[:3] = objects_poses["lemon"]["translation"]
-                    obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
+                    # obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
+                    obj_pos[2] += 0.03
                     obj_pos[7:10] = objects_poses["apple"]["translation"]
                     # obj_pos[10:14] = R.from_matrix(objects_poses["apple"]["orientation"]).as_quat()
                     obj_pos[21:24] = objects_poses["bowl"]["translation"]
+                    obj_pos[23] -= 0.02
                     # obj_pos[24:28] = R.from_matrix(objects_poses["bowl"]["orientation"]).as_quat()
                 # gripper_pos = received_data["gripper"]
                 # gripper_pos = gripper_pos / 255 * 0.8  # robotiq to mujoco
