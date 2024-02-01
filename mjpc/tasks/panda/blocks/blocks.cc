@@ -50,27 +50,39 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   int param_counter = 0;
 
   double *pinch_pos = SensorByName(model, data, "hand");
-  double *apple_pos = SensorByName(model, data, "red_block");
-  double pinch_dis = mju_dist3(pinch_pos, apple_pos);
+  // double *object_pos = SensorByName(model, data, "red_block");
+  double *object_pos = SensorByName(model, data, "yellow_block");
+  double pinch_dis = mju_dist3(pinch_pos, object_pos);
+
+  residual[counter ++] = std::max(object_pos[0] - 0.75, 0.) + std::max(object_pos[1], 0.0) + std::max(object_pos[2] - 0.06, 0.0);  // Drop Zone
+
 
   double *finger_tip = SensorByName(model, data, "finger_tip");
   double *base_bottom = SensorByName(model, data, "base_bottom");
   residual[counter ++] = 100 * std::max(0.01 - std::min(finger_tip[2], base_bottom[2]), 0.);
 
   double *gripper_joint = SensorByName(model, data, "finger_joint");
-  residual[counter ++] = pinch_dis < 0.06 ? 0. : *gripper_joint;
+  residual[counter ++] = pinch_dis < 0.08 ? 0. : *gripper_joint;
 
   double *bin_vel = SensorByName(model, data, "bin_vel");
-  mju_copy3(residual + counter, bin_vel);
-  counter += 3;
+  // mju_copy3(residual + counter, bin_vel);
+  residual[counter ++] = std::max(std::abs(bin_vel[0]) - 0.01, 0.);
+  residual[counter ++] = std::max(std::abs(bin_vel[1]) - 0.01, 0.);
+  residual[counter ++] = std::max(std::abs(bin_vel[2]) - 0.01, 0.);
+  // counter += 3;
 
-  double *red_block_quat = SensorByName(model, data, "red_block_quat");
-  double red_block_mat[9] = {0.};
-  mju_quat2Mat(red_block_mat, red_block_quat);
-  // mju_copy(residual + counter, red_block_quat, 2);
-  // std::cout << red_block_quat[0] << " " << red_block_quat[1] << " " << red_block_quat[2] << " " << red_block_quat[3] << std::endl;
-  // counter += 2;
-  residual[counter ++] = std::max(0., 1 - red_block_mat[8] - 0.00);
+  // double *red_block_quat = SensorByName(model, data, "red_block_quat");
+  // double red_block_mat[9] = {0.};
+  // mju_quat2Mat(red_block_mat, red_block_quat);
+  // // mju_copy(residual + counter, red_block_quat, 2);
+  // // std::cout << red_block_quat[0] << " " << red_block_quat[1] << " " << red_block_quat[2] << " " << red_block_quat[3] << std::endl;
+  // // counter += 2;
+  // residual[counter ++] = std::max(0., 1 - red_block_mat[8] - 0.00);
+
+  double *yellow_block_quat = SensorByName(model, data, "yellow_block_quat");
+  double yellow_block_mat[9] = {0.};
+  mju_quat2Mat(yellow_block_mat, yellow_block_quat);
+  residual[counter ++] = std::max(0., 1 - yellow_block_mat[4] - 0.00);
 
   int lift_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
   double *lift_obj = SensorByName(model, data, object_names[lift_obj_id]);
@@ -181,7 +193,9 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // std::cout << residual[counter] << " " << residual[counter + 1] << std::endl;
   // counter += 2; // only xy
 
-  residual[counter++] = std::max(move_distance_target - mju_dist3(move_obj_a, move_obj_b), 0.0);
+  // residual[counter++] = std::max(move_distance_target - mju_dist3(move_obj_a, move_obj_b), 0.0);
+  double cur_distance = (move_obj_a[0] - move_obj_b[0]) * (move_obj_a[0] - move_obj_b[0]) + (move_obj_a[1] - move_obj_b[1]) * (move_obj_a[1] - move_obj_b[1]);
+  residual[counter ++] = std::max(move_distance_target - cur_distance, 0.0);
   // residual[counter] = std::max(move_distance_target - mju_norm(residual + counter - 2, 2), 0.0);
   // counter += 1;
 

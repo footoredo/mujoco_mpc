@@ -68,6 +68,7 @@ def environment_reset(model, data):
   return get_observation(model, data)
 
 REAL_ROBOT = True
+REMOVE_LEMON = True
 
 ENV = "blocks"
 REPEATS = 2
@@ -279,7 +280,7 @@ def reset_reward():
     COST_WEIGHTS["LockBin"] = 1
     COST_WEIGHTS["BlockOrient"] = 1
     COST_WEIGHTS["OpenGripper"] = 1
-
+    COST_WEIGHTS["DropZone"] = 1
 
 
 def map_name(name):
@@ -420,7 +421,9 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     TASK_PARAMS[f"MoveAway{cnt}ObjectA"] = map_name(obj1)
     TASK_PARAMS[f"MoveAway{cnt}ObjectB"] = map_name(obj2)
     # TASK_PARAMS[f"MoveAwayDistance"] = distance * 1.5 if ENV == "kitchen" else distance * 0.8
-    move_away_distance = original_distance + 0.6 if ENV == "kitchen" else original_distance + 0.3
+    move_away_distance = 0.10
+    # else:
+    #     move_away_distance = original_distance + 0.6 if ENV == "kitchen" else original_distance + 0.3
     if ENV == "kitchen":
         max_distance = 2.0
     elif ENV == "cabinet":
@@ -554,7 +557,7 @@ class Runner:
             update_step_size = 540
             # waypoint_step_size = 10
             # step_size = 50
-            waypoint_step_size = 20 if reach_cost < 0.2 else 60
+            waypoint_step_size = 10 if reach_cost < 0.2 else 60
             if num_steps % waypoint_step_size == 0 or finished:
                 # print(site_translation)
                 # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
@@ -631,11 +634,11 @@ class Runner:
                     print(objects_data)
                     obj_pos[:3] = objects_poses["lemon"]["translation"]
                     # obj_pos[3:7] = R.from_matrix(objects_poses["lemon"]["orientation"]).as_quat()
-                    obj_pos[2] += 0.03
+                    obj_pos[2] += 0.04
                     obj_pos[7:10] = objects_poses["apple"]["translation"]
                     # obj_pos[10:14] = R.from_matrix(objects_poses["apple"]["orientation"]).as_quat()
                     obj_pos[21:24] = objects_poses["bowl"]["translation"]
-                    obj_pos[23] -= 0.02
+                    obj_pos[23] -= 0.03
                     # obj_pos[24:28] = R.from_matrix(objects_poses["bowl"]["orientation"]).as_quat()
                 # gripper_pos = received_data["gripper"]
                 # gripper_pos = gripper_pos / 255 * 0.8  # robotiq to mujoco
@@ -676,12 +679,15 @@ class Runner:
             # if reach1_cost > 0.02:
             #     self.actions[-1][-1] = 0.
             lift_cost = self.agent.get_cost_term_values()["Lift"]
+            move_away_cost = self.agent.get_cost_term_values()["Move Away"]
             self.agent.set_cost_weights({
-                "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
-                "Lift": reach2_cost > 0.1,
+                # "Reach2": lift_cost < 0.05 or reach2_cost <= 0.1,
+                "Lift": move_away_cost > 0.03,
                 # "BlockOrient": reach2_cost > 0.09
-                "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1,
-                "Reach": reach2_cost > 0.03,
+                "BlockOrient": 0.0,
+                "Move Away" : lift_cost < 0.01,
+                "DropZone": lift_cost < 0.01
+                # "Reach": reach2_cost > 0.03,
                 # "OpenGripper": reach_cost > 0.05
             })
             self.agent.planner_step()

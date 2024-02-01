@@ -77,11 +77,11 @@
     <!-- <default class="mug_collision"> -->
       <!-- <geom type="box" group="1"/> -->
       <default class="cup_collision">
-        <geom type="box" size="0.0026 0.007822 0.03550" conaffinity="1" condim="3" contype="0" group="4" margin="0.001" solimp=".8 .9 .01" solref=".02 1"/>
+        <geom type="box" size="0.0026 0.007822 0.03350" conaffinity="1" condim="3" contype="0" group="4" margin="0.001" solimp=".8 .9 .01" solref=".02 1"/>
       </default>
 
       <default class="cup_visual">
-        <geom type="box" size="0.0026 0.007822 0.03050" material="kettle_green" contype="0" conaffinity="0"/>
+        <geom type="box" size="0.0026 0.007822 0.03350" material="kettle_green" contype="0" conaffinity="0"/>
       </default>
   </default>
 
@@ -123,9 +123,9 @@
 
     <body name="yellow_block" pos="0.4 -0.15 .04">  <!-- lemon -->
       <joint type="free"/>
-      <geom class="hinge_collision" type="ellipsoid" size="0.0585 0.035 0.035" mass=".1" condim="6"/>
-      <geom material="kettle_yellow" pos="0 0 0" size="0.0585 0.035 0.035" type="ellipsoid"/>
-      <site name="yellow_block" type="box" pos="0 0 0" size="0.001 0.001 0.001" group="3"/>
+      <geom class="hinge_collision" type="ellipsoid" size="0.0595 0.033 0.033" mass=".1" condim="6"/>
+      <geom material="kettle_yellow" pos="0 0 0" size="0.0595 0.033 0.033" type="ellipsoid"/>
+      <site name="yellow_block" type="box" pos="0.01 0 0" size="0.001 0.001 0.001" group="3"/>
     </body>
 
     <!-- <body name="red_block" pos="0.4 0.2 0.04">
@@ -195,48 +195,48 @@
       <!-- <geom material="kettle_blue" pos="0 0 0" size="0.031 0.031 0.031" type="box"/> -->
 
       <!-- <geom type="mesh" mesh="mug" material="kettle_yellow" euler="0 0 0" group="1" contype="0" conaffinity="0"/> -->
-      <geom class="cup_collision" pos="0.05000 0.00000 0.03550" euler="0 0 0.00000"/>
-      <geom class="cup_collision" pos="0.04755 0.01545 0.03550" euler="0 0 0.31416"/>
-      <geom class="cup_collision" pos="0.04045 0.02939 0.03550" euler="0 0 0.62832"/>
-      <geom class="cup_collision" pos="0.02939 0.04045 0.03550" euler="0 0 0.94248"/>
-      <geom class="cup_collision" pos="0.01545 0.04755 0.03550" euler="0 0 1.25664"/>
-      <geom class="cup_collision" pos="0.00000 0.05000 0.03550" euler="0 0 1.57080"/>
-      <geom class="cup_collision" pos="-0.01545 0.04755 0.03550" euler="0 0 1.88496"/>
-      <geom class="cup_collision" pos="-0.02939 0.04045 0.03550" euler="0 0 2.19911"/>
-      <geom class="cup_collision" pos="-0.04045 0.02939 0.03550" euler="0 0 2.51327"/>
-      <geom class="cup_collision" pos="-0.04755 0.01545 0.03550" euler="0 0 2.82743"/>
-      <geom class="cup_collision" pos="-0.05000 0.00000 0.03550" euler="0 0 3.14159"/>
-      <geom class="cup_collision" pos="-0.04755 -0.01545 0.03550" euler="0 0 3.45575"/>
-      <geom class="cup_collision" pos="-0.04045 -0.02939 0.03550" euler="0 0 3.76991"/>
-      <geom class="cup_collision" pos="-0.02939 -0.04045 0.03550" euler="0 0 4.08407"/>
-      <geom class="cup_collision" pos="-0.01545 -0.04755 0.03550" euler="0 0 4.39823"/>
-      <geom class="cup_collision" pos="-0.00000 -0.05000 0.03550" euler="0 0 4.71239"/>
-      <geom class="cup_collision" pos="0.01545 -0.04755 0.03550" euler="0 0 5.02655"/>
-      <geom class="cup_collision" pos="0.02939 -0.04045 0.03550" euler="0 0 5.34071"/>
-      <geom class="cup_collision" pos="0.04045 -0.02939 0.03550" euler="0 0 5.65487"/>
-      <geom class="cup_collision" pos="0.04755 -0.01545 0.03550" euler="0 0 5.96903"/>
+      <geom class="cup_collision" pos="0.05000 0.00000 0.03350" euler="0 0 0.00000"/>
+      <geom class="cup_collision" pos="0.04755 0.01545 0.03350" euler="0 0 0.31416"/>
+      <geom class="cup_collision" pos="0.04045 0.02939 0.03350" euler="0 0 0.62832"/>
+      <geom class="cup_collision" pos="0.02939 0.04045 0.03350" euler="0 0 0.94248"/>
+      <geom class="cup_collision" pos="0.01545 0.04755 0.03350" euler="0 0 1.25664"/>
+      <geom class="cup_collision" pos="0.00000 0.05000 0.03350" euler="0 0 1.57080"/>
+      <geom class="cup_collision" pos="-0.01545 0.04755 0.03350" euler="0 0 1.88496"/>
+      <geom class="cup_collision" pos="-0.02939 0.04045 0.03350" euler="0 0 2.19911"/>
+      <geom class="cup_collision" pos="-0.04045 0.02939 0.03350" euler="0 0 2.51327"/>
+      <geom class="cup_collision" pos="-0.04755 0.01545 0.03350" euler="0 0 2.82743"/>
+      <geom class="cup_collision" pos="-0.05000 0.00000 0.03350" euler="0 0 3.14159"/>
+      <geom class="cup_collision" pos="-0.04755 -0.01545 0.03350" euler="0 0 3.45575"/>
+      <geom class="cup_collision" pos="-0.04045 -0.02939 0.03350" euler="0 0 3.76991"/>
+      <geom class="cup_collision" pos="-0.02939 -0.04045 0.03350" euler="0 0 4.08407"/>
+      <geom class="cup_collision" pos="-0.01545 -0.04755 0.03350" euler="0 0 4.39823"/>
+      <geom class="cup_collision" pos="-0.00000 -0.05000 0.03350" euler="0 0 4.71239"/>
+      <geom class="cup_collision" pos="0.01545 -0.04755 0.03350" euler="0 0 5.02655"/>
+      <geom class="cup_collision" pos="0.02939 -0.04045 0.03350" euler="0 0 5.34071"/>
+      <geom class="cup_collision" pos="0.04045 -0.02939 0.03350" euler="0 0 5.65487"/>
+      <geom class="cup_collision" pos="0.04755 -0.01545 0.03350" euler="0 0 5.96903"/>
       <geom class="cup_collision" type="cylinder" size="0.050 0.0026" pos="0 0 0.0026"/>
       
-      <geom class="cup_visual" pos="0.05000 0.00000 0.03550" euler="0 0 0.00000"/>
-      <geom class="cup_visual" pos="0.04755 0.01545 0.03550" euler="0 0 0.31416"/>
-      <geom class="cup_visual" pos="0.04045 0.02939 0.03550" euler="0 0 0.62832"/>
-      <geom class="cup_visual" pos="0.02939 0.04045 0.03550" euler="0 0 0.94248"/>
-      <geom class="cup_visual" pos="0.01545 0.04755 0.03550" euler="0 0 1.25664"/>
-      <geom class="cup_visual" pos="0.00000 0.05000 0.03550" euler="0 0 1.57080"/>
-      <geom class="cup_visual" pos="-0.01545 0.04755 0.03550" euler="0 0 1.88496"/>
-      <geom class="cup_visual" pos="-0.02939 0.04045 0.03550" euler="0 0 2.19911"/>
-      <geom class="cup_visual" pos="-0.04045 0.02939 0.03550" euler="0 0 2.51327"/>
-      <geom class="cup_visual" pos="-0.04755 0.01545 0.03550" euler="0 0 2.82743"/>
-      <geom class="cup_visual" pos="-0.05000 0.00000 0.03550" euler="0 0 3.14159"/>
-      <geom class="cup_visual" pos="-0.04755 -0.01545 0.03550" euler="0 0 3.45575"/>
-      <geom class="cup_visual" pos="-0.04045 -0.02939 0.03550" euler="0 0 3.76991"/>
-      <geom class="cup_visual" pos="-0.02939 -0.04045 0.03550" euler="0 0 4.08407"/>
-      <geom class="cup_visual" pos="-0.01545 -0.04755 0.03550" euler="0 0 4.39823"/>
-      <geom class="cup_visual" pos="-0.00000 -0.05000 0.03550" euler="0 0 4.71239"/>
-      <geom class="cup_visual" pos="0.01545 -0.04755 0.03550" euler="0 0 5.02655"/>
-      <geom class="cup_visual" pos="0.02939 -0.04045 0.03550" euler="0 0 5.34071"/>
-      <geom class="cup_visual" pos="0.04045 -0.02939 0.03550" euler="0 0 5.65487"/>
-      <geom class="cup_visual" pos="0.04755 -0.01545 0.03550" euler="0 0 5.96903"/>
+      <geom class="cup_visual" pos="0.05000 0.00000 0.03350" euler="0 0 0.00000"/>
+      <geom class="cup_visual" pos="0.04755 0.01545 0.03350" euler="0 0 0.31416"/>
+      <geom class="cup_visual" pos="0.04045 0.02939 0.03350" euler="0 0 0.62832"/>
+      <geom class="cup_visual" pos="0.02939 0.04045 0.03350" euler="0 0 0.94248"/>
+      <geom class="cup_visual" pos="0.01545 0.04755 0.03350" euler="0 0 1.25664"/>
+      <geom class="cup_visual" pos="0.00000 0.05000 0.03350" euler="0 0 1.57080"/>
+      <geom class="cup_visual" pos="-0.01545 0.04755 0.03350" euler="0 0 1.88496"/>
+      <geom class="cup_visual" pos="-0.02939 0.04045 0.03350" euler="0 0 2.19911"/>
+      <geom class="cup_visual" pos="-0.04045 0.02939 0.03350" euler="0 0 2.51327"/>
+      <geom class="cup_visual" pos="-0.04755 0.01545 0.03350" euler="0 0 2.82743"/>
+      <geom class="cup_visual" pos="-0.05000 0.00000 0.03350" euler="0 0 3.14159"/>
+      <geom class="cup_visual" pos="-0.04755 -0.01545 0.03350" euler="0 0 3.45575"/>
+      <geom class="cup_visual" pos="-0.04045 -0.02939 0.03350" euler="0 0 3.76991"/>
+      <geom class="cup_visual" pos="-0.02939 -0.04045 0.03350" euler="0 0 4.08407"/>
+      <geom class="cup_visual" pos="-0.01545 -0.04755 0.03350" euler="0 0 4.39823"/>
+      <geom class="cup_visual" pos="-0.00000 -0.05000 0.03350" euler="0 0 4.71239"/>
+      <geom class="cup_visual" pos="0.01545 -0.04755 0.03350" euler="0 0 5.02655"/>
+      <geom class="cup_visual" pos="0.02939 -0.04045 0.03350" euler="0 0 5.34071"/>
+      <geom class="cup_visual" pos="0.04045 -0.02939 0.03350" euler="0 0 5.65487"/>
+      <geom class="cup_visual" pos="0.04755 -0.01545 0.03350" euler="0 0 5.96903"/>
       <geom class="cup_visual" type="cylinder" size="0.050 0.0026" pos="0 0 0.0026"/>
       <!-- <body name="handle" pos="0.056 0 0.0395" euler="90 0 0">
         <geom class="handle" pos="0.0193 0 0" euler="0 0 0"/>
@@ -257,7 +257,7 @@
     </body>
 
     <!-- <site name="ee_origin" pos="4.55737943e-01 1.20335101e-04 5.61278488e-01" group="3"/> -->
-    <site name="ee_origin" pos="0.465437943 1.20335101e-04 0.538278488" group="3"/>
+    <site name="ee_origin" pos="0.462437943 1.20335101e-04 0.538278488" group="3"/>
 
     <!-- <body name="hingecabinet" pos="0 1 .21" >
       <include file="../furniture_sim/hingecabinet/hingecabinet_body.xml"/>
@@ -295,13 +295,13 @@
 
   <keyframe>
     <key name="home" qpos='
-      0.8 -0.15 0.0309981 
-      1 2.65706e-17 5.49329e-19 -1.39678e-17 
+      0.7548 -0.0409 0.1 
+      0 0.7071 0 0.7071
       0.8 0.15 0.0309981 
       1 2.65706e-17 5.49329e-19 -1.39678e-17 
       10000.4 -0.2 0.0309996 
       1 2.35473e-17 4.385e-19 -6.41441e-19 
-      .76 0.0 .001
+      .7514 -0.0414 .001
       1 0 0 0
       0.00010941128140862762 -0.7839987460186607 0.00017243857977997608 -2.357870360525031 0.00024733272634653577 1.5694190480973986 0.7857085690100988
       0.00647986 0.0025101 0.0104537 -0.0156212 0.00647986 0.00251018 0.0104655 -0.0156448'/>
@@ -316,6 +316,7 @@
     <user name="Open Door" dim="1" user="2 .1 0 1 0.003"/>
     <user name="Reach Box" dim="3" user="2 .1 0 1 0.01"/>
     <user name="Move Box" dim="1" user="2 1 0 5 0.003"/> -->
+    <user name="DropZone" dim="1" user="2 1 0 5 0.01"/>
     <user name="HitGround" dim="1" user="2 1 0 5 0.01"/>
     <user name="OpenGripper" dim="1" user="2 1 0 5 0.01"/>
     <user name="LockBin" dim="3" user="2 1 0 5 0.01"/>
@@ -339,6 +340,7 @@
     <framepos name="hand" objtype="site" objname="pinch"/>
 	<velocimeter name="hand_vel"  site="pinch"/>
     <framepos name="yellow_block" objtype="site" objname="yellow_block"/>
+    <framequat name="yellow_block_quat" objtype="site" objname="yellow_block"/>
     <framepos name="red_block" objtype="site" objname="red_block"/>
     <framepos name="blue_block" objtype="site" objname="blue_block"/>
     <framepos name="red_bin" objtype="site" objname="red_bin"/>
