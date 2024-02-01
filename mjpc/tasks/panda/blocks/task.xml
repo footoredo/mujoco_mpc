@@ -137,8 +137,8 @@
 
     <body name="red_block" pos="0.4 0.15 0.04">  
       <joint type="free"/>
-      <geom class="hinge_collision" type="cylinder" size="0.033 0.025" mass=".1" condim="6"/>
-      <geom material="kettle_red" pos="0 0 0" type="cylinder" size="0.0331 0.0251" />
+      <geom class="hinge_collision" type="cylinder" size="0.034 0.025" mass=".1" condim="6"/>
+      <geom material="kettle_red" pos="0 0 0" type="cylinder" size="0.0341 0.0251" />
       <site name="red_block" type="box" pos="0 0 -0.01" size="0.001 0.001 0.001" group="3"/>
     </body>
 
