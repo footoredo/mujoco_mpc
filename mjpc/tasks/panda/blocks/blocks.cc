@@ -54,7 +54,7 @@ void Blocks::ResidualFn::Residual(const mjModel* model, const mjData* data,
   double *object_pos = SensorByName(model, data, "yellow_block");
   double pinch_dis = mju_dist3(pinch_pos, object_pos);
 
-  residual[counter ++] = std::max(object_pos[0] - 0.75, 0.) + std::max(object_pos[1], 0.0) + std::max(object_pos[2] - 0.06, 0.0);  // Drop Zone
+  residual[counter ++] = std::max(object_pos[0] - 0.75, 0.) + std::max(object_pos[1] + 0.05, 0.0) + std::max(object_pos[2] - 0.06, 0.0);  // Drop Zone
 
 
   double *finger_tip = SensorByName(model, data, "finger_tip");
