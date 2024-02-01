@@ -67,7 +67,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = False
+REAL_ROBOT = True 
 
 ENV = "blocks"
 REPEATS = 2
@@ -560,7 +560,7 @@ class Runner:
                 site_rotation = R.from_matrix(self.data.site('franka_ee').xmat.copy().reshape(3, 3))
                 # site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
                 rotation_offset = R.from_quat([1, 0, 0, 0])
-                site_rotation = rotation_offset.inv() * site_rotation 
+                # site_rotation = rotation_offset.inv() * site_rotation 
                 print("rotation", site_rotation.as_rotvec(), site_rotation.as_quat())
                 print(site_rotation.as_matrix())
                 site_rotation = site_rotation.as_matrix()
