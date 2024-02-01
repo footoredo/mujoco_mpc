@@ -81,7 +81,7 @@
       </default>
 
       <default class="cup_visual">
-        <geom type="box" size="0.0026 0.007822 0.03050" material="kettle_green" contype="0" conaffinity="0"/>
+        <geom type="box" size="0.0026 0.007822 0.03550" material="kettle_green" contype="0" conaffinity="0"/>
       </default>
   </default>
 

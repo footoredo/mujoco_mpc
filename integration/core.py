@@ -67,7 +67,7 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = True
+REAL_ROBOT = False
 
 ENV = "blocks"
 REPEATS = 2
@@ -554,7 +554,7 @@ class Runner:
             update_step_size = 540
             # waypoint_step_size = 10
             # step_size = 50
-            waypoint_step_size = 20 if reach_cost < 0.2 else 60
+            waypoint_step_size = 10 if reach_cost < 0.2 else 60
             if num_steps % waypoint_step_size == 0 or finished:
                 # print(site_translation)
                 # site_translation = site_translation - np.array([0.1, 0.0, 0.0])  # from pinch to franka ee pos
