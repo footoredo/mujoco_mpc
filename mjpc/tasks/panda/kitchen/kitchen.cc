@@ -61,13 +61,13 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
   param_counter ++;
   // residual[counter++] = std::max(pinch_force_target - std::min(abs(*left_finger_force), abs(*right_finger_force)), 0.0);
 
-  int finger_touch_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
-  double* left_finger = SensorByName(model, data, "leftfinger");
-  double* right_finger = SensorByName(model, data, "rightfinger");
-  double* finger_touch_obj = SensorByName(model, data, object_names[finger_touch_obj_id]);
-  mju_sub3(residual + counter, left_finger, finger_touch_obj);
+  // int finger_touch_obj_id = ReinterpretAsInt(parameters_[param_counter ++]);
+  // double* left_finger = SensorByName(model, data, "leftfinger");
+  // double* right_finger = SensorByName(model, data, "rightfinger");
+  // double* finger_touch_obj = SensorByName(model, data, object_names[finger_touch_obj_id]);
+  // mju_sub3(residual + counter, left_finger, finger_touch_obj);
   counter += 3;
-  mju_sub3(residual + counter, right_finger, finger_touch_obj);
+  // mju_sub3(residual + counter, right_finger, finger_touch_obj);
   counter += 3;
 
   double length1 = std::max(mju_norm3(residual + counter - 6), 0.01);
@@ -142,11 +142,12 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // double panda_joints_default[8] = {0.00260707, 0.267844, -0.580238, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_joints_default[8] = {0.00, 0.00 -0.00, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_hand_default[3] = {0.0576433, 0.00168072, 0.579432};
-  for (int i = 0; i < 6; i ++) {
-    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));
+  for (int i = 0; i < 5; i ++) {
+    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i + 1));
     // std::cout << joint_i << " ";
     residual[counter ++] = panda_joints_default[i] - joint_i;
   }
+  residual[counter ++] = 0.0;
   // double* hand = SensorByName(model, data, "hand");
   // mju_sub3(residual + counter, hand, panda_hand_default);
   // counter += 3;
@@ -159,11 +160,12 @@ void Kitchen::ResidualFn::Residual(const mjModel* model, const mjData* data,
   // double panda_joints_default[8] = {0.00260707, 0.267844, -0.580238, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_joints_default[8] = {0.00, 0.00 -0.00, 0.0102786, -2.53195, 0.149859, 0.373268, -0.189007};
   // double panda_hand_default[3] = {0.0576433, 0.00168072, 0.579432};
-  for (int i = 0; i < 8; i ++) {
-    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));
+  for (int i = 0; i < 7; i ++) {
+    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i + 1));
     // std::cout << joint_i << " ";
     residual[counter ++] = panda_joints_default_no_obstruction[i] - joint_i;
   }
+  residual[counter ++] = 0.0;
   // std::cout << std::endl;
 
   // sensor dim sanity check

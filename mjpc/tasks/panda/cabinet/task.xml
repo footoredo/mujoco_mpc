@@ -4,20 +4,23 @@
   <size memory="1M"/>
 
   <custom>
-    <!-- <numeric name="agent_planner" data="0" />
-    <numeric name="agent_horizon" data="0.5" />
-    <numeric name="agent_timestep" data="0.009" />
+    <numeric name="task_transition" data="1" />
+    <numeric name="agent_planner" data="0" />
+    <numeric name="agent_horizon" data="0.6" />
+    <numeric name="agent_integrator" data="2" />
+    <numeric name="agent_timestep" data="0.005" />
     <numeric name="agent_policy_width" data="0.0035" />
     <numeric name="sampling_trajectories" data="60"/>
-    <numeric name="sampling_spline_points" data="7" />
-    <numeric name="sampling_exploration" data="0.1" />
-    <numeric name="gradient_spline_points" data="6" /> -->
+    <numeric name="sampling_spline_points" data="5" />
+    <numeric name="sampling_exploration" data="0.04" />
+    <numeric name="robust_xfrc" data="0.015" />
+    <numeric name="gradient_spline_points" data="6" /> 
 
     <!-- ILQG planner -->
-    <numeric name="agent_planner" data="2" />
+	<!-- <numeric name="agent_planner" data="2" />
     <numeric name="agent_horizon" data="0.35" />
     <numeric name="agent_timestep" data="0.01" />
-    <numeric name="agent_integrator" data="3" />
+	<numeric name="agent_integrator" data="3" /> -->
 
     <numeric name="residual_select_ReachObjectA" data="0"/>
     <text name="residual_list_ReachObjectA" data="hand|leftdoorhandle|rightdoorhandle|box|box_left|box_right|target|left_target_position|right_target_position"/>
@@ -137,13 +140,15 @@
       <site name="box2" type="box" pos="0 -.026 0" size="0.021 0.005 0.021" rgba=".1 .1 1 1"/>
     </body>
 	-->
+
+    <site name="ee_origin" pos="0.465437943 1.20335101e-04 0.538278488" group="3"/>
   </worldbody>
 
-  <contact>
+  <!-- <contact>
     <exclude body1="world" body2="left_finger"/>
     <exclude body1="world" body2="right_finger"/>
     <exclude body1="left_finger" body2="right_finger"/>
-  </contact>
+  </contact> --> 
 
   <!-- <keyframe>
     <key name="home" qpos="0.0 0.7 0.4 0.0 0.0 0.0 0.0 0.0 0.0 -0.026895 0.391451 0.0199961 0.959693 0 0 -0.281049 1.00714 0.42312"/>
@@ -160,7 +165,7 @@
  -7.04516127e-01  6.04733541e-02 -1.97900347e-04  1.92571763e-04
   1.13803077e-05 -3.05630657e-03  7.16622564e-04 -7.03151069e-03
  -1.67658966e+00  2.21333724e-02  1.67626977e+00  7.76219408e-01
-  5.00000000e-03  5.00000000e-03"/>
+  5.00000000e-03  5.00000000e-03  0               0 0 0 0"/>
   </keyframe>
 
   <sensor>
@@ -181,7 +186,7 @@
     <user name="Default Pose" dim="6" user="2 0 0 5 0.01"/>
 	  <user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
     <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
-    <framepos name="hand" objtype="site" objname="eeff"/>
+    <framepos name="hand" objtype="site" objname="pinch"/>
     <framepos name="left_target_position" objtype="site" objname="left_target_position"/>
     <framepos name="right_target_position" objtype="site" objname="right_target_position"/>
     <framepos name="rightdoorhandle" objtype="site" objname="rightdoor_site"/>
@@ -193,7 +198,6 @@
     <jointpos name="leftdoorhinge" joint="leftdoorhinge"/>
     <jointpos name="rightdoorhinge" joint="rightdoorhinge"/>
 
-    <jointpos name='panda_joint0' joint= 'joint0'/>
     <jointpos name='panda_joint1' joint= 'joint1'/>
     <jointpos name='panda_joint2' joint= 'joint2'/>
     <jointpos name='panda_joint3' joint= 'joint3'/>
@@ -201,9 +205,9 @@
     <jointpos name='panda_joint5' joint= 'joint5'/>
     <jointpos name='panda_joint6' joint= 'joint6'/>
     <jointpos name='panda_joint7' joint= 'joint7'/>
-
-    <jointpos name='finger_joint1' joint='finger_joint1'/>
-    <jointpos name='finger_joint2' joint='finger_joint2'/>
+	<jointpos name='finger_joint' joint= 'left_driver_joint'/>
+    <framepos name="finger_tip" objtype="site" objname="finger_tip"/>
+    <framepos name="base_bottom" objtype="site" objname="base_bottom"/>
 
 	<!--
     <framepos name="box" objtype="geom" objname="box"/>
@@ -213,11 +217,11 @@
     <framepos name="target1" objtype="site" objname="target1"/>
     <framepos name="target2" objtype="site" objname="target2"/>
 	-->
-    <framepos name="trace0" objtype="site" objname="touch_left"/>
-    <framepos name="trace1" objtype="site" objname="touch_right"/>
+	<!-- <framepos name="trace0" objtype="site" objname="touch_left"/>
+	<framepos name="trace1" objtype="site" objname="touch_right"/> -->
   </sensor>
 
   <!-- <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/> -->
 
-  <include file="panda.xml"/>
+  <include file="panda_gripper.xml"/>
 </mujoco>

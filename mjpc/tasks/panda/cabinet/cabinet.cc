@@ -162,11 +162,14 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   counter += 3;
 
   // end effector finger
-  double finger_1 = *SensorByName(model, data, "finger_joint1");
-  double finger_2 = *SensorByName(model, data, "finger_joint2");
+  // double finger_1 = *SensorByName(model, data, "finger_joint1");
+  // double finger_2 = *SensorByName(model, data, "finger_joint2");
+  // residual[counter ++] = (0.0407 * 2 - finger_1 - finger_2) * 20;
+  // residual[counter ++] = (finger_1 + finger_2) * 20;
 
-  residual[counter ++] = (0.0407 * 2 - finger_1 - finger_2) * 20;
-  residual[counter ++] = (finger_1 + finger_2) * 20;
+  residual[counter ++] = 0.0; 
+  residual[counter ++] = 0.0; 
+  // counter += 2;
 
   // std::cout << finger_1 << " " << finger_2 << std::endl;
 
@@ -177,26 +180,30 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
   for (int i = 0; i < model->nu; i++) {
     residual[counter ++] = data->actuator_force[i] / model->actuator_gainprm[i * mjNGAIN];
   }
+  residual[counter ++] = 0.0;
+  residual[counter ++] = 0.0;
 
   // default position
   // double panda_joints_default[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
   double panda_joints_default[8] = {0.000162331, 1.48074, -0.690224, -0.106001, -2.4659, -0.0792418, 1.14184, -1.48384};
-  for (int i = 0; i < 6; i ++) {
-    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));
+  for (int i = 0; i < 5; i ++) {
+    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i+1));
     // std::cout << panda_joints[i] << " ";
     residual[counter ++] = panda_joints_default[i] - joint_i;
   }
+  residual[counter ++] = 0.0;
 
   // default position no obstruction
   // double panda_joints_default_no_obstruction[8] = {-0.00149581, 0.0010889, -0.000380885, -2.96704, -3.06744, -2.9606, 0.342783, 2.96783};
   double panda_joints_default_no_obstruction[8] = {0.00, 0.00 -0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
   // double panda_joints_default[8] = {0.000162331, 1.48074, -0.690224, -0.106001, -2.4659, -0.0792418, 1.14184, -1.48384};
   // double panda_hand_default[3] = {0.0576433, 0.00168072, 0.579432};
-  for (int i = 0; i < 8; i ++) {
-    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i));
+  for (int i = 0; i < 7; i ++) {
+    double joint_i = *SensorByName(model, data, "panda_joint" + std::to_string(i+1));
     // std::cout << joint_i << " ";
     residual[counter ++] = panda_joints_default_no_obstruction[i] - joint_i;
   }
+  residual[counter ++] = 0.0;
   // std::cout << std::endl;
 
   // sensor dim sanity check
@@ -207,6 +214,7 @@ void Cabinet::ResidualFn::Residual(const mjModel* model, const mjData* data,
       user_sensor_dim += model->sensor_dim[i];
     }
   }
+  printf("%d %d\n", user_sensor_dim, counter);
   if (user_sensor_dim != counter) {
     mju_error_i(
         "mismatch between total user-sensor dimension "

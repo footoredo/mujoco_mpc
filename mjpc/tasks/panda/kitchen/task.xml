@@ -121,13 +121,14 @@
 	  <site type="sphere" name="kettle_center" pos="0 0 0.15" size=".01"/>
     </body>   
 	
+    <site name="ee_origin" pos="0.465437943 1.20335101e-04 0.538278488"/>
   </worldbody>
 
-  <contact>
+  <!-- <contact>
     <exclude body1="world" body2="left_finger"/>
     <exclude body1="world" body2="right_finger"/>
     <exclude body1="left_finger" body2="right_finger"/>
-  </contact>
+  </contact> -->
 
   <sensor>
 	<user name="Finger Touch" dim="6" user="2 0 0 5 0.01"/>
@@ -140,7 +141,7 @@
 	<user name="Move Away" dim="1" user="2 1 0 5 0.01"/>
 	<user name="Default Pose" dim="6" user="2 0 0 5 0.01"/>
 	<user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
-    <framepos name="hand" objtype="site" objname="eeff"/>
+    <framepos name="hand" objtype="site" objname="pinch"/>
 	<!--
     <framepos name="trace0" objtype="site" objname="touch_left"/>
     <framepos name="trace1" objtype="site" objname="touch_right"/>
@@ -159,7 +160,6 @@
 	<framepos name="knob3" objtype="site" objname="knob3_site"/>
 	<framepos name="knob4" objtype="site" objname="knob4_site"/>
 
-	<jointpos name='panda_joint0' joint= 'joint0'/>
 	<jointpos name='panda_joint1' joint= 'joint1'/>
 	<jointpos name='panda_joint2' joint= 'joint2'/>
 	<jointpos name='panda_joint3' joint= 'joint3'/>
@@ -177,12 +177,10 @@
 	<jointpos name='leftdoorhinge' joint= 'leftdoorhinge'/>
 	<jointpos name='rightdoorhinge' joint= 'rightdoorhinge'/>
     <jointpos name="micro0joint" joint="micro0joint"/>
-	<framepos name="leftfinger" objtype="site" objname="touch_left"/>
-	<framepos name="rightfinger" objtype="site" objname="touch_right"/>
-	<jointpos name="fingerjoint" joint='finger_joint1'/>
-	<touch name="leftfingerforce" site="tip_left"/>
-	<touch name="rightfingerforce" site="tip_right"/>
+	<jointpos name='finger_joint' joint= 'left_driver_joint'/>
+    <framepos name="finger_tip" objtype="site" objname="finger_tip"/>
+    <framepos name="base_bottom" objtype="site" objname="base_bottom"/>
   </sensor>
 
-  <include file="panda.xml"/>
+  <include file="panda_gripper.xml"/>
 </mujoco>
