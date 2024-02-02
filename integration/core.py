@@ -102,7 +102,10 @@ BLOCKS_NAME_MAPPING = {
     "leftside_cube": "red_block",
     "crate": "red_bin",
     "plate": "red_bin",
-    "square_plate": "red_bin"
+    "square_plate": "red_bin",
+    "bowl": "red_bin",
+    "lemon": "yellow_block",
+    "apple": "red_block"
 }
 
 BLOCKS_SITE_MAPPING = {
@@ -387,6 +390,10 @@ def minimize_l2_distance_reward(obj1, obj2, primary_reward=False):
         return
     if is_joint(obj1) or is_joint(obj2):
         return
+    if obj1 == "palm":
+        lift(obj2, 1.2)
+    elif obj2 == "palm":
+        lift(obj1, 1.2)
     REWARD_CNT["min_l2"] += 1
     cnt = REWARD_CNT["min_l2"]
     if cnt == 1:
@@ -486,11 +493,10 @@ class Runner:
         self.model = mujoco.MjModel.from_xml_path(str(model_path))
         if init_data is None:
             self.data = mujoco.MjData(self.model)
+            mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
         else:
             self.data = init_data
             
-        mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
-
         # print(self.data.site("eeff").xpos)
 
         # self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
@@ -962,10 +968,8 @@ class Runner:
         elif self.task == "blocks":
             distance1 = get_object_distance("crate", "red_block")
             distance2 = get_object_distance("crate", "yellow_block")
-            if distance2 < 0.05:
+            if distance1 < 0.05:
                 return 1
-            elif distance1 < 0.05:
-                return -1
             else:
                 return 0
         elif self.task == "long":
