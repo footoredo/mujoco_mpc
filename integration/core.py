@@ -78,6 +78,7 @@ SAVE_VIDEO = False
 OPENED_CABINET = False
 NO_LOCK = False
 IS_COP = False
+CAMID = 0
 
 REWARD_CNT = {
     "min_l2": 0,
@@ -241,6 +242,11 @@ SITE_MAPPING = {
 PRIMARY_REWARD = None
 
 COST_NAMES_REQUIRED = []
+
+
+def set_camid(camid):
+    global CAMID
+    CAMID = camid
 
 
 def set_env(env):
@@ -736,7 +742,7 @@ class Runner:
             # print("Cost weights:", self.agent.get_cost_weights())
 
             if self.save_video:
-                img = self.mj_viewer.read_pixels(camid=0)
+                img = self.mj_viewer.read_pixels(camid=CAMID)
                 self.images.append(img)
                 # total_cost += agent.get_total_cost()
             
@@ -1048,7 +1054,7 @@ class Runner:
         # print(111)
 
         if self.save_last_img and self.mj_viewer is not None:
-            im = self.mj_viewer.read_pixels(camid=0)
+            im = self.mj_viewer.read_pixels(camid=CAMID)
             cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
 
         joblib.dump(self.data, "data.joblib")
