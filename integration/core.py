@@ -67,18 +67,18 @@ def environment_reset(model, data):
   mujoco.mj_resetData(model, data)
   return get_observation(model, data)
 
-REAL_ROBOT = True
+REAL_ROBOT = False
 
 ENV = "blocks"
 REPEATS = 2
 RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = False
+SAVE_VIDEO = True
 OPENED_CABINET = False
 NO_LOCK = False
 IS_COP = False
-CAMID = 0
+CAMID = 1
 
 REWARD_CNT = {
     "min_l2": 0,
@@ -284,7 +284,7 @@ def reset_reward():
     # COST_WEIGHTS["HitGround"] = 0
     COST_WEIGHTS["LockBin"] = 1
     COST_WEIGHTS["BlockOrient"] = 1
-    COST_WEIGHTS["OpenGripper"] = 1
+    # COST_WEIGHTS["OpenGripper"] = 1
 
 
 
@@ -501,8 +501,8 @@ class Runner:
 
         # print(self.data.site("eeff").xpos)
 
-        # self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
-        self.mj_viewer = None
+        self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
+        # self.mj_viewer = None
 
         if self.use_viewer:
             self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
@@ -706,11 +706,11 @@ class Runner:
             #     self.actions[-1][-1] = 0.
             lift_cost = self.agent.get_cost_term_values()["Lift"]
             self.agent.set_cost_weights({
-                "Reach2": lift_cost < 0.09 or reach2_cost <= 0.1,
-                "Lift": reach2_cost > 0.1,
+                # "Reach2": lift_cost < 0.09 or reach2_cost <= 0.1,
+                # "Lift": reach2_cost > 0.1,
                 # "BlockOrient": reach2_cost > 0.09
                 "BlockOrient": lift_cost > 0.08 and reach2_cost > 0.1 and reach_cost > 0.03,
-                "Reach": reach2_cost > 0.03,
+                # "Reach": reach2_cost > 0.03,
                 # "OpenGripper": reach_cost > 0.05
             })
             self.agent.planner_step()
@@ -782,7 +782,7 @@ class Runner:
         # print(last_primary)
         succ = self.run_once(task_parameters=None, cost_weights={
             "Default Pose": 1, last_primary: 1
-        }, cost_limit=0.02, cost_name="Default Pose", step_limit=200)
+        }, cost_limit=0.02, cost_name="Default Pose", step_limit=100)
         return succ
 
     def run_reset_no_obstruction(self):
@@ -827,8 +827,9 @@ class Runner:
             if succ:
                 return True
             retries += 1
-            if retries >= num_retries and not improved:
-                break
+            # if retries >= num_retries and not improved:
+            #     break
+            break
         return False
         
     def run_kitchen(self):
@@ -1079,7 +1080,7 @@ def runner_init(load_init=True):
         init_data = None
 
     global RUNNER
-    RUNNER = Runner(ENV, use_viewer=True, save_video=SAVE_VIDEO, save_last_img=True, init_data=init_data)
+    RUNNER = Runner(ENV, use_viewer=False, save_video=SAVE_VIDEO, save_last_img=True, init_data=init_data)
 
 
 def cop_runner_init():
