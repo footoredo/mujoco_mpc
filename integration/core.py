@@ -70,7 +70,7 @@ REPEATS = 5
 RETRIES = 2
 # ENV = "cabinet"
 # ENV = "kitchen"
-SAVE_VIDEO = True
+SAVE_VIDEO = False
 OPENED_CABINET = False
 NO_LOCK = False
 IS_COP = False
@@ -481,11 +481,13 @@ class Runner:
         print(self.data.site("eeff").xpos)
 
         self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
+        # self.mj_viewer = None
 
-        if self.use_viewer:
-            self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
-        else:
-            self.viewer = None
+        # if self.use_viewer:
+        #     self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
+        # else:
+        #     self.viewer = None
+        self.viewer = None
 
         self.repeats = REPEATS
 
@@ -842,8 +844,11 @@ class Runner:
         if self.save_video:
             images = np.stack(self.images, 0)
             vidwrite("output.mp4", images, 240 * 5)
+            
+        if self.viewer is not None:
+            self.viewer.close()
 
-        if self.save_last_img:
+        if self.save_last_img and self.mj_viewer is not None:
             im = self.mj_viewer.read_pixels(camid=0)
             cv2.imwrite('output.png', cv2.cvtColor(im, cv2.COLOR_RGB2BGR))
 
