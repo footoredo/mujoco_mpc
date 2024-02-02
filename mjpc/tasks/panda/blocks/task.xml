@@ -80,12 +80,14 @@
   </asset>
 
   <worldbody>
-    <site name="world"/>
+    <site name="world" xyaxes="-1 0 0 0  1 0"/>
     <light pos="0 -0.1 0.5" dir="0 0.2 -1" diffuse="0.7 0.7 0.7" specular="0.3 0.3 0.3"
         directional="true" castshadow="true"/>
 
     <!-- <camera pos="0.255 1.630 1.003" xyaxes="-0.983 0.182 0.000 -0.093 -0.503 0.859"/> -->
-    <camera pos="-0.119 1.552 1.015" xyaxes="-1.000 0.017 0.000 -0.009 -0.489 0.872"/>
+    <!-- <camera pos="-0.119 1.552 1.015" xyaxes="-1.000 0.017 0.000 -0.009 -0.489 0.872"/> -->
+    <!-- <camera pos="1.202 0.085 0.829" xyaxes="0.033 0.999 0.000 -0.633 0.021 0.774"/> -->
+    <camera pos="1.127 0.052 0.781" xyaxes="0.010 1.000 -0.000 -0.574 0.006 0.819"/>
 
 
     <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" material="blue_grid"/>
@@ -93,14 +95,14 @@
     <!-- <body name="target" pos="0.2 0.0 0.2"> -->
 			<!-- <body name="yellow_block" pos="0 0.5 0.032"> -->
     <!-- <body name="yellow_block" pos="0.5 0.0 .04"> -->
-    <body name="yellow_block" pos="-0.2 0.4 .04">
+    <body name="yellow_block" pos="0.4 -0.2 .04">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
       <geom material="kettle_yellow" pos="0 0 0" size="0.0301 0.0301 0.0301" type="box"/>
       <site name="yellow_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
 
-    <body name="red_block" pos="0.2 0.4 0.04">
+    <body name="red_block" pos="0.4 0.2 0.04">
       <joint type="free"/>
       <geom class="hinge_collision" type="box" size="0.030 0.030 0.030" mass=".3" condim="6" friction="1 .01 .003"/>
       <geom material="kettle_red" pos="0 0 0" size="0.0301 0.0301 0.0301" type="box"/>
@@ -113,6 +115,8 @@
       <geom material="kettle_blue" pos="0 0 0" size="0.031 0.031 0.031" type="box"/>
       <site name="blue_block" type="box" pos="0 0 0" size="0.030 0.030 0.030"/>
     </body>
+
+    <site name="pedestral" pos="0.45 0.0 0.0" type="box" size="0.001 0.001 0.001"/>
 
     <!-- <body name="bin" pos="0.0 0.5 .001" >
       <geom class="hinge_collision" type="box" size="0.06 0.06 0.001" material="kettle_red" />
@@ -130,7 +134,7 @@
       <site name="red_bin" type="box" pos="0 0 0.04" size="0.001 0.001 0.001"/>
     </body> -->
 
-    <body name="bin" pos="0.0 0.5 .001" >
+    <body name="bin" pos="0.5 0.0 .001" >
       <geom class="hinge_collision" type="box" size="0.06 0.06 0.001" material="kettle_yellow" />
       <geom class="hinge_collision" pos="0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_yellow"/>
       <geom class="hinge_collision" pos="-0.06 0 0.01" type="box" size="0.007 0.05 0.007" material="kettle_yellow"/>
@@ -174,15 +178,22 @@
 	-->
   </worldbody>
 
-  <contact>
+  <!-- <contact>
     <exclude body1="world" body2="left_finger"/>
     <exclude body1="world" body2="right_finger"/>
     <exclude body1="left_finger" body2="right_finger"/>
-  </contact>
+  </contact> -->
 
-  <!-- <keyframe>
-    <key name="home" qpos="0.0 0.7 0.4 0.0 0.0 0.0 0.0 0.0 0.0 -0.026895 0.391451 0.0199961 0.959693 0 0 -0.281049 1.00714 0.42312"/>
-  </keyframe> -->
+  <keyframe>
+  <key name="home" qpos='0.4 -0.2 0.0309981 1 2.8261e-17 8.23994e-19 -1.91142e-17 0.4 0.2 0.0309981 1 2.8261e-17 8.23994e-19 -1.91142e-17 10000.4 -0.2 0.0309996 1 2.32807e-17 1.63353e-18 5.63228e-19 2.89424 0.665995 -2.84742 -2.95994 0.242685 2.30036 0.608368 0.00647986 0.0025101 0.0104537 -0.0156212 0.00647986 0.00251018 0.0104655 -0.0156448'/>
+    <!-- <key name="home" qpos='0.4 -0.2 0.0309981 
+      1 2.65706e-17 5.49329e-19 -1.39678e-17 
+      0.4 0.2 0.0309981 
+      1 2.65706e-17 5.49329e-19 -1.39678e-17 
+      10000.4 -0.2 0.0309996 
+      1 2.35473e-17 4.385e-19 -6.41441e-19 
+      2.88201 0.55156 -2.87356 -2.76687 0.175641 2.22391 0.648175 0.00647986 0.0025101 0.0104537 -0.0156212 0.00647986 0.00251018 0.0104655 -0.0156448'/> -->
+  </keyframe>
 
   <!-- <keyframe>
     <key name="home" qpos="100.0000 0.6500 0.0210 1.0000 0.0000 -0.0000 -0.0000 -0.1000 0.2000 0.0410 1.0000 0.0000 -0.0000 0.0000 0.0000 1.5700 0.0000 0.0013 0.0134 -0.0529 -1.6816 -0.0012 1.5955 -1.5308 0.0050 0.0050"/>
@@ -204,7 +215,7 @@
     <user name="End-Effector To" dim="3" user="2 1 0 5 0.001"/>
     <user name="End-Effector Open" dim="1" user="2 1 0 5 0.01"/>
     <user name="End-Effector Close" dim="1" user="2 1 0 5 0.01"/>
-	  <user name="Control" dim="9" user="2 0 0 5 0.01"/>
+	  <!-- <user name="Control" dim="9" user="2 0 0 5 0.01"/> -->
     <user name="Default Pose" dim="6" user="2 0 0 5 0.01"/>
 	  <user name="Default Pose No-Obstruction" dim="8" user="2 0 0 5 0.01"/>
     <!-- <user name="Actuator" dim="7" user="0 0.1 0.0 1.0"/> -->
@@ -214,17 +225,17 @@
     <framepos name="blue_block" objtype="site" objname="blue_block"/>
     <framepos name="red_bin" objtype="site" objname="red_bin"/>
 
-    <jointpos name='panda_joint0' joint= 'joint0'/>
+    <!-- <jointpos name='panda_joint0' joint= 'joint0'/>
     <jointpos name='panda_joint1' joint= 'joint1'/>
     <jointpos name='panda_joint2' joint= 'joint2'/>
     <jointpos name='panda_joint3' joint= 'joint3'/>
     <jointpos name='panda_joint4' joint= 'joint4'/>
     <jointpos name='panda_joint5' joint= 'joint5'/>
     <jointpos name='panda_joint6' joint= 'joint6'/>
-    <jointpos name='panda_joint7' joint= 'joint7'/>
+    <jointpos name='panda_joint7' joint= 'joint7'/> -->
 
-    <jointpos name='finger_joint1' joint='finger_joint1'/>
-    <jointpos name='finger_joint2' joint='finger_joint2'/>
+    <!-- <jointpos name='finger_joint1' joint='finger_joint1'/>
+    <jointpos name='finger_joint2' joint='finger_joint2'/> -->
 
 	<!--
     <framepos name="box" objtype="geom" objname="box"/>
@@ -234,11 +245,11 @@
     <framepos name="target1" objtype="site" objname="target1"/>
     <framepos name="target2" objtype="site" objname="target2"/>
 	-->
-    <framepos name="trace0" objtype="site" objname="touch_left"/>
-    <framepos name="trace1" objtype="site" objname="touch_right"/>
+    <!-- <framepos name="trace0" objtype="site" objname="touch_left"/>
+    <framepos name="trace1" objtype="site" objname="touch_right"/> -->
   </sensor>
 
   <!-- <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/> -->
 
-  <include file="panda.xml"/>
+  <include file="../panda_gripper.xml"/>
 </mujoco>

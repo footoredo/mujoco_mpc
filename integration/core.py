@@ -11,6 +11,7 @@ import mujoco_mpc
 from mujoco_mpc import agent as agent_lib
 import numpy as np
 import joblib
+from scipy.spatial.transform import Rotation as R
 
 
 import pathlib
@@ -44,7 +45,13 @@ def get_observation(model, data):
 
 def environment_step(model, data, action):
   data.ctrl[:] = action
-  mujoco.mj_step(model, data)
+  joint1adr = model.jnt_dofadr[model.joint("joint1").id]
+  mujoco.mj_step1(model, data)
+#   print(model.nv, model.nu)
+#   print(data.qfrc_actuator[joint1adr: joint1adr + 8])  # joint torque
+  mujoco.mj_step2(model, data)
+#   print(model.nv, model.nu)
+#   print(data.qfrc_applied)
 #   print(data.joint("rightdoorhandle").qpos)
   if ENV == "cabinet" and OPENED_CABINET:
     data.qpos[15] = 1.57
@@ -68,6 +75,8 @@ def environment_reset(model, data):
 ENV = "blocks"
 REPEATS = 5
 RETRIES = 2
+STEP_LIMIT = 200
+PERSIST_STEPS = 20
 # ENV = "cabinet"
 # ENV = "kitchen"
 SAVE_VIDEO = False
@@ -92,10 +101,10 @@ BLOCKS_NAME_MAPPING = {
     "yellow_block": "yellow_block",
     "red_block": "red_block",
     "blue_block": "blue_block",
-    "right_cube": "yellow_block",
-    "rightside_cube": "yellow_block",
-    "left_cube": "red_block",
-    "leftside_cube": "red_block",
+    "right_cube": "red_block",
+    "rightside_cube": "red_block",
+    "left_cube": "yellow_block",
+    "leftside_cube": "yellow_block",
     "crate": "red_bin",
     "plate": "red_bin",
     "square_plate": "red_bin"
@@ -155,6 +164,8 @@ LONG_NAME_MAPPING = {
     "bottom_cabinet": "slidedoorjoint",
     "stone_cabinet_door_handle": "slidedoorhandle",
     "stone_cabinet": "slidedoorjoint",
+    "marble_cabinet_door_handle": "slidedoorhandle",
+    "marble_cabinet": "slidedoorjoint",
     "hinge_cabinet_inside": "leftcabinetinside",
     "microwave": "micro0joint",
 }
@@ -218,12 +229,36 @@ KITCHEN_SITE_MAPPING = {
     "hand": "eeff"
 }
 
+KITCHEN_LONG_NAME_MAPPING = {
+    "palm": "hand",
+    "cabinet_handle": "cabinet_doorhandle_l",
+    "right_cabinet_handle": "cabinet_doorhandle_r",
+    "cabinet": "leftdoorhinge",
+    "right_cabinet": "rightdoorhinge",
+    "microwave_handle": "microwave_handle",
+    "microwave": "micro0joint",
+    "blue_kettle_handle": "kettle_handle",
+    "green_apple": "box",
+    "green_cube": "box",
+    "target_position": "target_position"
+}
+
+KITCHEN_LONG_SITE_MAPPING = {
+    "cabinet_doorhandle_r": "rightdoor_site",
+    "cabinet_doorhandle_l": "leftdoor_site",
+    "kettle_handle": "kettle_site0",
+    "microwave_handle": "microhandle_site",
+    "hand": "eeff"
+}
+
+
 NAME_MAPPING = {
     "locklock": LOCKLOCK_NAME_MAPPING,
     "blocks": BLOCKS_NAME_MAPPING,
     "cabinet": CABINET_NAME_MAPPING,
     "kitchen": KITCHEN_NAME_MAPPING,
     "long": LONG_NAME_MAPPING,
+    "kitchen_long": KITCHEN_LONG_NAME_MAPPING
 }
 
 SITE_MAPPING = {
@@ -231,7 +266,8 @@ SITE_MAPPING = {
     "cabinet": CABINET_SITE_MAPPING,
     "kitchen": KITCHEN_SITE_MAPPING,
     "blocks": BLOCKS_SITE_MAPPING,
-    "long": LONG_SITE_MAPPING
+    "long": LONG_SITE_MAPPING,
+    "kitchen_long": KITCHEN_LONG_SITE_MAPPING
 }
 
 PRIMARY_REWARD = None
@@ -290,6 +326,8 @@ def get_object_position(obj_name):
 def get_object_distance(obj1, obj2):
     pos1 = get_object_position(obj1)
     pos2 = get_object_position(obj2)
+    
+    # print(pos1, pos2, obj1, obj2)
     
     if pos1 is None or pos2 is None:
         return None
@@ -397,6 +435,7 @@ def maximize_l2_distance_reward(obj1, obj2, distance=0.5, primary_reward=False):
     if is_joint(obj1) or is_joint(obj2):
         return
     original_distance = get_object_distance(obj1, obj2)
+    # print(obj1, obj2, original_distance)
     if original_distance is None:
         return
     print("original_distance:", original_distance)
@@ -438,10 +477,10 @@ def set_joint_fraction_reward(obj, fraction, primary_reward=False):
     if cnt == 1:
         cnt = ""
     TASK_PARAMS[f"JointTarget{cnt}"] = map_name(obj)
-    if map_name(obj) == "slidedoorjoint":
-        fraction = fraction * 0.4
-    else:
-        fraction = fraction * 1.5
+    # if map_name(obj) == "slidedoorjoint":
+    #     fraction = fraction * 0.4
+    # else:
+    #     fraction = fraction * 1.5
     TASK_PARAMS[f"JointTarget{cnt}Angle"] = fraction
     COST_WEIGHTS[f"Joint Target{cnt}"] = 1.0
 
@@ -457,6 +496,10 @@ def set_primary_reward(reward_index):
 
 
 last_primary = None
+
+
+def capitalize(task):
+    return " ".join([s.capitalize() for s in task.split("_")])
 
 
 class Runner:
@@ -475,10 +518,11 @@ class Runner:
         self.model = mujoco.MjModel.from_xml_path(str(model_path))
         if init_data is None:
             self.data = mujoco.MjData(self.model)
+            mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
         else:
             self.data = init_data
 
-        print(self.data.site("eeff").xpos)
+        # print(self.data.site("eeff").xpos)
 
         self.mj_viewer = mujoco_viewer.MujocoViewer(self.model, self.data, 'offscreen', width=1280, height=960)
         # self.mj_viewer = None
@@ -496,7 +540,7 @@ class Runner:
 
         self.images = []
 
-        self.agent = agent_lib.Agent(task_id=f"Panda {self.task.capitalize()}", model=self.model)
+        self.agent = agent_lib.Agent(task_id=f"Panda {capitalize(self.task)}", model=self.model)
 
     # def get_joints(self):
     #     joints = []
@@ -512,7 +556,28 @@ class Runner:
         num_steps = 0
         best_cost = 1e9
         last_updated = 0
+        satisfied = 0
+        site_action = None
+        freeze_qpos = None
         while True:
+            # print(self.data.act)
+            # if (num_steps + 1) % 10 == 0:
+            #     # if freeze_qpos is None:
+            #     site_transition = self.data.site('eeff').xpos.copy()
+            #     site_transition = site_transition - np.array([0.45, 0.0, 0.3])
+            #     site_rotation = R.from_matrix(self.data.site('eeff').xmat.copy().reshape(3, 3))
+            #     site_rotation = site_rotation.as_rotvec() - np.array([0.0, 1.5708, 0.0])
+            #     # gripper_pose = 
+            #     site_action = np.concatenate((site_transition, site_rotation, [0.]))
+            #     print(site_rotation)
+            #     # print(self.data.joint("right_driver_joint").qpos)
+            #     freeze_qpos = self.data.qpos.copy()
+            #     freeze_qpos[0] += 1.
+            #     input()
+            #     self.data.qpos[:] = freeze_qpos
+            #     self.data.qvel[:] = 0.
+            #     # self.actions.append(site_action)
+            # else:
             self.agent.set_state(
                 time=self.data.time,
                 qpos=self.data.qpos,
@@ -526,10 +591,17 @@ class Runner:
             # print(i)
             # actions.append(agent.get_action(averaging_duration=control_timestep))
             self.actions.append(self.agent.get_action())
+            # print(self.data.site('eeff').xpos, self.data.site('eeff').xmat, self.actions[-1])
+                
+
             # print(i)
-            satisfied = False
+            # satisfied = False
             for _ in range(self.repeats):
-                self.observations.append(environment_step(self.model, self.data, self.actions[-1]))
+                # if num_steps > 20:
+                #     action = np.zeros_like(self.actions[-1])
+                # else:
+                action = self.actions[-1]
+                self.observations.append(environment_step(self.model, self.data, action))
                 # print("hand xpos:", data.site("eeff").xpos)
                 if self.viewer is not None:
                     self.viewer.sync()
@@ -544,7 +616,7 @@ class Runner:
                 # agent.planner_step()
                 if num_steps > 20:
                     if cost_limit is not None and cost <= cost_limit:
-                        satisfied = True
+                        satisfied += 1
 
             if self.save_video:
                 img = self.mj_viewer.read_pixels(camid=0)
@@ -555,7 +627,7 @@ class Runner:
                 # print(i, cost)
                 print(num_steps, f"{self.agent.get_total_cost():.2f} {cost:.2f}", self.agent.get_cost_term_values())
 
-            if satisfied:
+            if satisfied >= PERSIST_STEPS * self.repeats:
                 return True
 
             # observations.append(environment_step(model, data, actions[-1]))
@@ -564,6 +636,7 @@ class Runner:
             last_updated += 1
             # print(last_updated, best_cost)
             if last_updated > 200 and num_steps > step_limit:
+                # input()
                 break
         return False
         
@@ -576,6 +649,12 @@ class Runner:
         }
         self.agent.set_cost_weights(zeroed_cost_weights)
         return self.plan(cost_limit=cost_limit, cost_name=cost_name, step_limit=step_limit)
+        
+    def run_reset_cartisian(self):
+        for _ in range(500):
+            environment_step(self.model, self.data, np.zeros(self.model.nu))
+            if self.viewer is not None:
+                self.viewer.sync()
         
     def run_reset(self):
         # print(last_primary)
@@ -590,7 +669,7 @@ class Runner:
         }, cost_limit=0.02, cost_name="Default Pose No-Obstruction", step_limit=200)
         return succ
 
-    def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=5, step_limit=1000):
+    def run_with_retries(self, task_name, task_parameters, cost_weights, cost_limit, cost_name=None, num_retries=5, step_limit=STEP_LIMIT):
         retries = 0
         best_primary_cost = 1e9
         
@@ -607,7 +686,8 @@ class Runner:
         
         while True:
             print(f"Task [{task_name}] retry #{retries} ...", flush=True)
-            self.run_reset()
+            # self.run_reset()
+            self.run_reset_cartisian()
             costs = self.agent.get_cost_term_values()
             # if PRIMARY_REWARD is not None:
             #     primary_cost_before = costs[PRIMARY_REWARD]
@@ -784,7 +864,7 @@ class Runner:
             else:
                 cost_limit = 0.02
         succ = self.run_with_retries("custom", task_parameters=TASK_PARAMS, cost_weights=COST_WEIGHTS,
-        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=RETRIES, step_limit=500)
+        cost_limit=cost_limit, cost_name=PRIMARY_REWARD, num_retries=RETRIES, step_limit=STEP_LIMIT)
 
         return succ
     
@@ -841,6 +921,10 @@ class Runner:
         return self.outcome
 
     def finish(self):
+        self.agent.reset()
+        if self.viewer is not None:
+            self.viewer.close()
+        
         if self.save_video:
             images = np.stack(self.images, 0)
             vidwrite("output.mp4", images, 240 * 5)
@@ -883,7 +967,7 @@ def cop_runner_init():
     runner_init(load_init=False)
 
 
-def execute_plan(duration=None, finish=True, reset_after_done=True):
+def execute_plan(duration=None, finish=True, reset_after_done=False):
     print(TASK_PARAMS)
     print(COST_WEIGHTS)
     print(PRIMARY_REWARD)
@@ -891,6 +975,8 @@ def execute_plan(duration=None, finish=True, reset_after_done=True):
     print(int(RUNNER.execute(custom=True, reset_after_done=reset_after_done)))
     if finish:
         RUNNER.finish()
+        
+    print("Done")
 
 
 def end_effector_to(position):

@@ -46,3 +46,8 @@ integration/logs-iclr-24/
 *.joblib
 *.zip
 
+confidentials.yaml
+
+test.ipynb
+test2.py
+test_gpt4v.ipynb

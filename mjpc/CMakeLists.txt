@@ -56,6 +56,8 @@ add_library(
   tasks/panda/cabinet/cabinet.h
   tasks/panda/kitchen/kitchen.cc
   tasks/panda/kitchen/kitchen.h
+  tasks/panda/kitchen_long/kitchen_long.cc
+  tasks/panda/kitchen_long/kitchen_long.h
   tasks/panda/blocks/blocks.cc
   tasks/panda/blocks/blocks.h
   tasks/panda/locklock/locklock.cc

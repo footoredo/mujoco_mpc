@@ -213,5 +213,5 @@
 
   <!-- <include file="../furniture_sim/hingecabinet/hingecabinet_asset.xml"/> -->
 
-  <include file="panda.xml"/>
+  <include file="../panda.xml"/>
 </mujoco>
